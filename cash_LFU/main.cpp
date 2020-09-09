@@ -1,6 +1,6 @@
-
 #include <iostream>
 #include <cassert>
+#include <chrono>
 
 #include "cash_LFU.h"
 
@@ -12,9 +12,16 @@ enum class Typ
     , four
 };
 
+std::ostream& operator << (std::ostream& stream, Typ _tp) {
+    stream << static_cast<int>(_tp);
+    return stream;
+}
+
 int main()
 {
     cash_LFU<int, Typ> test(3);
+    assert(test.size() == 0);
+    assert(test.mSize() == 3);
 
     test.add(Typ::one, []() { return new int(1); });
     test.add(Typ::two, []() { return new int(2); });
@@ -32,8 +39,12 @@ int main()
     a = test.get(Typ::four);
     assert(a == 4);
 
-    std::cout << test.size() << std::endl;
-    assert(test.size() == 3);
+    std::cout << test.debugString() << std::endl;
+
+    test.reloadAll();
+    assert(test.size() == 0);
+
+    std::cout << test.debugString() << std::endl;
 
     return 0;
 }
