@@ -13,24 +13,22 @@
 
 //Val doesn't have to be an array(pointer to array)!!!
 template<typename Val, typename Key>
-class cash_LFU
+class cache_LFU
 {
 	class Elem;
 	
 	using DataType = std::unordered_map< Key, Elem >;
-
-	//comparator for multiset
-	std::function<bool(const Elem* lhs, const Elem* rhs)> cmp =
-		[](const Elem* lhs, const Elem* rhs) { return lhs->getRequest() < rhs->getRequest(); };
-	using CashType = std::multiset< Elem*, decltype(cmp) >;
+	using CacheType = std::list< Elem* >;
 
 public:
-	//defoult constructor
+
+	using ValType = Val;
+
+	//default constructor
 	//   _max_size - max loaded elements in cash
-	cash_LFU(size_t _max_size)
+	cache_LFU(size_t _max_size)
 		: m_size(0u)
 		, m_maxSize(_max_size)
-		, m_cash(cmp)
 	{
 		if (_max_size == 0u) {
 			throw std::invalid_argument("max size of cash can't be zero");
@@ -49,7 +47,7 @@ public:
 	bool check(Key _id);
 
 	//returns a reference to the element with key _id.
-	//if add is not called for _id, you get out_of_range.
+	//if add is not called for _id, you get out_of_range exception.
 	Val& get(Key _id);
 
 	void reloadAll();
@@ -78,21 +76,30 @@ private:
 	void _load_  (const Key& _id);
 
 private:
-	CashType m_cash;
+	CacheType m_cash;
 	DataType m_data;
 
 	size_t m_size;
 	size_t m_maxSize;
 }; //class cash
 
+
 ///////////////////////////////////////////////////////////////////
 //Elem class:
 //made for the convenience of downloading and uploading data 
 //and for calculating the frequency of use.
 template<typename Val, typename Key>
-class cash_LFU<Val, Key>::Elem
+class cache_LFU<Val, Key>::Elem
 {
 public:
+
+	Elem            (const Elem& _that) = delete;   //not saported
+	Elem& operator= (const Elem&)       = delete;   //not saported
+	Elem            (Elem&& _that)      = delete;   //not saported
+	Elem& operator= (Elem&&)            = delete;   //not saported
+
+public:
+
 	Elem() = default;
 	Elem(Key _id, std::function< Val* () > _loader)
 		: m_key(_id)
@@ -104,30 +111,30 @@ public:
 		m_data = nullptr;
 	}
 
-	Key    getKey    () const { return m_key; }
-	size_t getRequest() const { return m_request; }
-	Val*   getData   ()       { return m_data; }
-	bool   isLoad    () const { return m_data != nullptr; }
+	Key    getKey    () const noexcept { return m_key; }
+	size_t getRequest() const noexcept { return m_request; }
+	Val*   getData   ()       noexcept { return m_data; }
+	bool   isLoad    () const noexcept { return m_data != nullptr; }
 
 	void setLoader(std::function< Val* () > _loader) { m_loader = _loader; }
-	void setKey   (Key _id)                          { m_key = _id; }
+	void setKey   (Key _id) noexcept                 { m_key = _id; }
 
-	void incRequest() { m_request++; }
-	void decRequest() { m_request--; }
+	void incRequest() noexcept { m_request++; }
+	void decRequest() noexcept { m_request--; }
 
 	void load();
-	void reload() {	delete m_data; /**/ m_data = nullptr; }
+	void reload() noexcept { delete m_data; /**/ m_data = nullptr; }
 
 private:
 
 	Key                      m_key = Key();
 	Val*                     m_data = nullptr;
-	std::function< Val* () > m_loader = []() { return nullptr; };
+	std::function< Val* () > m_loader;
 	size_t                   m_request = 0u;
 }; // class Elem
 
 template<typename Val, typename Key>
-void cash_LFU<Val, Key>::Elem::load() {
+void cache_LFU<Val, Key>::Elem::load() {
 	if (m_data == nullptr)
 	{
 		m_data = m_loader();
@@ -141,7 +148,7 @@ void cash_LFU<Val, Key>::Elem::load() {
 
 
 template<typename Val, typename Key>
-void cash_LFU<Val, Key>::add(const Key& _id, std::function< Val* () > _loader)
+void cache_LFU<Val, Key>::add(const Key& _id, std::function< Val* () > _loader)
 {
 	Elem& elem = m_data[_id];
 	elem.setLoader(_loader);
@@ -149,14 +156,14 @@ void cash_LFU<Val, Key>::add(const Key& _id, std::function< Val* () > _loader)
 }
 
 template<typename Val, typename Key>
-bool cash_LFU<Val, Key>::check(Key _id)
+bool cache_LFU<Val, Key>::check(Key _id)
 {
-	Elem& res = m_data.at(_id);
+	const Elem& res = m_data.at(_id);
 	return res.isLoad();
 }
 
 template<typename Val, typename Key>
-Val& cash_LFU<Val, Key>::get(Key _id)
+Val& cache_LFU<Val, Key>::get(Key _id)
 {
 	Elem& res = m_data.at(_id);
 
@@ -170,7 +177,7 @@ Val& cash_LFU<Val, Key>::get(Key _id)
 }
 
 template<typename Val, typename Key>
-void cash_LFU<Val, Key>::reloadAll()
+void cache_LFU<Val, Key>::reloadAll()
 {
 	while (!empty()) {
 		_remove_();
@@ -178,7 +185,7 @@ void cash_LFU<Val, Key>::reloadAll()
 }
 
 template<typename Val, typename Key>
-void cash_LFU<Val, Key>::_load_(const Key& _id)
+void cache_LFU<Val, Key>::_load_(const Key& _id)
 {
 	Elem& elem = m_data.at(_id);
 	
@@ -188,26 +195,27 @@ void cash_LFU<Val, Key>::_load_(const Key& _id)
 	}
 
 	elem.load();
-	m_cash.insert(&elem);
+	m_cash.push_back(&elem);
 	m_size++;
 }
 
 template<typename Val, typename Key>
-void cash_LFU<Val, Key>::_up_(const Key& _id)
+void cache_LFU<Val, Key>::_up_(const Key& _id)
 {
 	Elem* elem = &m_data[_id];
-
-	m_cash.erase(elem);
 	elem->incRequest();
-	m_cash.insert(elem);
 }
 
 template<typename Val, typename Key>
-void cash_LFU<Val, Key>::_remove_()
+void cache_LFU<Val, Key>::_remove_()
 {
 	if (m_size == 0u) {
 		throw std::logic_error("remove for empty data");
 	}
+	//sloooww
+	m_cash.sort([](const auto& lhs, const auto& rhs) noexcept {
+		return lhs->getRequest() < rhs->getRequest();
+		});
 	Key key = (*m_cash.begin())->getKey();
 	Elem& elem = m_data[key];
 
@@ -219,7 +227,7 @@ void cash_LFU<Val, Key>::_remove_()
 }
 
 template<typename Val, typename Key>
-std::string cash_LFU<Val, Key>::debugString()
+std::string cache_LFU<Val, Key>::debugString()
 {
 	using std::setw;
 
@@ -229,8 +237,9 @@ std::string cash_LFU<Val, Key>::debugString()
 		<< "size data: " << m_data.size() << '\n'
 		<< "size cash: " << m_cash.size() << '\n'
 		<< "max size:  " << m_maxSize << '\n';
+
 	if (!m_cash.empty()) {
-		out << "loaded: \n";
+		out << "loaded:\n";
 		out << setw(10) << "id" << setw(10) << "request" << setw(10) << "data" << '\n';
 		for (const auto& elem : m_cash) {
 			out << setw(10) << elem->getKey() << setw(10) << elem->getRequest() 
