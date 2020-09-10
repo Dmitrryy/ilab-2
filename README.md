@@ -3,6 +3,6 @@
 ## Homework
 
 ### in developing
-* LFU_cache
+* cache
 ### done
 * --
