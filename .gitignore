@@ -338,3 +338,6 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+cache/tests/main
+cache/cache_LFU/main
+cache/cache_2Q/main
