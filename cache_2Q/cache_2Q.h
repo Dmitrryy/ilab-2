@@ -3,6 +3,7 @@
 #include <sstream>
 #include <functional>
 #include <iomanip>
+#include <cassert>
 
 #include "LRU_conteiner.h"
 

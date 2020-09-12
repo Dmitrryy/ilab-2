@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include <test_runner.h>
-#include <profiler.h>
+#include "../include/test_runner.h"
+#include "../include/profiler.h"
 
 template <typename TCache>
 void lineTest()
@@ -34,7 +34,7 @@ void lineTest()
 		size_t hit_count = 0u;
 		size_t try_count = 0u;
 
-		TCache t(100);
+		TCache t(101);
 
 		for (int i = 0; i < 100; i++) {
 			t.add(i, [i]() { return new typename TCache::ValType(i); });

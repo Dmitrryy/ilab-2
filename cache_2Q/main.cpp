@@ -2,18 +2,15 @@
 #include <cassert>
 #include <chrono>
 #include <random>
-#include <Windows.h>
 
 #include "cache_2Q.h"
-
 
 struct Page
 {
     Page(size_t _id = 0)
         : m_id(_id)
     {
-        //type heavy object...
-        //Sleep(10);
+
     }
 
 private:
@@ -22,7 +19,6 @@ private:
 
 int main()
 {
-
     size_t size = 0u, n = 0u;
     std::cin >> size >> n;
 

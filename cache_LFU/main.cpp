@@ -2,18 +2,15 @@
 #include <cassert>
 #include <chrono>
 #include <random>
-#include <Windows.h>
 
 #include "cache_LFU.h"
-#include "cache_tests.h"
 
 struct Page
 {
     Page(size_t _id = 0)
         : m_id(_id)
     {
-        //type heavy object...
-        Sleep(10);
+
     }
 
 private:
@@ -22,7 +19,24 @@ private:
 
 int main()
 {
-    RunTest<cache_LFU<Page, int>>();
+    size_t size = 0u, n = 0u;
+    std::cin >> size >> n;
+
+    cache_LFU<int, int> cache(size);
+
+    for (size_t i = 0; i < n; i++) {
+        size_t key;
+        std::cin >> key;
+
+        if (!cache.existence(key)) {
+            cache.add(key, []() {return new int(); });
+        }
+        cache.get(key);
+    }
+
+    std::cout << "hit: " << cache.hit() << std::endl;
+
+    return 0;
 
     return 0;
 }
