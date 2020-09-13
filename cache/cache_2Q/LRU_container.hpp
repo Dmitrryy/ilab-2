@@ -13,6 +13,8 @@ public:
     //   _size - max size of container
     LRU_container(size_t _size = 0u) noexcept
         : m_max_size(_size)
+        , m_hit(0u)
+        , m_miss(0u)
     {}
 
     //lookup:
@@ -54,6 +56,9 @@ public:
     bool full    () const noexcept { return m_max_size == m_map.size(); }
     size_t size  () const noexcept { return m_map.size(); }
     size_t mSize () const noexcept { return m_max_size; }
+    //
+    size_t hit() const noexcept { return m_hit; }
+    size_t miss() const noexcept { return m_miss; }
 
     void resize(size_t _size) noexcept;
 
@@ -72,6 +77,9 @@ private:
     std::list<TVal> m_list;
 
     size_t m_max_size;
+
+    size_t m_hit;
+    size_t m_miss;
 };
 
 
@@ -86,13 +94,15 @@ std::pair<TVal, bool> LRU_container<TVal>::lookup(const TVal& _val)
 
         m_list.erase(res->second);
         res->second = m_list.begin();
+
+        m_hit++;
     }
     else if (m_max_size != 0u) {
         if (m_map.size() == m_max_size) {
             result = std::make_pair(back(), true);
             pop_back();
         }
-
+        m_miss++;
         push_front(_val);
     }
 

@@ -16,6 +16,8 @@ public:
 
     LFU_container(size_t _maxSize)
         : m_maxSize(_maxSize)
+        , m_hit(0u)
+        , m_miss(0u)
     { }
 
     //lookup:
@@ -53,6 +55,9 @@ public:
     bool full    () const noexcept { return m_maxSize == m_keyToFreq.size(); }
     size_t size  () const noexcept { return m_keyToFreq.size(); }
     size_t mSize () const noexcept { return m_maxSize; }
+    //
+    size_t hit() const noexcept { return m_hit; }
+    size_t miss() const noexcept { return m_miss; }
 
     void resize(size_t _size);
 
@@ -75,6 +80,9 @@ private:
     std::unordered_map< T, size_t > m_history;
 
     size_t m_maxSize;
+
+    size_t m_hit;
+    size_t m_miss;
 };
 
 template <typename T>
@@ -93,12 +101,15 @@ std::pair<T, bool> LFU_container<T>::lookup(const T& _val)
             m_history[_val] += 1;
             _insert_(_val);
         }
+        m_miss++;
     }
     else 
     {
         erase(_val);
         m_history[_val] += 1;
         _insert_(_val);
+
+        m_hit++;
     }
 
     return removed;

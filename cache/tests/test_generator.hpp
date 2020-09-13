@@ -15,22 +15,11 @@ public:
         , m_dist{_min, _max}
         {}
 
-    unsigned operator()() {
+    int operator()() {
         return get();
     }
 
-    unsigned get() { return m_dist(m_gen); }
-
-    std::vector<unsigned> range(size_t _count) 
-    {
-        std::vector<unsigned> result(_count);
-
-        for (size_t i = 0u; i != _count; i++) {
-            result[i] = get();
-        }
-
-        return result;
-    }
+    int get() { return m_dist(m_gen); }
 
 private:
 
