@@ -22,15 +22,13 @@ int main()
     size_t size = 0u, num = 0u;
     std::cin >> size >> num;
 
-    std::ofstream out("cache/tests/006.txt", std::ios::trunc);
+    std::ofstream out("cache/tests/010.txt", std::ios::trunc);
 
     if (out.is_open()) 
     {
         out << size << ' ' << num << '\n';
 
-        for (size_t i = 0; i < num; i++) {
-            out << r.get() << ' ';
-        }
+        /*c*/
 
         out << std::endl;
 
