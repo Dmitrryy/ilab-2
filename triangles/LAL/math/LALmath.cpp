@@ -457,9 +457,8 @@ namespace la
 {
     bool intersec(const Plane& _lhs, const Plane& _rhs)
     {
-        return contein(_lhs, _rhs.getP())
-            && contein(_lhs, _rhs.getP() + _rhs.getA())
-            && contein(_lhs, _rhs.getP() + _rhs.getB());
+        return intersec(_lhs, Line3(_rhs.getP(), _rhs.getA(), Line3::Type::PointAndVector))
+            || intersec(_lhs, Line3(_rhs.getP(), _rhs.getB(), Line3::Type::PointAndVector));
     }
 
     std::pair<Line3, Intersec::quantity> findIntersec(const Plane& _lhs, const Plane& _rhs)
@@ -474,12 +473,13 @@ namespace la
             //
             //dot(P2 - E, n2) = 0
             //dot(P1 - E, n1) = 0
+            //E = P1 + s * a1 + t * b1
             //<=>
             //s * dot(a1, n2) + t * dot(b1, n2) = dot(P2 - P1, n2)
-            //s * dot(a1, n1) + t * dot(b1, n1) = dot(P2 - P1, n1)
+            //s * dot(a1, n1) + t * dot(b1, n1) = 0
             //<=>
             //s * q + t * w = l
-            //s * r + t * y = u
+            //s * r + t * y = 0
             //
             //det = q * y - w * r
             //...
@@ -489,7 +489,7 @@ namespace la
             float l = (_rhs.getP() - _lhs.getP()) ^ _rhs.getN();
             float r = _lhs.getA() ^ _lhs.getN();
             float y = _lhs.getB() ^ _lhs.getN();
-            float u = (_rhs.getP() - _lhs.getP()) ^ _lhs.getN();
+            float u = 0;
 
             float det = q * y - w * r;
 

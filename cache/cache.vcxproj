@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{13472a73-b6e5-48e5-b656-13ccd9ad5a28}</ProjectGuid>
-    <RootNamespace>triangles</RootNamespace>
+    <ProjectGuid>{c174873b-e758-41c9-8f83-6822ee1dc619}</ProjectGuid>
+    <RootNamespace>cache</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>LAL</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -140,24 +139,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="LAL\Line.cpp" />
-    <ClCompile Include="LAL\LineSegment.cpp" />
-    <ClCompile Include="LAL\math\LALmath.cpp" />
-    <ClCompile Include="LAL\Plane.cpp" />
-    <ClCompile Include="LAL\triangle.cpp" />
-    <ClCompile Include="LAL\Vector.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClInclude Include="cache_2Q\cache_2Q.hpp" />
+    <ClInclude Include="cache_2Q\LRU_container.hpp" />
+    <ClInclude Include="cache_LFU\cache_LFU.hpp" />
+    <ClInclude Include="cache_LFU\LFU_container.hpp" />
+    <ClInclude Include="tests\test_generator.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LAL\include\config.h" />
-    <ClInclude Include="LAL\include\LAL.h" />
-    <ClInclude Include="LAL\include\LALmath.h" />
-    <ClInclude Include="LAL\include\Line.h" />
-    <ClInclude Include="LAL\include\LineSegment.h" />
-    <ClInclude Include="LAL\include\Plane.h" />
-    <ClInclude Include="LAL\include\triangle.h" />
-    <ClInclude Include="LAL\include\Vector.h" />
-    <ClInclude Include="tests\LAL_test.h" />
+    <ClCompile Include="cache_2Q\main.cpp" />
+    <ClCompile Include="cache_LFU\main.cpp" />
+    <ClCompile Include="tests\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cache_2Q\README.md" />
+    <None Include="cache_LFU\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="tests\001.txt" />
+    <Text Include="tests\002.txt" />
+    <Text Include="tests\003.txt" />
+    <Text Include="tests\004.txt" />
+    <Text Include="tests\005.txt" />
+    <Text Include="tests\006.txt" />
+    <Text Include="tests\007.txt" />
+    <Text Include="tests\008.txt" />
+    <Text Include="tests\009.txt" />
+    <Text Include="tests\010.txt" />
+    <Text Include="tests\011.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

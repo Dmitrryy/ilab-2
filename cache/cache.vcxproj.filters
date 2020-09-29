@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="cache_2Q">
+      <UniqueIdentifier>{d0b35586-c914-451f-bb9f-696701f43bc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cache_LFU">
+      <UniqueIdentifier>{7cf15deb-f2bc-4a9a-8f9e-1e254b7e10e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{07a22cc4-a3d6-4e9b-9d77-eb305c3aeca6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cache_2Q\cache_2Q.hpp">
+      <Filter>cache_2Q</Filter>
+    </ClInclude>
+    <ClInclude Include="cache_2Q\LRU_container.hpp">
+      <Filter>cache_2Q</Filter>
+    </ClInclude>
+    <ClInclude Include="cache_LFU\cache_LFU.hpp">
+      <Filter>cache_LFU</Filter>
+    </ClInclude>
+    <ClInclude Include="cache_LFU\LFU_container.hpp">
+      <Filter>cache_LFU</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\test_generator.hpp">
+      <Filter>tests</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cache_2Q\main.cpp">
+      <Filter>cache_2Q</Filter>
+    </ClCompile>
+    <ClCompile Include="cache_LFU\main.cpp">
+      <Filter>cache_LFU</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\main.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cache_2Q\README.md">
+      <Filter>cache_2Q</Filter>
+    </None>
+    <None Include="cache_LFU\README.md">
+      <Filter>cache_LFU</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="tests\001.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\002.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\003.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\004.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\005.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\006.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\007.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\008.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\009.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\010.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\011.txt">
+      <Filter>tests</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

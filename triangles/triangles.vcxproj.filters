@@ -19,6 +19,9 @@
     <Filter Include="Source Files\LALsource\math">
       <UniqueIdentifier>{a3a83031-4d60-44d1-9b0e-6315d1e81dc0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tests">
+      <UniqueIdentifier>{07f9fdf4-0f6b-4db7-a95d-3ce328e1af91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -67,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="LAL\include\triangle.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\LAL_test.h">
+      <Filter>Header Files\tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

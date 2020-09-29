@@ -31,7 +31,6 @@ namespace la {
 
         bool intersection(const Line2& _rhs) const;
 
-
         bool contein(const Vector2f& _rhs) const { return (m_p - _rhs).collinear(m_v); }
         
         friend std::ostream& operator << (std::ostream& _stream, const Line2& _goal) {
@@ -66,9 +65,12 @@ namespace la {
 
         void reup(la::Vector3f _a, la::Vector3f _b, Type _t = Type::TwoPoints) { *this = Line3(_a, _b, _t); }
 
+        bool equal(const Line3& _that) const noexcept { return contein(_that.getP()) && contein(_that.getP() + _that.getV()); }
+
         bool intersection(const Line3& _rhs) const;
         bool contein(const Vector3f& _rhs) const { return (m_p - _rhs).collinear(m_v); }
 
+        bool operator == (const Line3& _that) const noexcept { return equal(_that); }
 
         friend std::ostream& operator << (std::ostream& _stream, const Line3& _goal) {
             _stream << '[' << _goal.m_p << ", " << _goal.m_p + _goal.m_v << ']';
