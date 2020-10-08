@@ -7,6 +7,7 @@
 #include "Line.h"
 #include "LineSegment.h"
 #include "Plane.h"
+#include "triangle.h"
 
 ///////////////////////////////////////////////////////////////
 //
@@ -22,6 +23,7 @@ namespace la
     inline bool   equal(const Vector3f& _lhs, const Vector3f& _rhs) { return _lhs.equal(_rhs); }
 
     inline bool   collinear(const Vector3f& _lhs, const Vector3f& _rhs) { return _lhs.collinear(_rhs); }
+    bool codirected(const Vector3f& _lhs, const Vector3f& _rhs);
 
     Vector3f  normalization(const Vector3f& _that);
 
@@ -124,6 +126,21 @@ namespace la
 
 ///////////////////////////////////////////////////////////////
 //
+// LineSegment & LineSegment
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+//3D
+    std::pair<Vector3f, Intersec::quantity>
+        findIntersection(const LineSegment3& _ls, const Line3& _line);
+
+    inline std::pair<Vector3f, Intersec::quantity>
+        findIntersection(const Line3& _line, const LineSegment3& _ls) { return findIntersection(_ls, _line); }
+}
+
+///////////////////////////////////////////////////////////////
+//
 // Plane & Plane
 //
 ///////////////////////////////////////////////////////////////
@@ -191,3 +208,31 @@ namespace la
     bool contein(const Plane& _pl, const Line3& _ln);
 
 }//namespace la (Plane & Line)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Triangle & Triangle
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+//3D
+    bool intersec(const Triangle& _lhs, const Triangle& _rhs);
+
+}//namespace la (Triangle & Triangle)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Triangle & Line
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    //3D
+    std::pair<LineSegment3, Intersec::quantity> findIntersec(const Triangle& _tr, const Line3& _line);
+    inline std::pair<LineSegment3, Intersec::quantity> 
+        findIntersec(const Line3& _line, const Triangle& _tr) { return findIntersec(_tr, _line); }
+
+}//namespace la (Triangle & Line)

@@ -1,6 +1,5 @@
 #include "../include/LALmath.h"
 
-
 ///////////////////////////////////////////////////////////////
 //
 // Vector & Vector
@@ -24,6 +23,11 @@ namespace la
     float modul(const Vector3f& _v)
     {
         return std::sqrt(_v.x * _v.x + _v.y * _v.y + _v.z * _v.z);
+    }
+
+    bool codirected(const Vector3f& _lhs, const Vector3f& _rhs)
+    {
+        return collinear(_lhs, _rhs) && scalarProduct(_lhs, _rhs) >= 0.f;
     }
 
     la::Vector3f crossProduct(const la::Vector3f& _lhs, const la::Vector3f& _rhs)
@@ -447,6 +451,17 @@ namespace la
 }//namespace la (LineSegment & LineSegment)
 
 
+///////////////////////////////////////////////////////////////
+//
+// LineSegment & LineSegment
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    //3D
+
+}//namespace la (LineSegment & Line)
+
 
 ///////////////////////////////////////////////////////////////
 //
@@ -475,8 +490,11 @@ namespace la
             //dot(P1 - E, n1) = 0
             //E = P1 + s * a1 + t * b1
             //<=>
+            //dot(P2 - P1 - s * a1 - t * b1, n2) = 0
+            //dot(s * a1 + t * b1, n1) = 0
+            //<=>
             //s * dot(a1, n2) + t * dot(b1, n2) = dot(P2 - P1, n2)
-            //s * dot(a1, n1) + t * dot(b1, n1) = 0
+            //s * dot(a1, n1) + t * (b1, n1) = 0
             //<=>
             //s * q + t * w = l
             //s * r + t * y = 0
@@ -484,12 +502,12 @@ namespace la
             //det = q * y - w * r
             //...
 
-            float q = _lhs.getA() ^ _rhs.getN();
-            float w = _lhs.getB() ^ _rhs.getN();
-            float l = (_rhs.getP() - _lhs.getP()) ^ _rhs.getN();
-            float r = _lhs.getA() ^ _lhs.getN();
-            float y = _lhs.getB() ^ _lhs.getN();
-            float u = 0;
+            float q = scalarProduct(_lhs.getA(), _rhs.getN());
+            float w = scalarProduct(_lhs.getB(), _rhs.getN());
+            float l = scalarProduct(_rhs.getP() - _lhs.getP(), _rhs.getN());
+            float r = scalarProduct(_lhs.getA(), _lhs.getN());
+            float y = scalarProduct(_lhs.getB(), _lhs.getN());
+
 
             float det = q * y - w * r;
 
@@ -501,8 +519,8 @@ namespace la
             {
                 Vector3f V_ = _lhs.getN() * _rhs.getN();
 
-                float det1 = l * y - w * u;
-                float det2 = q * u - r * l;
+                float det1 = l * y;
+                float det2 = - r * l;
 
                 float s = det1 / det;
                 float t = det2 / det;
@@ -688,3 +706,188 @@ namespace la
     }
 
 }//namespace la (Plane & Line)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Triangle & Triangle
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    //3D
+    bool intersec(const Triangle& _lhs, const Triangle& _rhs)
+    {
+        bool result = false;
+
+        //2D
+        if (_lhs.getPlane() == _rhs.getPlane())
+        {
+            result = result || _lhs.contein(_rhs.getA());
+            result = result || _lhs.contein(_rhs.getB());
+            result = result || _lhs.contein(_rhs.getC());
+        }
+        //3D
+        else if (intersec(_lhs.getPlane(), _rhs.getPlane()))
+        {
+            auto line_inters = findIntersec(_lhs.getPlane(), _rhs.getPlane());
+            assert(line_inters.second != Intersec::quantity::Nop);
+            assert(line_inters.second != Intersec::quantity::Same);
+
+            auto res1 = findIntersec(_lhs, line_inters.first);
+            if (res1.second != Intersec::quantity::Nop)
+            {
+                auto res2 = findIntersec(_rhs, line_inters.first);
+                if (res2.second != Intersec::quantity::Nop)
+                {
+                    auto findRes = findIntersection(res1.first, res2.first);
+                    if (findRes.second != Intersec::quantity::Nop) {
+                        result = true;
+                    }
+                }
+            }
+        }
+        else
+        {
+            result = false;
+        }
+        
+        return result;
+    }
+
+}//namespace la (Triangle & Triangle)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Triangle & Line
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    std::pair<LineSegment3, Intersec::quantity> findIntersec(const Triangle& _tr, const Line3& _line)
+    {
+        auto line_plane = findIntersec(_line, _tr.getPlane());
+        auto result = std::make_pair(LineSegment3(), Intersec::quantity::Nop);
+
+        if (line_plane.second == Intersec::quantity::One)
+        {
+            if (_tr.contein(line_plane.first))
+            {
+                result.first.reup(line_plane.first, line_plane.first, LineSegment3::Type::TwoPoints);
+                result.second = Intersec::quantity::One;
+            }
+        }
+        else if (line_plane.second == Intersec::quantity::Same)
+        {
+            Vector3f a_shtrix = projection(_tr.getA(), _line);
+            Vector3f b_shtrix = projection(_tr.getB(), _line);
+            Vector3f c_shtrix = projection(_tr.getC(), _line);
+
+            Vector3f ash_to_a = _tr.getA() - a_shtrix;
+            Vector3f bsh_to_b = _tr.getB() - b_shtrix;
+            Vector3f csh_to_c = _tr.getC() - c_shtrix;
+
+            float a_dist = (ash_to_a).modul();
+            float b_dist = (bsh_to_b).modul() * ((codirected(ash_to_a, bsh_to_b) ? 1 : -1));
+            float c_dist = (csh_to_c).modul() * ((codirected(ash_to_a, csh_to_c) ? 1 : -1));
+
+            float a_mdist = std::abs(a_dist);
+            float b_mdist = std::abs(b_dist);
+            float c_mdist = std::abs(c_dist);
+
+            if (a_dist * b_dist * c_dist > 0.f)
+            {
+                /*nop*/
+            }
+            else if (std::abs(a_dist) < EPSILON)
+            {
+                if (std::abs(b_dist) < EPSILON)
+                {
+                    assert(std::abs(c_dist) > EPSILON);
+
+                    result.first.reup(_tr.getA(), _tr.getB(), LineSegment3::Type::TwoPoints);
+                    result.second = Intersec::quantity::Interval;
+                }
+                else if (std::abs(c_dist) < EPSILON)
+                {
+                    result.first.reup(_tr.getA(), _tr.getC(), LineSegment3::Type::TwoPoints);
+                    result.second = Intersec::quantity::Interval;
+                }
+                else if (c_dist * b_dist > 0.f)
+                {
+                    result.first.reup(_tr.getA(), _tr.getA());
+                    result.second = Intersec::quantity::One;
+                }
+                else
+                {
+                    result.first.reup(a_shtrix, b_shtrix + (c_shtrix - b_shtrix) * (b_mdist / (c_mdist + b_mdist)));
+                    result.second = Intersec::quantity::Interval;
+                }
+            }
+            else if (std::abs(b_dist) < EPSILON)
+            {
+                if (std::abs(c_dist) < EPSILON)
+                {
+                    result.first.reup(_tr.getB(), _tr.getC(), LineSegment3::Type::TwoPoints);
+                    result.second = Intersec::quantity::Interval;
+                }
+                else if (c_dist * a_dist > 0.f)
+                {
+                    result.first.reup(_tr.getB(), _tr.getB());
+                    result.second = Intersec::quantity::One;
+                }
+                else
+                {
+                    result.first.reup(b_shtrix, a_shtrix + (c_shtrix - a_shtrix) * (a_mdist / (c_mdist + a_mdist)));
+                    result.second = Intersec::quantity::Interval;
+                }
+            }
+            else if (std::abs(c_dist) < EPSILON)
+            {
+                if (a_dist * b_dist > 0.f)
+                {
+                    result.first.reup(_tr.getC(), _tr.getC());
+                    result.second = Intersec::quantity::One;
+                }
+                else
+                {
+                    result.first.reup(c_shtrix, b_shtrix + (a_shtrix - b_shtrix) * (b_mdist / (a_mdist + b_mdist)));
+                    result.second = Intersec::quantity::Interval;
+                }
+            }
+            else
+            {
+                result.second = Intersec::quantity::Interval;
+
+                if (a_dist * b_dist > 0.f)
+                {
+                    auto res_ca = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getA()));
+                    auto res_cb = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getB()));
+
+                    result.first.reup(res_ca.first, res_cb.first);
+                }
+                else if (b_dist * c_dist > 0.f)
+                {
+                    auto res_ab = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getB()));
+                    auto res_ac = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getC()));
+
+                    result.first.reup(res_ab.first, res_ac.first);
+                }
+                else if (c_dist * a_dist > 0.f)
+                {
+                    auto res_bc = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getC()));
+                    auto res_ba = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getA()));
+
+                    result.first.reup(res_ba.first, res_bc.first);
+                }
+                else { assert(0); }
+            }
+        }
+        else { assert(0); }
+
+        return result;
+    }
+
+
+}//namespace la (Triangle & Line)
