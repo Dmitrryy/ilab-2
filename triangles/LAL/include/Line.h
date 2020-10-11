@@ -18,8 +18,8 @@ namespace la {
         };
 
         Line2()
-            : m_p(0.f)
-            , m_v(0.f)
+            : m_p(0)
+            , m_v(0)
         {}
 
         Line2(la::Vector2f _p, la::Vector2f _v, Type _t = Type::TwoPoints);
@@ -54,8 +54,8 @@ namespace la {
         };
 
         Line3()
-            : m_p(0.f)
-            , m_v(0.f)
+            : m_p(0)
+            , m_v(0)
         {}
 
         Line3(la::Vector3f _p, la::Vector3f _v, Type _t = Type::TwoPoints);

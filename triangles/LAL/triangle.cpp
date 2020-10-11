@@ -40,15 +40,27 @@ namespace la
 		return _stream;
 	}
 
-	bool Triangle::contein(const Vector3f& _vec) const noexcept
+	bool Triangle::contein(const Vector3f& _vec) const
 	{
 		bool res = false;
 		
 		if (la::contein(getPlane(), _vec))
 		{
-			res =         distance(_vec, Line3(m_a, m_b)) <= distance(m_c, Line3(m_a, m_b));
-			res = res  && distance(_vec, Line3(m_c, m_b)) <= distance(m_a, Line3(m_c, m_b));
-			res = res  && distance(_vec, Line3(m_c, m_a)) <= distance(m_b, Line3(m_c, m_a));
+			if (LineSegment3(m_a, m_b).contein(_vec) ||
+				LineSegment3(m_b, m_c).contein(_vec) ||
+				LineSegment3(m_c, m_a).contein(_vec)) 
+			{ 
+				res = true;
+			}
+			else
+			{
+				const Vector3f p1 = m_a + (((m_c + ((m_b - m_c) / 2.f)) - m_a) * 3.f / 5.f);
+				const LineSegment3 p1_vec(p1, _vec);
+
+				res = findIntersection(LineSegment3(m_b, m_a), p1_vec).second == Intersec::quantity::Nop;
+				res = res && findIntersection(LineSegment3(m_b, m_c), p1_vec).second == Intersec::quantity::Nop;
+				res = res && findIntersection(LineSegment3(m_a, m_c), p1_vec).second == Intersec::quantity::Nop;
+			}
 		}
 
 		return res;

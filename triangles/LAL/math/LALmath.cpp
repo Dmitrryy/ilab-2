@@ -7,20 +7,20 @@
 ///////////////////////////////////////////////////////////////
 namespace la
 {
-    la::Vector3f normalization(const la::Vector3f& _that)
+    Vector3f normalization(const Vector3f& _that)
     {
         if (!_that.isZero())
         {
-            float m = _that.modul();
-            return la::Vector3f(_that.x / m, _that.y / m, _that.z / m);
+            double m = _that.modul();
+            return Vector3f(_that.x / m, _that.y / m, _that.z / m);
         }
         else
         {
-            return la::Vector3f(0.f);
+            return Vector3f(0.f);
         }
     }
 
-    float modul(const Vector3f& _v)
+    double modul(const Vector3f& _v)
     {
         return std::sqrt(_v.x * _v.x + _v.y * _v.y + _v.z * _v.z);
     }
@@ -30,9 +30,9 @@ namespace la
         return collinear(_lhs, _rhs) && scalarProduct(_lhs, _rhs) >= 0.f;
     }
 
-    la::Vector3f crossProduct(const la::Vector3f& _lhs, const la::Vector3f& _rhs)
+    Vector3f crossProduct(const Vector3f& _lhs, const Vector3f& _rhs)
     {
-        auto res = la::Vector3f(_lhs.y * _rhs.z - _lhs.z * _rhs.y,
+        auto res = Vector3f(_lhs.y * _rhs.z - _lhs.z * _rhs.y,
             _lhs.z * _rhs.x - _lhs.x * _rhs.z,
             _lhs.x * _rhs.y - _lhs.y * _rhs.x);
 
@@ -40,83 +40,83 @@ namespace la
     }
 
 
-    float scalarProduct(const la::Vector3f& _lhs, const la::Vector3f& _rhs)
+    double scalarProduct(const Vector3f& _lhs, const Vector3f& _rhs)
     {
         return _lhs.x * _rhs.x + _lhs.y * _rhs.y + _lhs.z * _rhs.z;
     }
 
 
-    la::Vector3f operator -  (const la::Vector3f& _lhs, const la::Vector3f& _rhs) 
+    Vector3f operator -  (const Vector3f& _lhs, const Vector3f& _rhs) 
     { 
-        return la::Vector3f(_lhs.x - _rhs.x, _lhs.y - _rhs.y, _lhs.z - _rhs.z); 
+        return Vector3f(_lhs.x - _rhs.x, _lhs.y - _rhs.y, _lhs.z - _rhs.z); 
     }
-    la::Vector3f operator +  (const la::Vector3f& _lhs, const la::Vector3f& _rhs) 
+    Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs) 
     { 
-        return la::Vector3f(_lhs.x + _rhs.x, _lhs.y + _rhs.y, _lhs.z + _rhs.z); 
+        return Vector3f(_lhs.x + _rhs.x, _lhs.y + _rhs.y, _lhs.z + _rhs.z); 
     }
-    la::Vector3f operator *  (const la::Vector3f& _lhs, const la::Vector3f& _rhs) 
+    Vector3f operator *  (const Vector3f& _lhs, const Vector3f& _rhs) 
     { 
         return crossProduct(_lhs, _rhs); 
     }
-    la::Vector3f operator *  (const la::Vector3f& _lhs, float _n) 
+    Vector3f operator *  (const Vector3f& _lhs, double _n) 
     { 
         return { _lhs.x * _n, _lhs.y * _n, _lhs.z * _n }; 
     }
-    float        operator ^  (const la::Vector3f& _lhs, const la::Vector3f& _rhs) 
+    double        operator ^  (const Vector3f& _lhs, const Vector3f& _rhs) 
     { 
         return scalarProduct(_lhs, _rhs); 
     }
 
 
 //2D
-    la::Vector2f normalization(const la::Vector2f& _that)
+    Vector2f normalization(const Vector2f& _that)
     {
         if (!_that.isZero())
         {
-            float m = _that.modul();
-            return la::Vector2f(_that.x / m, _that.y / m);
+            double m = _that.modul();
+            return Vector2f(_that.x / m, _that.y / m);
         }
         else
         {
-            return la::Vector2f(0.f);
+            return Vector2f(0.f);
         }
     }
 
-    float modul(const Vector2f& _v) 
+    double modul(const Vector2f& _v) 
     { 
         return std::sqrt(_v.x * _v.x + _v.y * _v.y); 
     }
 
 
-    la::Vector3f crossProduct(const la::Vector2f& _lhs, const la::Vector2f& _rhs)
+    Vector3f crossProduct(const Vector2f& _lhs, const Vector2f& _rhs)
     {
         return crossProduct({ _lhs.x, _lhs.y, 0.f }, { _rhs.x, _rhs.y, 0.f });
     }
 
-    float scalarProduct(const la::Vector2f& _lhs, const la::Vector2f& _rhs)
+    double scalarProduct(const Vector2f& _lhs, const Vector2f& _rhs)
     {
         return (static_cast<double>(_lhs.x) * _rhs.x
             + static_cast<double>(_lhs.y) * _rhs.y);
     }
 
 
-    la::Vector2f operator -  (const la::Vector2f& _lhs, const la::Vector2f& _rhs) 
+    Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs) 
     { 
-        return la::Vector2f(_lhs.x - _rhs.x, _lhs.y - _rhs.y);
+        return Vector2f(_lhs.x - _rhs.x, _lhs.y - _rhs.y);
     }
-    la::Vector2f operator +  (const la::Vector2f& _lhs, const la::Vector2f& _rhs) 
+    Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs) 
     { 
-        return la::Vector2f(_lhs.x + _rhs.x, _lhs.y + _rhs.y);
+        return Vector2f(_lhs.x + _rhs.x, _lhs.y + _rhs.y);
     }
-    float        operator ^  (const la::Vector2f& _lhs, const la::Vector2f& _rhs) 
+    double        operator ^  (const Vector2f& _lhs, const Vector2f& _rhs) 
     { 
         return scalarProduct(_lhs, _rhs);
     }
-    la::Vector3f operator *  (const la::Vector2f& _lhs, const la::Vector2f& _rhs)
+    Vector3f operator *  (const Vector2f& _lhs, const Vector2f& _rhs)
     { 
         return crossProduct(_lhs, _rhs);
     }
-    la::Vector2f operator *  (const la::Vector2f& _lhs, float _n) 
+    Vector2f operator *  (const Vector2f& _lhs, double _n) 
     { 
         return { _lhs.x * _n, _lhs.y * _n };
     }
@@ -137,13 +137,13 @@ namespace la
     {
         Vector3f tmp_lv = normalization(_line.getV());
 
-        float s = scalarProduct(tmp_lv, _point - _line.getP());
+        double s = scalarProduct(tmp_lv, _point - _line.getP());
 
         return _line.getP() + tmp_lv * s;
     }
 
 
-    float distance(const Vector3f& _point, const Line3& _line)
+    double distance(const Vector3f& _point, const Line3& _line)
     {
         return (_point - projection(_point, _line)).modul();
     }
@@ -153,13 +153,13 @@ namespace la
     {
         Vector2f tmp_lv = normalization(_line.getV());
 
-        float s = scalarProduct(tmp_lv, _point - _line.getP());
+        double s = scalarProduct(tmp_lv, _point - _line.getP());
 
         return _line.getP() + tmp_lv * s;
     }
 
 
-    float distance(const Vector2f& _point, const Line2& _line)
+    double distance(const Vector2f& _point, const Line2& _line)
     {
         return (_point - projection(_point, _line)).modul();
     }
@@ -191,12 +191,12 @@ namespace la
         //S2 * b - S2 * d = f
 
         Vector3f pp = _rhs.getP() - _lhs.getP();
-        float a = scalarProduct(_lhs.getV(), _lhs.getV());
-        float b = scalarProduct(_lhs.getV(), _rhs.getV());
-        float c = scalarProduct(pp, _lhs.getV());
-        float d = scalarProduct(_rhs.getV(), _rhs.getV());
-        float f = scalarProduct(pp, _rhs.getV());
-        float det = -a * d + b * b;
+        double a = scalarProduct(_lhs.getV(), _lhs.getV());
+        double b = scalarProduct(_lhs.getV(), _rhs.getV());
+        double c = scalarProduct(pp, _lhs.getV());
+        double d = scalarProduct(_rhs.getV(), _rhs.getV());
+        double f = scalarProduct(pp, _rhs.getV());
+        double det = -a * d + b * b;
 
         std::pair<Vector3f, Intersec::quantity> res(0.f, Intersec::quantity::Nop);
         if (std::abs(det) < EPSILON)
@@ -211,11 +211,11 @@ namespace la
         }
         else
         {
-            float det1 = -d * c + b * f;
-            float det2 = a * f - b * c;
+            double det1 = -d * c + b * f;
+            double det2 = a * f - b * c;
 
-            float S1 = det1 / det;
-            float S2 = det2 / det;
+            double S1 = det1 / det;
+            double S2 = det2 / det;
 
             Vector3f Q1 = _lhs.getP() + _lhs.getV() * S1;
             Vector3f Q2 = _rhs.getP() + _rhs.getV() * S2;
@@ -245,14 +245,14 @@ namespace la
         //S2 * b - S2 * d = f
 
         Vector3f pp = _rhs.getP() - _lhs.getP();
-        float a = scalarProduct(_lhs.getV(), _lhs.getV());
-        float b = scalarProduct(_lhs.getV(), _rhs.getV());
-        float c = scalarProduct(pp, _lhs.getV());
-        float d = scalarProduct(_rhs.getV(), _rhs.getV());
-        float f = scalarProduct(pp, _rhs.getV());
-        float det = -a * d + b * b;
+        double a = scalarProduct(_lhs.getV(), _lhs.getV());
+        double b = scalarProduct(_lhs.getV(), _rhs.getV());
+        double c = scalarProduct(pp, _lhs.getV());
+        double d = scalarProduct(_rhs.getV(), _rhs.getV());
+        double f = scalarProduct(pp, _rhs.getV());
+        double det = -a * d + b * b;
 
-        float res = 0.f;
+        double res = 0.f;
         if (std::abs(det) < EPSILON)
         {
             //V1 || V2
@@ -264,22 +264,22 @@ namespace la
             }
             else
             {
-                float S2 = 0.f;
-                float S1 = c / a;
+                const double S2 = 0.f;
+                const double S1 = c / a;
 
                 res = (_lhs.getP() + _lhs.getV() * S1 - _rhs.getP()).modul();
             }
         }
         else
         {
-            float det1 = -d * c + b * f;
-            float det2 = a * f - b * c;
+            const double det1 = -d * c + b * f;
+            const double det2 = a * f - b * c;
 
-            float S1 = det1 / det;
-            float S2 = det2 / det;
+            const double S1 = det1 / det;
+            const double S2 = det2 / det;
 
-            Vector3f Q1 = _lhs.getP() + _lhs.getV() * S1;
-            Vector3f Q2 = _rhs.getP() + _rhs.getV() * S2;
+            const Vector3f Q1 = _lhs.getP() + _lhs.getV() * S1;
+            const Vector3f Q2 = _rhs.getP() + _rhs.getV() * S2;
 
             res = (Q1 - Q2).modul();
         }
@@ -297,7 +297,7 @@ namespace la
         std::pair<Vector2f, Intersec::quantity> res({}, Intersec::quantity::Nop);
 
         if (!_lhs.getV().collinear(_rhs.getV())) {
-            float t = crossProduct(_rhs.getP() - _lhs.getP(), _rhs.getV()).z
+            const double t = crossProduct(_rhs.getP() - _lhs.getP(), _rhs.getV()).z
                 / crossProduct(_lhs.getV(), _rhs.getV()).z;
             res.first = _lhs.getP() + t * _lhs.getV();
             res.second = Intersec::quantity::One;
@@ -325,10 +325,11 @@ namespace la
     std::pair<LineSegment3, Intersec::quantity>
         findIntersection(const LineSegment3& _lhs, const LineSegment3& _rhs)
     {
-        std::pair<Vector3f, Intersec::quantity> intersec_line = findIntersection(_lhs.toLine(), _rhs.toLine());
+        const std::pair<Vector3f, Intersec::quantity> intersec_line = findIntersection(_lhs.toLine(), _rhs.toLine());
 
         std::pair<LineSegment3, Intersec::quantity> res({}, Intersec::quantity::Nop);
-        if (intersec_line.second == Intersec::quantity::Nop) {
+        if (intersec_line.second == Intersec::quantity::Nop) 
+        {
             /*nop*/
         }
         else if (intersec_line.second == Intersec::quantity::One)
@@ -341,10 +342,16 @@ namespace la
         }
         else if (intersec_line.second == Intersec::quantity::Same)
         {
-            float s0 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP()) / _lhs.getV().modul();
-            float s1 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP()) / _lhs.getV().modul();
+            double s0 = 0;
+            double s1 = 0;
+            if (_lhs.getV().modul() > EPSILON) {
+                s0 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP())
+                    / _lhs.getV().modul();
+                s1 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP())
+                    / _lhs.getV().modul();
+            }
 
-            auto inter_res = findIntersection({ 0.f, 1.f }, { s0, s1 });
+            const auto inter_res = findIntersection({ 0.f, 1.f }, { s0, s1 });
             if (inter_res.second != Intersec::quantity::Nop)
             {
                 res.second = inter_res.second;
@@ -361,7 +368,7 @@ namespace la
     std::pair<LineSegment2, Intersec::quantity>
         findIntersection(const LineSegment2& _lhs, const LineSegment2& _rhs)
     {
-        std::pair<Vector2f, Intersec::quantity> intersec_line = findIntersection(_lhs.toLine(), _rhs.toLine());
+        const std::pair<Vector2f, Intersec::quantity> intersec_line = findIntersection(_lhs.toLine(), _rhs.toLine());
 
         std::pair<LineSegment2, Intersec::quantity> res({}, Intersec::quantity::Nop);
         if (intersec_line.second == Intersec::quantity::Nop) {
@@ -377,10 +384,10 @@ namespace la
         }
         else if (intersec_line.second == Intersec::quantity::Same)
         {
-            float s0 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP()) / _lhs.getV().modul();
-            float s1 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP()) / _lhs.getV().modul();
+            const double s0 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP()) / _lhs.getV().modul();
+            const double s1 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP()) / _lhs.getV().modul();
 
-            auto inter_res = findIntersection({ 0.f, 1.f }, { s0, s1 });
+            const auto inter_res = findIntersection({ 0.f, 1.f }, { s0, s1 });
             if (inter_res.second != Intersec::quantity::Nop)
             {
                 res.second = inter_res.second;
@@ -401,8 +408,8 @@ namespace la
             return res;
         }
 
-        float res_a = 0.f;
-        float res_b = 0.f;
+        double res_a = 0.f;
+        double res_b = 0.f;
         // m_a === a1
         // m_b === b1
         // ...
@@ -459,7 +466,30 @@ namespace la
 namespace la
 {
     //3D
+    std::pair<Vector3f, Intersec::quantity>
+        findIntersection(const LineSegment3& _ls, const Line3& _line)
+    {
+        auto result = std::make_pair(Vector3f(0.f), Intersec::quantity::Nop);
 
+        const auto tmp_res = findIntersection(_ls.toLine(), _line);
+
+        if (tmp_res.second == Intersec::quantity::One)
+        {
+            const double s = (tmp_res.first - _ls.getP()).modul() / _ls.getV().modul();
+
+            if (s >= 0.f && s <= 1.f)
+            {
+                result.first = tmp_res.first;
+                result.second = Intersec::quantity::One;
+            }
+        }
+        else if (tmp_res.second == Intersec::quantity::Same)
+        {
+            result.second = Intersec::quantity::Same;
+        }
+
+        return result;
+    }
 }//namespace la (LineSegment & Line)
 
 
@@ -488,45 +518,42 @@ namespace la
             //
             //dot(P2 - E, n2) = 0
             //dot(P1 - E, n1) = 0
-            //E = P1 + s * a1 + t * b1
+            //E = a * n1 + b * n2;
             //<=>
-            //dot(P2 - P1 - s * a1 - t * b1, n2) = 0
-            //dot(s * a1 + t * b1, n1) = 0
+            //a * dot(n1, n1) + b * dot(n2, n1) = dot(p1, n1)
+            //a * dot(n2, n1) + b * dot(n2, n2) = dot(p2, n2)
             //<=>
-            //s * dot(a1, n2) + t * dot(b1, n2) = dot(P2 - P1, n2)
-            //s * dot(a1, n1) + t * (b1, n1) = 0
+            //a * q + b * w = s1
+            //a * w + b * l = s2
             //<=>
-            //s * q + t * w = l
-            //s * r + t * y = 0
-            //
-            //det = q * y - w * r
+            //det = q * l - w^2
+            //det1 = s1 * l - s2 * w
+            //det2 = q * s2 - s1 * w
             //...
 
-            float q = scalarProduct(_lhs.getA(), _rhs.getN());
-            float w = scalarProduct(_lhs.getB(), _rhs.getN());
-            float l = scalarProduct(_rhs.getP() - _lhs.getP(), _rhs.getN());
-            float r = scalarProduct(_lhs.getA(), _lhs.getN());
-            float y = scalarProduct(_lhs.getB(), _lhs.getN());
+            const double q = scalarProduct(_lhs.getN(), _lhs.getN());
+            const double w = scalarProduct(_lhs.getN(), _rhs.getN());
+            const double l = scalarProduct(_rhs.getN(), _rhs.getN());
+            const double s1 = scalarProduct(_lhs.getP(), _lhs.getN());
+            const double s2 = scalarProduct(_rhs.getP(), _rhs.getN());
 
-
-            float det = q * y - w * r;
-
+            const double det = q * l - w * w;
             if (std::abs(det) < EPSILON)
             {
                 res.second = Intersec::quantity::Same;
+                assert(_lhs == _rhs);
             }
             else
             {
-                Vector3f V_ = _lhs.getN() * _rhs.getN();
+                const double det1 = s1 * l - w * s2;
+                const double det2 = q * s2 - w * s1;
 
-                float det1 = l * y;
-                float det2 = - r * l;
+                const double a = det1 / det;
+                const double b = det2 / det;
 
-                float s = det1 / det;
-                float t = det2 / det;
-
-                res.first.reup(_lhs.getP() + s * _lhs.getA() + t * _lhs.getB(),
-                    V_, Line3::Type::PointAndVector);
+                const Vector3f e = _lhs.getN() * a + _rhs.getN() * b;
+                const Vector3f v = crossProduct(normalization(_lhs.getN()), normalization(_rhs.getN()));
+                res.first.reup(e, v, Line3::Type::PointAndVector);
                 res.second = Intersec::quantity::Interval;
             }
         }
@@ -544,14 +571,14 @@ namespace la
         return res;
     }
 
-    float distance(const Plane& _lhs, const Plane& _rhs)
+    double distance(const Plane& _lhs, const Plane& _rhs)
     {
         return std::abs(distanceWithSign(_lhs, _rhs));
     }
 
-    float distanceWithSign(const Plane& _lhs, const Plane& _rhs)
+    double distanceWithSign(const Plane& _lhs, const Plane& _rhs)
     {
-        float res = 0.f;
+        double res = 0.f;
 
         if (!intersec(_lhs, _rhs))
         {
@@ -561,9 +588,9 @@ namespace la
             //
             // s * dot(_lhs.getN(), _rhs.getN()) =  dot(_rhs.getP(), _rhs.getN()) 
             //                                      - dot(_lhs.getP(), _rhs.getN())
-            float a = scalarProduct(_lhs.getN(), _rhs.getN());
-            float b = scalarProduct(_rhs.getP(), _rhs.getN());
-            float c = scalarProduct(_lhs.getP(), _rhs.getN());
+            const double a = scalarProduct(_lhs.getN(), _rhs.getN());
+            const double b = scalarProduct(_rhs.getP(), _rhs.getN());
+            const double c = scalarProduct(_lhs.getP(), _rhs.getN());
 
             res = (b - c) / a;
         }
@@ -589,20 +616,20 @@ namespace la
 
     Vector3f projection(const Vector3f& _point, const Plane& _pl)
     {
-        Vector3f res = _point;
+        const Vector3f res = _point;
 
-        float s = distanceWithSign(_pl, _point);
+        const double s = distanceWithSign(_pl, _point);
 
 
         return _point - _pl.getN() * s;
     }
 
-    float distance(const Plane& _pl, const Vector3f _point)
+    double distance(const Plane& _pl, const Vector3f _point)
     {
         return distance(_pl, Plane(_point, _pl.getA(), _pl.getB()));
     }
 
-    float distanceWithSign(const Plane& _pl, const Vector3f _point)
+    double distanceWithSign(const Plane& _pl, const Vector3f _point)
     {
         return distanceWithSign(_pl, Plane(_point, _pl.getA(), _pl.getB()));
     }
@@ -635,8 +662,8 @@ namespace la
 
     Line3 projection(const Line3& _line, const Plane& _pl)
     {
-        Vector3f p1_ = projection(_line.getP(), _pl);
-        Vector3f p2_ = projection(_line.getP() + _line.getV(), _pl);
+        const Vector3f p1_ = projection(_line.getP(), _pl);
+        const Vector3f p2_ = projection(_line.getP() + _line.getV(), _pl);
 
         return {p1_, p2_, Line3::Type::TwoPoints};
     }
@@ -658,7 +685,7 @@ namespace la
             //<=> 
             //s = (a - b) / c;
 
-            float c = _pl.getN() ^ _ln.getV();
+            const double c = _pl.getN() ^ _ln.getV();
 
             if (std::abs(c) < EPSILON)
             {
@@ -668,10 +695,10 @@ namespace la
             {
                 res.second = Intersec::quantity::One;
 
-                float a = _pl.getN() ^ _pl.getP();
-                float b = _pl.getN() ^ _ln.getP();
+                const double a = _pl.getN() ^ _pl.getP();
+                const double b = _pl.getN() ^ _ln.getP();
 
-                float s = (a - b) / c;
+                const double s = (a - b) / c;
                 res.first = _ln.getP() + s * _ln.getV();
             }
         }
@@ -679,9 +706,9 @@ namespace la
         return res;
     }
 
-    float distanceWithSign(const Plane& _pl, const Line3 _ln)
+    double distanceWithSign(const Plane& _pl, const Line3 _ln)
     {
-        float res = 0.f;
+        double res = 0.f;
 
         if (!_ln.getV().collinear(_pl.getA()))
         {
@@ -695,7 +722,7 @@ namespace la
         return res;
     }
 
-    float distance(const Plane& _pl, const Line3 _ln)
+    double distance(const Plane& _pl, const Line3 _ln)
     {
         return std::abs(distanceWithSign(_pl, _ln));
     }
@@ -730,17 +757,17 @@ namespace la
         //3D
         else if (intersec(_lhs.getPlane(), _rhs.getPlane()))
         {
-            auto line_inters = findIntersec(_lhs.getPlane(), _rhs.getPlane());
+            const auto line_inters = findIntersec(_lhs.getPlane(), _rhs.getPlane());
             assert(line_inters.second != Intersec::quantity::Nop);
             assert(line_inters.second != Intersec::quantity::Same);
 
-            auto res1 = findIntersec(_lhs, line_inters.first);
+            const auto res1 = findIntersec(_lhs, line_inters.first);
             if (res1.second != Intersec::quantity::Nop)
             {
-                auto res2 = findIntersec(_rhs, line_inters.first);
+                const auto res2 = findIntersec(_rhs, line_inters.first);
                 if (res2.second != Intersec::quantity::Nop)
                 {
-                    auto findRes = findIntersection(res1.first, res2.first);
+                    const auto findRes = findIntersection(res1.first, res2.first);
                     if (findRes.second != Intersec::quantity::Nop) {
                         result = true;
                     }
@@ -767,7 +794,7 @@ namespace la
 {
     std::pair<LineSegment3, Intersec::quantity> findIntersec(const Triangle& _tr, const Line3& _line)
     {
-        auto line_plane = findIntersec(_line, _tr.getPlane());
+        const auto line_plane = findIntersec(_line, _tr.getPlane());
         auto result = std::make_pair(LineSegment3(), Intersec::quantity::Nop);
 
         if (line_plane.second == Intersec::quantity::One)
@@ -780,23 +807,23 @@ namespace la
         }
         else if (line_plane.second == Intersec::quantity::Same)
         {
-            Vector3f a_shtrix = projection(_tr.getA(), _line);
-            Vector3f b_shtrix = projection(_tr.getB(), _line);
-            Vector3f c_shtrix = projection(_tr.getC(), _line);
+            const Vector3f a_shtrix = projection(_tr.getA(), _line);
+            const Vector3f b_shtrix = projection(_tr.getB(), _line);
+            const Vector3f c_shtrix = projection(_tr.getC(), _line);
 
-            Vector3f ash_to_a = _tr.getA() - a_shtrix;
-            Vector3f bsh_to_b = _tr.getB() - b_shtrix;
-            Vector3f csh_to_c = _tr.getC() - c_shtrix;
+            const Vector3f ash_to_a = _tr.getA() - a_shtrix;
+            const Vector3f bsh_to_b = _tr.getB() - b_shtrix;
+            const Vector3f csh_to_c = _tr.getC() - c_shtrix;
 
-            float a_dist = (ash_to_a).modul();
-            float b_dist = (bsh_to_b).modul() * ((codirected(ash_to_a, bsh_to_b) ? 1 : -1));
-            float c_dist = (csh_to_c).modul() * ((codirected(ash_to_a, csh_to_c) ? 1 : -1));
+            const double a_dist = (ash_to_a).modul();
+            const double b_dist = (bsh_to_b).modul() * ((codirected(ash_to_a, bsh_to_b) ? 1 : -1));
+            const double c_dist = (csh_to_c).modul() * ((codirected(ash_to_a, csh_to_c) ? 1 : -1));
 
-            float a_mdist = std::abs(a_dist);
-            float b_mdist = std::abs(b_dist);
-            float c_mdist = std::abs(c_dist);
+            const double a_mdist = std::abs(a_dist);
+            const double b_mdist = std::abs(b_dist);
+            const double c_mdist = std::abs(c_dist);
 
-            if (a_dist * b_dist * c_dist > 0.f)
+            if (a_dist * b_dist * c_dist > EPSILON)
             {
                 /*nop*/
             }
@@ -862,29 +889,29 @@ namespace la
 
                 if (a_dist * b_dist > 0.f)
                 {
-                    auto res_ca = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getA()));
-                    auto res_cb = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getB()));
+                    const auto res_ca = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getA()));
+                    const auto res_cb = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getB()));
 
                     result.first.reup(res_ca.first, res_cb.first);
                 }
                 else if (b_dist * c_dist > 0.f)
                 {
-                    auto res_ab = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getB()));
-                    auto res_ac = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getC()));
+                    const auto res_ab = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getB()));
+                    const auto res_ac = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getC()));
 
                     result.first.reup(res_ab.first, res_ac.first);
                 }
                 else if (c_dist * a_dist > 0.f)
                 {
-                    auto res_bc = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getC()));
-                    auto res_ba = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getA()));
+                    const auto res_bc = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getC()));
+                    const auto res_ba = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getA()));
 
                     result.first.reup(res_ba.first, res_bc.first);
                 }
                 else { assert(0); }
             }
         }
-        else { assert(0); }
+        else if (line_plane.second != Intersec::quantity::Nop) { assert(0); }
 
         return result;
     }

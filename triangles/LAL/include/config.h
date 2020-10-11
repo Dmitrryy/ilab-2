@@ -4,7 +4,7 @@
 #include <iostream>
 
 namespace la {
-	static const float EPSILON = 0.00001f;
+	static constexpr double EPSILON = 0.000001;
 
     namespace Intersec {
 

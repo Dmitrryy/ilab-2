@@ -24,7 +24,7 @@ namespace la
 		Plane() = default;
 
 		//Ax + By + Cz + D = 0
-		//Plane(float _a, float _b, float _c, float _d)
+		//Plane(double _a, double _b, double _c, double _d)
 		//{
 		//	reup(_a, _b, _c, _d);
 		//}
@@ -46,7 +46,7 @@ namespace la
 		bool operator == (const Plane& _that) const noexcept;
 
 		void reup(Vector3f _point, Vector3f _vec1, Vector3f _vec2, Type _t = Type::PointAndTwoVec);
-		//void reup(float _a, float _b, float _c, float _d);
+		//void reup(double _a, double _b, double _c, double _d);
 
 		friend std::ostream& operator << (std::ostream& _stream, const Plane& _target)
 		{

@@ -28,7 +28,7 @@ namespace la
 		return equal(*this, _that);
 	}
 
-	//void Plane::reup(float _a, float _b, float _c, float _d)
+	//void Plane::reup(double _a, double _b, double _c, double _d)
 	//{
 	//	if (std::abs(_a) > EPSILON)
 	//	{

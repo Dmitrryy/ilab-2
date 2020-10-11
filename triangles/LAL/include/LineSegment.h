@@ -9,8 +9,8 @@ namespace la {
 
     class LineSegment1
     {
-        float m_a;
-        float m_b;
+        double m_a;
+        double m_b;
 
     public:
 
@@ -19,28 +19,28 @@ namespace la {
             , m_b(0.f)
         {}
 
-        LineSegment1(float _a, float _b)
+        LineSegment1(double _a, double _b)
         {
             m_a = std::min(_a, _b);
             m_b = std::max(_a, _b);
         }
 
-        float length() const noexcept { return m_b - m_a; }
+        double length() const noexcept { return m_b - m_a; }
 
-        float getA() const noexcept { return m_a; }
-        float getB() const noexcept { return m_b; }
+        double getA() const noexcept { return m_a; }
+        double getB() const noexcept { return m_b; }
 
         bool equal(const LineSegment1& _rhs) const noexcept {
             return std::abs(m_a - _rhs.m_a) < EPSILON && std::abs(m_b - _rhs.m_b) < EPSILON;
         }
 
-        void reup(float _a, float _b) noexcept { *this = LineSegment1(_a, _b); }
+        void reup(double _a, double _b) noexcept { *this = LineSegment1(_a, _b); }
 
         bool operator == (const LineSegment1& _rhs) const noexcept { return equal(_rhs); }
 
         bool intersection(const LineSegment1& _rhs) const noexcept;
 
-        bool contein(float _x) const noexcept { return _x >= m_a && _x <= m_b; }
+        bool contein(double _x) const noexcept { return _x >= m_a && _x <= m_b; }
 
     };
 
@@ -67,7 +67,7 @@ namespace la {
 
         LineSegment2(la::Vector2f _p, la::Vector2f _v, Type _t = Type::TwoPoints);
 
-        float length() const noexcept { return m_v.modul(); }
+        double length() const noexcept { return m_v.modul(); }
 
         Vector2f getP() const noexcept { return m_p; }
         Vector2f getV() const noexcept { return m_v; }
@@ -108,7 +108,7 @@ namespace la {
 
         LineSegment3(la::Vector3f _p, la::Vector3f _v, Type _t = Type::TwoPoints);
 
-        float length() const noexcept { return m_v.modul(); }
+        double length() const noexcept { return m_v.modul(); }
 
         Vector3f getP() const noexcept { return m_p; }
         Vector3f getV() const noexcept { return m_v; }

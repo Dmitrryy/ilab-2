@@ -39,8 +39,8 @@ namespace la
         bool res = false;
         if (toLine().contein(_rhs))
         {
-            float s = scalarProduct(normalization(m_v), _rhs - m_p) / m_v.modul();
-            if (s >= 0.f && s <= 1.f) {
+            const double s = scalarProduct(normalization(m_v), _rhs - m_p) / m_v.modul();
+            if (s >= -EPSILON && s <= 1.f + EPSILON) {
                 res = true;
             }
         }
@@ -63,7 +63,7 @@ namespace la
         bool res = false;
         if (toLine().contein(_rhs))
         {
-            float s = scalarProduct(normalization(m_v), _rhs - m_p) / m_v.modul();
+            double s = scalarProduct(normalization(m_v), _rhs - m_p) / m_v.modul();
             if (s >= 0.f && s <= 1.f + EPSILON) {
                 res = true;
             }

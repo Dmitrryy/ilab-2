@@ -37,7 +37,7 @@ namespace la
 
 		Plane getPlane() const noexcept;
 
-		bool contein(const Vector3f& _vec) const noexcept;
+		bool contein(const Vector3f& _vec) const;
 
 		bool equal(const Triangle& _that) const noexcept;
 
