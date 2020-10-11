@@ -11,27 +11,27 @@ namespace la {
     public:
 
         Vector2f()
-            : x(0.f)
-            , y(0.f)
+            : x(0)
+            , y(0)
         {};
 
-        Vector2f(float _x, float _y)
+        Vector2f(double _x, double _y)
             : x(_x)
             , y(_y)
         {};
 
-        explicit Vector2f(float _all)
+        explicit Vector2f(double _all)
             : x(_all)
             , y(_all)
         {};
 
-        float modul() const { return std::sqrt(x * x + y * y); }
+        double modul() const { return std::sqrt(x * x + y * y); }
 
         bool operator == (const la::Vector2f& _rhs) const noexcept { return equal(_rhs); }
 
         bool collinear(const la::Vector2f& _rhs) const noexcept;
         bool equal(const la::Vector2f& _rhs) const noexcept;
-        bool isZero() const noexcept { return equal(Vector2f(0.f)); }
+        bool isZero() const noexcept { return equal(Vector2f(0)); }
 
         friend Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs);
         friend Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs);
@@ -43,8 +43,8 @@ namespace la {
         }
 
 
-        float x;
-        float y;
+        double x;
+        double y;
     };
 
   
@@ -53,31 +53,31 @@ namespace la {
 
     struct Vector3f
     {
-        float x;
-        float y;
-        float z;
+        double x;
+        double y;
+        double z;
 
     public:
 
         Vector3f() noexcept
-            : x(0.f)
-            , y(0.f)
-            , z(0.f)
+            : x(0)
+            , y(0)
+            , z(0)
         {}
 
-        Vector3f(float _x, float _y, float _z) noexcept
+        Vector3f(double _x, double _y, double _z) noexcept
             : x(_x)
             , y(_y)
             , z(_z)
         {};
 
-        Vector3f(Vector2f _xy, float _z) noexcept
+        Vector3f(Vector2f _xy, double _z) noexcept
             : x(_xy.x)
             , y(_xy.y)
             , z(_z)
         {}
 
-        explicit Vector3f(float _all) noexcept
+        explicit Vector3f(double _all) noexcept
             : x(_all)
             , y(_all)
             , z(_all)
@@ -85,7 +85,7 @@ namespace la {
 
     public:
 
-        float modul() const { return std::sqrt(x * x + y * y + z * z); }
+        double modul() const { return std::sqrt(x * x + y * y + z * z); }
 
         bool  operator == (const la::Vector3f& _rhs) const noexcept { return equal(_rhs); }
 
@@ -94,7 +94,7 @@ namespace la {
 
         bool collinear(const la::Vector3f& _rhs) const noexcept;
         bool equal(const la::Vector3f& _rhs) const noexcept;
-        bool isZero() const noexcept { return equal(Vector3f(0.f)); }
+        bool isZero() const noexcept { return equal(Vector3f(0)); }
 
         friend std::ostream& operator << (std::ostream& _stream, const Vector3f& _vec)
         {
