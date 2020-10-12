@@ -5,8 +5,9 @@
 
 #include "LAL/include/LAL.h"
 
-void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data);
-void intersectionN_lnN(std::vector< std::pair< la::Triangle, bool > > data);
+void intersectionN_N    (std::vector< std::pair< la::Triangle, bool > > data);
+void intersectionOctree (std::vector< std::pair< la::Triangle, bool > > data);
+
 
 int main()
 {
@@ -71,4 +72,4 @@ void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data)
 }
 
 
-void intersectionN_lnN(std::vector< std::pair< la::Triangle, bool > > data);
+void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data);

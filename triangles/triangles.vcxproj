@@ -150,9 +150,11 @@
     <ClCompile Include="LAL\LineSegment.cpp" />
     <ClCompile Include="LAL\math\LALmath.cpp" />
     <ClCompile Include="LAL\Plane.cpp" />
+    <ClCompile Include="LAL\square.cpp" />
     <ClCompile Include="LAL\triangle.cpp" />
     <ClCompile Include="LAL\Vector.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Octree\Octree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LAL\include\config.h" />
@@ -161,8 +163,10 @@
     <ClInclude Include="LAL\include\Line.h" />
     <ClInclude Include="LAL\include\LineSegment.h" />
     <ClInclude Include="LAL\include\Plane.h" />
+    <ClInclude Include="LAL\include\square.h" />
     <ClInclude Include="LAL\include\triangle.h" />
     <ClInclude Include="LAL\include\Vector.h" />
+    <ClInclude Include="Octree\Octree.h" />
     <ClInclude Include="tests\LAL_test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
