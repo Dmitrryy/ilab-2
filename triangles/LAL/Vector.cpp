@@ -21,6 +21,24 @@ namespace la {
         return result;
     }
 
+    Vector3f& Vector3f::operator += (const la::Vector3f& _rhs) noexcept
+    {
+        x += _rhs.x;
+        y += _rhs.y;
+        z += _rhs.z;
+
+        return *this;
+    }
+
+    Vector2f& Vector2f::operator += (const la::Vector2f& _rhs) noexcept
+    {
+        x += _rhs.x;
+        y += _rhs.y;
+
+        return *this;
+    }
+
+
     //////////////////////////////////////////////////////////////////////
 
 

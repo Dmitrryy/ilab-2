@@ -11,3 +11,4 @@
 #include <LineSegment.cpp>
 #include <Plane.cpp>
 #include <math/LALmath.cpp>
+#include <square.cpp>

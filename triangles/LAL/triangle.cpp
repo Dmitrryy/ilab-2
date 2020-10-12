@@ -15,6 +15,22 @@ namespace la
 		return { m_a, m_b, m_c, Plane::Type::ThreePoints }; 
 	}
 
+	Square Triangle::getArea() const
+	{
+		using std::min;
+		using std::max;
+
+		Vector3f a, b;
+		a.x = min(getA().x, min(getB().x, getC().x));
+		a.y = min(getA().y, min(getB().y, getC().y));
+		a.z = min(getA().z, min(getB().z, getC().z));
+		b.x = max(getA().x, min(getB().x, getC().x));
+		b.y = max(getA().y, min(getB().y, getC().y));
+		b.z = max(getA().z, min(getB().z, getC().z));
+
+		return { a, b };
+	}
+
 	bool Triangle::equal(const Triangle& _that) const noexcept
 	{
 		return m_a == _that.getA() && m_b == _that.getB() && m_c == _that.getC();

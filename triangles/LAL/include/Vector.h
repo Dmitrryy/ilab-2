@@ -25,9 +25,10 @@ namespace la {
             , y(_all)
         {};
 
-        double modul() const { return std::sqrt(x * x + y * y); }
+        double modul() const noexcept { return std::sqrt(x * x + y * y); }
 
         bool operator == (const la::Vector2f& _rhs) const noexcept { return equal(_rhs); }
+        Vector2f& operator += (const la::Vector2f& _rhs) noexcept;
 
         bool collinear(const la::Vector2f& _rhs) const noexcept;
         bool equal(const la::Vector2f& _rhs) const noexcept;
@@ -85,9 +86,10 @@ namespace la {
 
     public:
 
-        double modul() const { return std::sqrt(x * x + y * y + z * z); }
+        double modul() const noexcept { return std::sqrt(x * x + y * y + z * z); }
 
         bool  operator == (const la::Vector3f& _rhs) const noexcept { return equal(_rhs); }
+        Vector3f&  operator += (const la::Vector3f& _rhs) noexcept;
 
         friend Vector3f operator -  (const Vector3f& _lhs, const Vector3f& _rhs);
         friend Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs);

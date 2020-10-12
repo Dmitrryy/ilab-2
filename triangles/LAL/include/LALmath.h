@@ -8,6 +8,7 @@
 #include "LineSegment.h"
 #include "Plane.h"
 #include "triangle.h"
+#include "square.h"
 
 ///////////////////////////////////////////////////////////////
 //
@@ -20,9 +21,9 @@ namespace la
     Vector3f  crossProduct(const Vector3f& _lhs, const Vector3f& _rhs);
     double     scalarProduct(const Vector3f& _lhs, const Vector3f& _rhs);
 
-    inline bool   equal(const Vector3f& _lhs, const Vector3f& _rhs) { return _lhs.equal(_rhs); }
+    inline bool   equal(const Vector3f& _lhs, const Vector3f& _rhs) noexcept { return _lhs.equal(_rhs); }
 
-    inline bool   collinear(const Vector3f& _lhs, const Vector3f& _rhs) { return _lhs.collinear(_rhs); }
+    inline bool   collinear(const Vector3f& _lhs, const Vector3f& _rhs) noexcept { return _lhs.collinear(_rhs); }
     bool codirected(const Vector3f& _lhs, const Vector3f& _rhs);
 
     Vector3f  normalization(const Vector3f& _that);
@@ -42,9 +43,9 @@ namespace la
     Vector3f crossProduct(const Vector2f& _lhs, const Vector2f& _rhs);
     double    scalarProduct(const Vector2f& _lhs, const Vector2f& _rhs);
 
-    inline bool  equal(const Vector2f& _lhs, const Vector2f& _rhs) { return _lhs.equal(_rhs); }
+    inline bool  equal(const Vector2f& _lhs, const Vector2f& _rhs) noexcept { return _lhs.equal(_rhs); }
     
-    inline bool  collinear(const Vector2f& _lhs, const Vector2f& _rhs) { return _lhs.collinear(_rhs); }
+    inline bool  collinear(const Vector2f& _lhs, const Vector2f& _rhs) noexcept { return _lhs.collinear(_rhs); }
     
     Vector2f normalization(const Vector2f& _that);
 
@@ -52,7 +53,7 @@ namespace la
 
     Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs);
     Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs);
-    double        operator ^  (const Vector2f& _lhs, const Vector2f& _rhs);
+    double   operator ^  (const Vector2f& _lhs, const Vector2f& _rhs);
     Vector3f operator *  (const Vector2f& _lhs, const Vector2f& _rhs);
     Vector2f operator *  (const Vector2f& _lhs, double _n);
     inline Vector2f operator *  (double _n, const Vector2f& _lhs) { return _lhs * _n; }
@@ -237,3 +238,19 @@ namespace la
         findIntersec(const Line3& _line, const Triangle& _tr) { return findIntersec(_tr, _line); }
 
 }//namespace la (Triangle & Line)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Square & Square
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    //3D
+    bool intersec(const Square& _lhs, const Square& _rhs);
+
+    bool contein(const Square& _lhs, const Square& _rhs);
+    bool contein(const Square& _sq, const Vector3f& _vec);
+
+}//namespace la (Square & Square)

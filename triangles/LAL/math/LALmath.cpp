@@ -11,7 +11,7 @@ namespace la
     {
         if (!_that.isZero())
         {
-            double m = _that.modul();
+            const double m = _that.modul();
             return Vector3f(_that.x / m, _that.y / m, _that.z / m);
         }
         else
@@ -52,7 +52,7 @@ namespace la
     }
     Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs) 
     { 
-        return Vector3f(_lhs.x + _rhs.x, _lhs.y + _rhs.y, _lhs.z + _rhs.z); 
+        return Vector3f(_lhs) += _rhs; 
     }
     Vector3f operator *  (const Vector3f& _lhs, const Vector3f& _rhs) 
     { 
@@ -73,7 +73,7 @@ namespace la
     {
         if (!_that.isZero())
         {
-            double m = _that.modul();
+            const double m = _that.modul();
             return Vector2f(_that.x / m, _that.y / m);
         }
         else
@@ -95,8 +95,8 @@ namespace la
 
     double scalarProduct(const Vector2f& _lhs, const Vector2f& _rhs)
     {
-        return (static_cast<double>(_lhs.x) * _rhs.x
-            + static_cast<double>(_lhs.y) * _rhs.y);
+        return (_lhs.x * _rhs.x
+            + _lhs.y * _rhs.y);
     }
 
 
@@ -106,7 +106,8 @@ namespace la
     }
     Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs) 
     { 
-        return Vector2f(_lhs.x + _rhs.x, _lhs.y + _rhs.y);
+        Vector2f tmp(_lhs);
+        return tmp += _rhs;
     }
     double        operator ^  (const Vector2f& _lhs, const Vector2f& _rhs) 
     { 
@@ -135,9 +136,9 @@ namespace la
 //3D
     Vector3f projection(const Vector3f& _point, const Line3& _line)
     {
-        Vector3f tmp_lv = normalization(_line.getV());
+        const Vector3f tmp_lv = normalization(_line.getV());
 
-        double s = scalarProduct(tmp_lv, _point - _line.getP());
+        const double s = scalarProduct(tmp_lv, _point - _line.getP());
 
         return _line.getP() + tmp_lv * s;
     }
@@ -151,9 +152,9 @@ namespace la
 //2D
     Vector2f projection(const Vector2f& _point, const Line2& _line)
     {
-        Vector2f tmp_lv = normalization(_line.getV());
+        const Vector2f tmp_lv = normalization(_line.getV());
 
-        double s = scalarProduct(tmp_lv, _point - _line.getP());
+        const double s = scalarProduct(tmp_lv, _point - _line.getP());
 
         return _line.getP() + tmp_lv * s;
     }
@@ -190,13 +191,13 @@ namespace la
         //S1 * a - S2 * b = c
         //S2 * b - S2 * d = f
 
-        Vector3f pp = _rhs.getP() - _lhs.getP();
-        double a = scalarProduct(_lhs.getV(), _lhs.getV());
-        double b = scalarProduct(_lhs.getV(), _rhs.getV());
-        double c = scalarProduct(pp, _lhs.getV());
-        double d = scalarProduct(_rhs.getV(), _rhs.getV());
-        double f = scalarProduct(pp, _rhs.getV());
-        double det = -a * d + b * b;
+        const Vector3f pp = _rhs.getP() - _lhs.getP();
+        const double a = scalarProduct(_lhs.getV(), _lhs.getV());
+        const double b = scalarProduct(_lhs.getV(), _rhs.getV());
+        const double c = scalarProduct(pp, _lhs.getV());
+        const double d = scalarProduct(_rhs.getV(), _rhs.getV());
+        const double f = scalarProduct(pp, _rhs.getV());
+        const double det = -a * d + b * b;
 
         std::pair<Vector3f, Intersec::quantity> res(0.f, Intersec::quantity::Nop);
         if (std::abs(det) < EPSILON)
@@ -211,14 +212,14 @@ namespace la
         }
         else
         {
-            double det1 = -d * c + b * f;
-            double det2 = a * f - b * c;
+            const double det1 = -d * c + b * f;
+            const double det2 = a * f - b * c;
 
-            double S1 = det1 / det;
-            double S2 = det2 / det;
+            const double S1 = det1 / det;
+            const double S2 = det2 / det;
 
-            Vector3f Q1 = _lhs.getP() + _lhs.getV() * S1;
-            Vector3f Q2 = _rhs.getP() + _rhs.getV() * S2;
+            const Vector3f Q1 = _lhs.getP() + _lhs.getV() * S1;
+            const Vector3f Q2 = _rhs.getP() + _rhs.getV() * S2;
 
             if (Q1 == Q2)
             {
@@ -244,13 +245,13 @@ namespace la
         //S1 * a - S2 * b = c
         //S2 * b - S2 * d = f
 
-        Vector3f pp = _rhs.getP() - _lhs.getP();
-        double a = scalarProduct(_lhs.getV(), _lhs.getV());
-        double b = scalarProduct(_lhs.getV(), _rhs.getV());
-        double c = scalarProduct(pp, _lhs.getV());
-        double d = scalarProduct(_rhs.getV(), _rhs.getV());
-        double f = scalarProduct(pp, _rhs.getV());
-        double det = -a * d + b * b;
+        const Vector3f pp = _rhs.getP() - _lhs.getP();
+        const double a = scalarProduct(_lhs.getV(), _lhs.getV());
+        const double b = scalarProduct(_lhs.getV(), _rhs.getV());
+        const double c = scalarProduct(pp, _lhs.getV());
+        const double d = scalarProduct(_rhs.getV(), _rhs.getV());
+        const double f = scalarProduct(pp, _rhs.getV());
+        const double det = -a * d + b * b;
 
         double res = 0.f;
         if (std::abs(det) < EPSILON)
@@ -740,13 +741,14 @@ namespace la
 // Triangle & Triangle
 //
 ///////////////////////////////////////////////////////////////
+size_t COUNT_TT_INTERSEC = 0u;
 namespace la
 {
     //3D
     bool intersec(const Triangle& _lhs, const Triangle& _rhs)
     {
         bool result = false;
-
+        COUNT_TT_INTERSEC++;
         //2D
         if (_lhs.getPlane() == _rhs.getPlane())
         {
@@ -918,3 +920,33 @@ namespace la
 
 
 }//namespace la (Triangle & Line)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Square & Square
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    //3D
+    bool intersec(const Square& _lhs, const Square& _rhs)
+    {
+        return contein(_lhs, _rhs.getA()) || contein(_lhs, _rhs.getB())
+            || contein(_rhs, _lhs.getA()) || contein(_rhs, _lhs.getB());
+    }
+
+    bool contein(const Square& _lhs, const Square& _rhs) 
+    {
+        return contein(_lhs, _rhs.getA()) && contein(_lhs, _rhs.getB());
+    }
+    bool contein(const Square& _sq, const Vector3f& _vec)
+    {
+        const LineSegment1 dx(_sq.getA().x, _sq.getB().x);
+        const LineSegment1 dy(_sq.getA().y, _sq.getB().y);
+        const LineSegment1 dz(_sq.getA().z, _sq.getB().z);
+
+        return dx.contein(_vec.x) && dy.contein(_vec.y) && dz.contein(_vec.z);
+    }
+
+}//namespace la (Square & Square)
