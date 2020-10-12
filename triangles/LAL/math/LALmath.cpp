@@ -741,13 +741,14 @@ namespace la
 // Triangle & Triangle
 //
 ///////////////////////////////////////////////////////////////
+size_t COUNT_TT_INTERSEC = 0u;
 namespace la
 {
     //3D
     bool intersec(const Triangle& _lhs, const Triangle& _rhs)
     {
         bool result = false;
-
+        COUNT_TT_INTERSEC++;
         //2D
         if (_lhs.getPlane() == _rhs.getPlane())
         {

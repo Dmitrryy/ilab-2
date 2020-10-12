@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "Vector.h"
+#include "square.h"
 
 namespace la
 {
@@ -38,6 +39,8 @@ namespace la
 		Plane getPlane() const noexcept;
 
 		bool contein(const Vector3f& _vec) const;
+
+		Square getArea() const;
 
 		bool equal(const Triangle& _that) const noexcept;
 

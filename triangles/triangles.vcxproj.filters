@@ -54,6 +54,9 @@
     <ClCompile Include="LAL\square.cpp">
       <Filter>Source Files\LALsource</Filter>
     </ClCompile>
+    <ClCompile Include="tests\test_gen.cpp">
+      <Filter>Header Files\tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LAL\include\config.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="LAL\include\square.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\test_gen.h">
+      <Filter>Header Files\tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -155,6 +155,7 @@
     <ClCompile Include="LAL\Vector.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Octree\Octree.cpp" />
+    <ClCompile Include="tests\test_gen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LAL\include\config.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="LAL\include\Vector.h" />
     <ClInclude Include="Octree\Octree.h" />
     <ClInclude Include="tests\LAL_test.h" />
+    <ClInclude Include="tests\test_gen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -36,15 +36,16 @@ namespace la
 
 		~Octree() {
 			for (int i = 0; i < 8; i++)
-				delete m_children[i];
+				delete m_children.at(i);
 		}
 
 		size_t split  ();
-		//size_t msplit ();
+		size_t split  (size_t _deep);
+		size_t msplit ();
 
 		size_t size() const;
 
-		bool haveChildren() const noexcept { return m_children[0] == nullptr; }
+		bool haveChildren() const noexcept { return m_children.at(0) != nullptr; }
 
 		size_t getDeep() const noexcept { return m_deep; }
 		Square getArea() const noexcept { return m_area; }
@@ -63,9 +64,9 @@ namespace la
 		//O(N^2)
 		IntersecC _intersecv_(const std::vector< T >& _vec) const;
 		IntersecC _intersecvv_(const std::vector< T >& _lhs, const std::vector< T >& _rhs) const;
-		IntersecC _intersecNv_(const std::vector< const std::vector< T >& >& _lhs, const std::vector< T >& _rhs) const;
+		IntersecC _intersecNv_(std::vector< std::vector< T > > _lhs, const std::vector< T >& _rhs)const ;
 
-		IntersecC _getIntersecWith_(std::vector< const std::vector< T >& > _vec) const;
+		IntersecC _getIntersecWith_(std::vector< std::vector< T > > _vec) const;
 
 	};
 
@@ -74,19 +75,20 @@ namespace la
 	template <typename T>
 	void Octree<T>::add(const T& _elem)
 	{
-		auto elem_area = _elem.getArea();
+		const auto elem_area = _elem.getArea();
 
 		if (!_tryAdd_(_elem, elem_area))
 		{
-			if (la::intersec(m_area, elem_area))
-			{
-				m_data.push_back(_elem);
-			}
-			else
-			{
-				m_outside_data.push_back(_elem);
-				assert(m_parent == nullptr);
-			}
+			//if (la::intersec(m_area, elem_area))
+			//{
+			//	m_data.push_back(_elem);
+			//}
+			//else
+			//{
+			//	m_outside_data.push_back(_elem);
+			//	assert(m_parent == nullptr);
+			//}
+			throw std::logic_error(std::string("elem is outside: \n"));
 		}
 	}
 
@@ -104,12 +106,12 @@ namespace la
 				Octree* tmp = nullptr;
 				for (int i = 0; i < 8; i++)
 				{
-					assert(m_children[i] != nullptr);
+					assert(m_children.at(i) != nullptr);
 
-					if (intersec(m_children[i].getArea(), elem_area))
+					if (intersec(m_children.at(i)->getArea(), elem_area))
 					{
 						counter++;
-						tmp = m_children[i];
+						tmp = m_children.at(i);
 					}
 					if (counter > 1)
 					{
@@ -120,7 +122,7 @@ namespace la
 
 				if (tmp != nullptr)
 				{
-					bool tr = tmp->_tryAdd_(_elem, elem_area);
+					const bool tr = tmp->_tryAdd_(_elem, elem_area);
 					assert(tr);
 				}
 				else
@@ -158,7 +160,7 @@ namespace la
 	{
 		size_t res = m_data.size() + m_outside_data.size();
 		for (int i = 0; i < 8; i++) {
-			res += m_children[i].size();
+			res += m_children.at(i).size();
 		}
 		return res;
 	}
@@ -171,7 +173,7 @@ namespace la
 		{
 			size_t res = 0;
 			for (Octree* ch : m_children) {
-				res = std::max(split(), res);
+				res = std::max(ch->split(), res);
 			}
 			return res;
 		}
@@ -184,15 +186,16 @@ namespace la
 
 		std::vector< std::vector< int > > new_chdata(8);
 		std::vector< int > new_data;
-		for (size_t i = 0; i < old_sdata; i++)
+		for (size_t i = 0, n = m_data.size(); i < n; i++)
 		{
 			T& tmp = m_data[i];
 			const Square esq = tmp.getArea();
 			uint16_t counter = 0u;
-			int k;
-			for (k = 0; k < 8; k++)
+			int num_target = 0;
+			for (int k = 0; k < 8; k++)
 			{
 				if (la::contein(squares[k], esq)) {
+					num_target = k;
 					counter++;
 				}
 				if (counter > 1) {
@@ -201,12 +204,12 @@ namespace la
 			}
 
 			if (counter == 1) {
-				new_chdata[k].push_back(i);
+				new_chdata[num_target].push_back(i);
 			}
 			else {
 				new_data.push_back(i);
 			}
-			assert(counter > 0);
+			//assert(counter > 0);
 		}
 		
 		if (new_data.size() <= m_data.size() / 2)
@@ -215,7 +218,7 @@ namespace la
 			m_data = std::vector< T >();
 			m_data.reserve(new_data.size());
 
-			for (int id_elem : new_data)
+			for (const int& id_elem : new_data)
 			{
 				m_data.push_back(std::move(tmp_data[id_elem]));
 			}
@@ -227,9 +230,9 @@ namespace la
 
 			for (int i = 0; i < 8; i++)
 			{
-				for (int id_elem : new_chdata[i])
+				for (const int& id_elem : new_chdata[i])
 				{
-					bool rest = m_children[i]->_tryAdd_(tmp_data[id_elem]);
+					const bool rest = m_children[i]->_tryAdd_(tmp_data[id_elem], tmp_data[id_elem].getArea());
 					assert(rest);
 				}
 			}
@@ -240,22 +243,27 @@ namespace la
 		return 0;
 	}
 
-	//template <typename T>
-	//size_t Octree<T>::msplit()
-	//{
-	//}
+	template <typename T>
+	size_t Octree<T>::msplit()
+	{
+		size_t res = 0, res2 = 0;
+		while ((res2 = split()) != 0) {
+			res += res2;
+		}
+		return res;
+	}
 
 
 	template <typename T>
-	Octree<T>::IntersecC Octree<T>::getIntersections() const
+	std::vector< std::pair< T, T > > Octree<T>::getIntersections() const 
 	{
 		IntersecC res = _intersecv_(m_data);
 
 		if (haveChildren())
 		{
-			std::vector< std::vector< T >& >& tmp_data;
-			tmp_data.push_back(m_data);
-			for (const Octree* ch : m_children)
+			std::vector< std::vector< T > > tmp_data;
+			tmp_data.emplace_back(m_data);
+			for (const Octree<T>* ch : m_children)
 			{
 				IntersecC tmp = ch->_getIntersecWith_(tmp_data);
 				res.insert(res.end(), std::make_move_iterator(tmp.begin()), std::make_move_iterator(tmp.end()));
@@ -269,7 +277,7 @@ namespace la
 	template <typename T>
 	std::vector< Square > Octree<T>::_splitArea_() const
 	{
-		la::Vector3f center = (m_area.getA() + m_area.getB()) / 2.0;
+		const la::Vector3f center = (m_area.getA() + m_area.getB()) / 2.0;
 
 		const double dx = m_area.getDX();
 		const double dy = m_area.getDY();
@@ -280,17 +288,17 @@ namespace la
 		squares[1] = Square(m_area.getA() + Vector3f(dx, 0, 0), center);
 		squares[2] = Square(m_area.getA() + Vector3f(dx, dy, 0), center);
 		squares[3] = Square(m_area.getA() + Vector3f(0, dy, 0), center);
-		squares[4] = Square(m_area.getA() + Vector3f(0, 0, dz), center);
-		squares[5] = Square(m_area.getA() + Vector3f(dx, 0, dz), center);
-		squares[6] = Square(m_area.getA() + Vector3f(dx, dy, dz), center);
-		squares[7] = Square(m_area.getA() + Vector3f(0, dy, dz), center);
+		squares[4] = Square(m_area.getB(), center);
+		squares[5] = Square(m_area.getB() - Vector3f(dx, 0, 0), center);
+		squares[6] = Square(m_area.getB() - Vector3f(dx, dy, 0), center);
+		squares[7] = Square(m_area.getB() - Vector3f(0, dy, 0), center);
 
 		return squares;
 	}
 
 
 	template <typename T>
-	Octree<T>::IntersecC Octree<T>::_intersecv_(const std::vector< T >& _vec) const 
+	std::vector< std::pair< T, T > > Octree<T>::_intersecv_(const std::vector< T >& _vec) const
 	{
 		IntersecC res;
 
@@ -309,8 +317,8 @@ namespace la
 
 
 	template <typename T>
-	Octree<T>::IntersecC Octree<T>::
-		_intersecNv_(const std::vector< const std::vector< T >& >& _lhs, const std::vector< T >& _rhs) const 
+	std::vector< std::pair< T, T > > Octree<T>::
+		_intersecNv_(std::vector< std::vector< T > > _lhs, const std::vector< T >& _rhs) const
 	{
 		IntersecC res;
 
@@ -324,16 +332,16 @@ namespace la
 	}
 
 	template <typename T>
-	Octree<T>::IntersecC Octree<T>::
+	std::vector< std::pair< T, T > > Octree<T>::
 		_intersecvv_(const std::vector< T >& _lhs, const std::vector< T >& _rhs) const
 	{
 		IntersecC res;
 
-		for (size_t i = 0; i < _lhs.size(), i++) {
-			for (size_t k = 0; k < _rhs.size(), k++) {
+		for (size_t i = 0; i < _lhs.size(); i++) {
+			for (size_t k = 0; k < _rhs.size(); k++) {
 				if (intersec(_lhs[i], _rhs[k]))
 				{
-					res.push_back(std::make_pair(_lhs[i], _rhs[i]));
+					res.push_back(std::make_pair(_lhs[i], _rhs[k]));
 				}
 			}
 		}
@@ -343,16 +351,16 @@ namespace la
 
 
 	template <typename T>
-	Octree<T>::IntersecC Octree<T>::_getIntersecWith_(std::vector< const std::vector< T >& > _vec) const
+	std::vector< std::pair< T, T > > Octree<T>::_getIntersecWith_(std::vector< std::vector< T > > _vec) const
 	{
 		IntersecC res = _intersecv_(m_data);
 
 		IntersecC tmpr = _intersecNv_(_vec, m_data);
-		res.insert(res.end(), std::make_move_iterator(tmp.begin()), std::make_move_iterator(tmp.end()));
+		res.insert(res.end(), std::make_move_iterator(tmpr.begin()), std::make_move_iterator(tmpr.end()));
 		
 		if (haveChildren())
 		{
-			_vec.push_back(m_data);
+			_vec.emplace_back(m_data);
 			for (const Octree* ch : m_children)
 			{
 				IntersecC tmp = ch->_getIntersecWith_(_vec);
