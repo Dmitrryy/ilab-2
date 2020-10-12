@@ -249,7 +249,8 @@ namespace la
 {
     //3D
     bool intersec(const Square& _lhs, const Square& _rhs);
-    bool constein(const Square& _lhs, const Square& _rhs);
-    bool constein(const Square& _sq, const Vector3f& _vec);
+
+    bool contein(const Square& _lhs, const Square& _rhs);
+    bool contein(const Square& _sq, const Vector3f& _vec);
 
 }//namespace la (Square & Square)

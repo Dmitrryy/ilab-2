@@ -27,6 +27,7 @@ test_class(Line2);
 test_class(Line3);
 test_class(Plane);
 test_class(Triangle);
+test_class(Square);
 
 
 TEST_F(Vector3fTest, Construct)
@@ -505,4 +506,36 @@ TEST_F(TriangleTest, intersec)
     q0_.reup({ 0, 0, 0 }, { -12, 5, 0 }, { 12, 5, 0 });
     q1_.reup({ 0, 0, 0 }, { 12, 231, 5 }, { 34, 9, 76 });
     EXPECT_TRUE(intersec(q0_, q1_));
+}
+
+
+///////////////////////////////////////////////////////////////
+//
+// Test Square
+//
+///////////////////////////////////////////////////////////////
+TEST_F(SquareTest, construct)
+{
+    q0_.reup({ 1, 2, -3 }, { 8, 0, 9 });
+    q1_.reup({ 8, 0, 9 } , { 1, 2, -3 });
+    EXPECT_EQ(q0_, q1_);
+
+    q0_.reup({ 1, 2, 9 }, { 8, 0, -3 });
+    EXPECT_EQ(q0_, q1_);
+}
+
+
+TEST_F(SquareTest, contein)
+{
+    q0_.reup({ 5, 5, 5 }, { -6, -7, 0 });
+    EXPECT_TRUE(contein(q0_, { 5, 5, 5 }));
+    EXPECT_TRUE(contein(q0_, { -6, -7, 0 }));
+    EXPECT_TRUE(contein(q0_, { 0, 0, 0 }));
+    EXPECT_TRUE(contein(q0_, { 4, 5, 5 }));
+    EXPECT_FALSE(contein(q0_, { 6, 6, 6 }));
+
+    q0_.reup({ 4, 5, 6 }, { 1, 2, 3 });
+    q1_.reup({ 4, 5, 5 }, { 2, 3, 4 });
+    EXPECT_TRUE(contein(q0_, q0_));
+    EXPECT_TRUE(contein(q0_, q1_));
 }

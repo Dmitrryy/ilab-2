@@ -3,6 +3,11 @@
 namespace la
 {
 
+	bool Square::equal(const Square& _that) const noexcept
+	{
+		return m_a == _that.getA() && m_b == _that.getB();
+	}
+
 	void Square::reup(const Vector3f& _a, const Vector3f& _b) noexcept
 	{
 		m_a = _a;
@@ -37,6 +42,12 @@ namespace la
 		{
 			reup(_b, _a);
 		}
+	}
+
+	std::ostream& operator << (std::ostream& _stream, const Square& _sq)
+	{
+		_stream << '[' << _sq.getA() << ", " << _sq.getB() << ']';
+		return _stream;
 	}
 
 }//namespace la

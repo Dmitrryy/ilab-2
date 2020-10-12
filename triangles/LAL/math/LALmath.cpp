@@ -919,3 +919,33 @@ namespace la
 
 
 }//namespace la (Triangle & Line)
+
+
+///////////////////////////////////////////////////////////////
+//
+// Square & Square
+//
+///////////////////////////////////////////////////////////////
+namespace la
+{
+    //3D
+    bool intersec(const Square& _lhs, const Square& _rhs)
+    {
+        return contein(_lhs, _rhs.getA()) || contein(_lhs, _rhs.getB())
+            || contein(_rhs, _lhs.getA()) || contein(_rhs, _lhs.getB());
+    }
+
+    bool contein(const Square& _lhs, const Square& _rhs) 
+    {
+        return contein(_lhs, _rhs.getA()) && contein(_lhs, _rhs.getB());
+    }
+    bool contein(const Square& _sq, const Vector3f& _vec)
+    {
+        const LineSegment1 dx(_sq.getA().x, _sq.getB().x);
+        const LineSegment1 dy(_sq.getA().y, _sq.getB().y);
+        const LineSegment1 dz(_sq.getA().z, _sq.getB().z);
+
+        return dx.contein(_vec.x) && dy.contein(_vec.y) && dz.contein(_vec.z);
+    }
+
+}//namespace la (Square & Square)
