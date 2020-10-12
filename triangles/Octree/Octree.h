@@ -40,7 +40,7 @@ namespace la
 		}
 
 		size_t split  ();
-		size_t msplit ();
+		//size_t msplit ();
 
 		size_t size() const;
 
@@ -63,9 +63,9 @@ namespace la
 		//O(N^2)
 		IntersecC _intersecv_(const std::vector< T >& _vec) const;
 		IntersecC _intersecvv_(const std::vector< T >& _lhs, const std::vector< T >& _rhs) const;
-		IntersecC _intersecNv_(std::vector< const std::vector< T >& >& _lhs, const std::vector< T >& _rhs) const;
+		IntersecC _intersecNv_(const std::vector< const std::vector< T >& >& _lhs, const std::vector< T >& _rhs) const;
 
-		IntersecC _getIntersecWith_(std::vector< const std::vector< T >& >& _vec) const;
+		IntersecC _getIntersecWith_(std::vector< const std::vector< T >& > _vec) const;
 
 	};
 
@@ -310,7 +310,7 @@ namespace la
 
 	template <typename T>
 	Octree<T>::IntersecC Octree<T>::
-		_intersecNv_(std::vector< const std::vector< T >& >& _lhs, const std::vector< T >& _rhs) const 
+		_intersecNv_(const std::vector< const std::vector< T >& >& _lhs, const std::vector< T >& _rhs) const 
 	{
 		IntersecC res;
 
@@ -343,7 +343,7 @@ namespace la
 
 
 	template <typename T>
-	Octree<T>::IntersecC Octree<T>::_getIntersecWith_(std::vector< const std::vector< T >& >& _vec) const
+	Octree<T>::IntersecC Octree<T>::_getIntersecWith_(std::vector< const std::vector< T >& > _vec) const
 	{
 		IntersecC res = _intersecv_(m_data);
 
