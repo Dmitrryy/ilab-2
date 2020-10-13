@@ -19,7 +19,7 @@ namespace la
 			m_b = _vec2;
 		}
 		//m_b = m_b - projection(m_b, Line3(Vector3f(0.f), m_a));
-		m_norm = crossProduct(m_a, m_b);
+		m_norm = product(m_a, m_b);
 		//m_norm = normalization(m_norm);
 	}
 

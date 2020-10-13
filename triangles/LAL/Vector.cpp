@@ -8,7 +8,7 @@ namespace la {
 
     bool Vector3f::collinear(const la::Vector3f& _rhs) const noexcept
     {
-        return crossProduct(*this, _rhs).isZero();
+        return product(*this, _rhs).isZero();
     }
 
     bool Vector3f::equal(const la::Vector3f& _rhs) const noexcept
@@ -29,6 +29,27 @@ namespace la {
 
         return *this;
     }
+    Vector3f& Vector3f::operator -= (const la::Vector3f& _rhs) noexcept
+    {
+        return *this = *this - _rhs;
+    }
+
+    Vector3f operator -  (const Vector3f& _lhs, const Vector3f& _rhs) noexcept
+    {
+        return Vector3f(_lhs.x - _rhs.x, _lhs.y - _rhs.y, _lhs.z - _rhs.z);
+    }
+    Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs) noexcept
+    {
+        return Vector3f(_lhs) += _rhs;
+    }
+    Vector3f operator *  (const Vector3f& _lhs, double _n) noexcept
+    {
+        return { _lhs.x * _n, _lhs.y * _n, _lhs.z * _n };
+    }
+
+
+    //////////////////////////////////////////////////////////////////////
+
 
     Vector2f& Vector2f::operator += (const la::Vector2f& _rhs) noexcept
     {
@@ -38,13 +59,9 @@ namespace la {
         return *this;
     }
 
-
-    //////////////////////////////////////////////////////////////////////
-
-
     bool Vector2f::collinear(const la::Vector2f& _rhs) const noexcept
     {
-        return crossProduct(*this, _rhs).isZero();
+        return product(*this, _rhs).isZero();
     }
 
 
@@ -55,6 +72,21 @@ namespace la {
         result &= std::abs(y - _rhs.y) < EPSILON;
 
         return result;
+    }
+
+
+    Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs) noexcept
+    {
+        return Vector2f(_lhs.x - _rhs.x, _lhs.y - _rhs.y);
+    }
+    Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs) noexcept
+    {
+        Vector2f tmp(_lhs);
+        return tmp += _rhs;
+    }
+    Vector2f operator *  (const Vector2f& _lhs, double _n) noexcept
+    {
+        return { _lhs.x * _n, _lhs.y * _n };
     }
 
 }//namespace ezg

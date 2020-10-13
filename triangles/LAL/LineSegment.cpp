@@ -8,7 +8,7 @@ namespace la
 {
     /////////////////////////////LineSegment1//////////////////////////////////
 
-    bool LineSegment1::intersection(const LineSegment1& _rhs) const noexcept
+    bool LineSegment1::intersec(const LineSegment1& _rhs) const noexcept
     {
         bool res = false;
 
@@ -23,7 +23,7 @@ namespace la
 
     /////////////////////////////LineSegment2//////////////////////////////////
 
-    LineSegment2::LineSegment2(la::Vector2f _p, la::Vector2f _v, Type _t /*= Type::TwoPoints*/)
+    LineSegment2::LineSegment2(la::Vector2f _p, la::Vector2f _v, Type _t /*= Type::TwoPoints*/) noexcept
         : m_p(_p)
         , m_v(_v)
     {
@@ -39,7 +39,7 @@ namespace la
         bool res = false;
         if (toLine().contein(_rhs))
         {
-            const double s = scalarProduct(normalization(m_v), _rhs - m_p) / m_v.modul();
+            const double s = dot(normalization(m_v), _rhs - m_p) / m_v.modul();
             if (s >= -EPSILON && s <= 1.f + EPSILON) {
                 res = true;
             }
@@ -49,7 +49,7 @@ namespace la
 
     /////////////////////////////LineSegment3//////////////////////////////////
 
-    LineSegment3::LineSegment3(la::Vector3f _p, la::Vector3f _v, Type _t /*= Type::TwoPoints*/)
+    LineSegment3::LineSegment3(la::Vector3f _p, la::Vector3f _v, Type _t /*= Type::TwoPoints*/) noexcept
         : m_p(_p)
         , m_v(_v)
     {
@@ -63,7 +63,7 @@ namespace la
         bool res = false;
         if (toLine().contein(_rhs))
         {
-            double s = scalarProduct(normalization(m_v), _rhs - m_p) / m_v.modul();
+            const double s = dot(normalization(m_v), _rhs - m_p) / m_v.modul();
             if (s >= 0.f && s <= 1.f + EPSILON) {
                 res = true;
             }

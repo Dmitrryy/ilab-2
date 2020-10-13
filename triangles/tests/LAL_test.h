@@ -51,37 +51,51 @@ TEST_F(Vector3fTest, Modul)
     EXPECT_EQ(q0_.modul(), std::sqrt(110));
 }
 
+TEST_F(Vector3fTest, Valid)
+{
+    EXPECT_TRUE(q0_.valid());
+
+    q0_ = Vector3f(NAN);
+    EXPECT_FALSE(q0_.valid());
+
+    q0_ = Vector3f(2191.3123912832131231231);
+    EXPECT_TRUE(q0_.valid());
+
+    q0_ = Vector3f(-1234);
+    EXPECT_TRUE(q0_.valid());
+}
+
 TEST_F(Vector3fTest, scalarProduct)
 {
-    EXPECT_EQ(scalarProduct(q0_, q1_), 0.f);
+    EXPECT_EQ(dot(q0_, q1_), 0.f);
 
     q0_ = { 11.f, 0.f, 123};
     q1_ = { 0.f, 1234.f, 0};
-    EXPECT_EQ((q0_ ^ q1_), 0.f);
+    EXPECT_EQ(dot(q0_, q1_), 0.f);
 
     q0_ = { 11.f, 0.f, 123};
-    EXPECT_EQ(scalarProduct(q0_, q2_), 0.f);
+    EXPECT_EQ(dot(q0_, q2_), 0.f);
 
     q0_ = { 10.f, 0.f, 0};
     q1_ = { 100.f, 0.f, 0};
-    EXPECT_EQ(scalarProduct(q0_, q1_), 1000.f);
+    EXPECT_EQ(dot(q0_, q1_), 1000.f);
 
     q0_ = { 12.f, 34.f, 32};
     q1_ = { 12.f, 453.f, 3};
-    EXPECT_EQ(scalarProduct(q0_, q1_), 15642.f);
+    EXPECT_EQ(dot(q0_, q1_), 15642.f);
 }
 
 TEST_F(Vector3fTest, crossProduct)
 {
-    EXPECT_EQ(crossProduct(q0_, q1_), Vector3f(0.f));
+    EXPECT_EQ(product(q0_, q1_), Vector3f(0.f));
 
     q0_ = { 11.f, 0.f, 0};
     q1_ = { 1243.f, 0.f, 0};
-    EXPECT_EQ(crossProduct(q0_, q1_), Vector3f(0.f));
+    EXPECT_EQ(product(q0_, q1_), Vector3f(0.f));
 
     q0_ = { 213.f, 13.f, 56};
     q1_ = { 90.f, 346.f, 12436};
-    EXPECT_EQ(crossProduct(q0_, q1_),
+    EXPECT_EQ(product(q0_, q1_),
         Vector3f(142292.f, -2643828.f, 72528));
 }
 
@@ -173,51 +187,51 @@ TEST_F(LineSegment1Test, intersection)
     EXPECT_FALSE(q0_.contein(3));
 
     q1_.reup(-10, 5);
-    EXPECT_TRUE(q1_.intersection(q0_));
-    EXPECT_TRUE(q0_.intersection(q1_));
-    EXPECT_TRUE(q0_.intersection(q2_));
+    EXPECT_TRUE(q1_.intersec(q0_));
+    EXPECT_TRUE(q0_.intersec(q1_));
+    EXPECT_TRUE(q0_.intersec(q2_));
 
     q1_.reup(2, 5);
-    EXPECT_TRUE(q1_.intersection(q0_));
+    EXPECT_TRUE(q1_.intersec(q0_));
 
     q1_.reup(3, 5);
-    EXPECT_FALSE(q1_.intersection(q0_));
+    EXPECT_FALSE(q1_.intersec(q0_));
 
     q1_.reup(-100, 5);
-    EXPECT_TRUE(q1_.intersection(q0_));
+    EXPECT_TRUE(q1_.intersec(q0_));
 }
 
 TEST_F(LineSegment1Test, findIntersection)
 {
     q0_.reup(-10, 5);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment1(0.f, 0.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment1(0.f, 0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
 
     q0_.reup(-10, 5);
     q1_.reup(-10, 5);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, q0_);
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Interval);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, q0_);
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Interval);
 
     q0_.reup(-10, 5);
     q1_.reup(-10, -11);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment1(-10.f, -10.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment1(-10.f, -10.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
 
     q0_.reup(-10, 5);
     q1_.reup(5, 10);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment1(5.f, 5.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment1(5.f, 5.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
 
     q0_.reup(-10, 5);
     q1_.reup(-100, 213);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment1(-10.f, 5.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Interval);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment1(-10.f, 5.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Interval);
 
 
     q0_.reup(-10, 5);
     q1_.reup(-100, -213);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment1(0.f, 0.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Nop);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment1(0.f, 0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Nop);
 }
 
 TEST_F(LineSegment2Test, contein)
@@ -243,39 +257,39 @@ TEST_F(LineSegment2Test, contein)
 TEST_F(LineSegment2Test, findIntersection)
 {
     q0_.reup({ 1.f, 1}, { -1.f, -1});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, q1_);
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, q1_);
 
 
     q0_.reup({ 0.f, 1}, { 0.f, -10});
     q1_.reup({ 0.f, 1}, { 0.f, -10});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Interval);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, q0_);
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Interval);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, q0_);
 
     q0_.reup({ 0.f, 1}, { 0.f, -10});
     q1_.reup({ 0.f, -100}, { 0.f, 10});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Interval);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, q0_);
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Interval);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, q0_);
 
     q0_.reup({ 10.f, 0}, { -10.f, 0});
     q1_.reup({ 5.f, 0}, { 5.f, 10});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment2({ 5.f, 0}, { 5.f, 0}));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment2({ 5.f, 0}, { 5.f, 0}));
 
     q0_.reup({ -2.f, 0}, { 0.f, 3});
     q1_.reup({ 0.f, 3}, { 3.f, 10});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment2({ 0.f, 3}, { 0.f, 3}));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment2({ 0.f, 3}, { 0.f, 3}));
 
     q0_.reup({ -2.f, 0}, { 0.f, 3});
     q1_.reup({ -2.f, 0}, { 2.f, 6});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Interval);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, q0_);
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Interval);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, q0_);
 
     q0_.reup({ -2.f, 0}, { 0.f, 3});
     q1_.reup({ 0.f, 0}, { 2.f, 6});
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Nop);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment2());
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Nop);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment2());
 }
 
 TEST_F(LineSegment3Test, contein)
@@ -306,14 +320,14 @@ TEST_F(LineSegment3Test, findintersection)
     q0_.reup({ 14.129032258064516, -0.58064516129032240, -17.709677419354840 },
         { 0.40140252454417968, -0.59326788218793813, 0.17924263674614238 }, la::LineSegment3::Type::PointAndVector);
     q1_.reup({ 9, 7, -20 }, { 0, 0, 0 }, la::LineSegment3::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_), findIntersection(q1_, q0_));
-    EXPECT_EQ(findIntersection(q0_.toLine(), q1_.toLine()), 
-        findIntersection(q1_.toLine(), q0_.toLine()));
+    EXPECT_EQ(findIntersec(q0_, q1_), findIntersec(q1_, q0_));
+    EXPECT_EQ(findIntersec(q0_.toLine(), q1_.toLine()), 
+        findIntersec(q1_.toLine(), q0_.toLine()));
 
     q0_.reup({ 0, 1, -3 }, { -2, 4, 6 }, LineSegment3::Type::PointAndVector);
     q1_.reup({ 0, 1, -3 }, { -1, 2, 3 }, LineSegment3::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, LineSegment3({ 0, 1, -3 }, { -1, 3, 0 }, LineSegment3::Type::TwoPoints));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Interval);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, LineSegment3({ 0, 1, -3 }, { -1, 3, 0 }, LineSegment3::Type::TwoPoints));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Interval);
 }
 
 ///////////////////////////////////////////////////////////
@@ -335,45 +349,45 @@ TEST_F(Line2Test, contein)
 
 TEST_F(Line2Test, intersection)
 {
-    EXPECT_TRUE(q0_.intersection(q1_));
+    EXPECT_TRUE(q0_.intersec(q1_));
 
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Same);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector2f(0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Same);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector2f(0.f));
 
     q0_.reup({ 0.f,0}, { 0.f, 10});
     q1_.reup({ 1.f,0}, { 1.f, 10});
-    EXPECT_FALSE(q0_.intersection(q1_));
+    EXPECT_FALSE(q0_.intersec(q1_));
 
     q0_.reup({ 0.f, 0}, { 10.f, 10}, Line2::Type::PointAndVector);
     q1_.reup({ 0.f, -1}, { -10.f, -10}, Line2::Type::PointAndVector);
-    EXPECT_FALSE(q0_.intersection(q1_));
+    EXPECT_FALSE(q0_.intersec(q1_));
 
     q0_.reup({ 0.f,0}, { 0.f, 10});
     q1_.reup({ 1.f,0}, { 1.1f, 10});
-    EXPECT_TRUE(q0_.intersection(q1_));
+    EXPECT_TRUE(q0_.intersec(q1_));
 }
 
 TEST_F(Line2Test, findIntersection)
 {
     q0_.reup({ 0.f,0}, { 1.f, 1}, Line2::Type::PointAndVector);
     q1_.reup({ 0.f,0}, { -1.f, 1}, Line2::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector2f(0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector2f(0.f));
 
     q0_.reup({ 0.f,0}, { 1.f, 1}, Line2::Type::PointAndVector);
     q1_.reup({ -2.f,-2}, { -1.f, -1}, Line2::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Same);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector2f(0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Same);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector2f(0.f));
 
     q0_.reup({ 12,34}, { 213, 7}, Line2::Type::PointAndVector);
     q1_.reup({ 34,83}, { 3, 67}, Line2::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector2f(31.83515, 34.65185));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector2f(31.83515, 34.65185));
 
     q0_.reup({ 8.f, 5}, { 4.f, 7}, Line2::Type::PointAndVector);
     q1_.reup({ 1.f, 4}, { 1.f, 10}, Line2::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector2f(-0.363636f, -9.636363f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector2f(-0.363636f, -9.636363f));
 }
 
 ///////////////////////////////////////////////////////////
@@ -404,18 +418,18 @@ TEST_F(Line3Test, findIntersection)
 {
     q0_.reup({ 1, -1, -1 }, { 1, 1, -2 });
     q1_.reup({ -1, 0, -4 }, { 0, -1.5, -2 });
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector3f(1, -3, 0));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::One);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector3f(1, -3, 0));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::One);
 
     q0_.reup({ -4, -5, 6 }, { -2, 4, 6 }, Line3::Type::PointAndVector);
     q1_.reup({ 0, 1, -3 }, { 1, -2, -3 }, Line3::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector3f(0.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Nop);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector3f(0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Nop);
 
     q0_.reup({ 0 + 1, 1 - 2, -3 - 3 }, { -2, 4, 6 }, Line3::Type::PointAndVector);
     q1_.reup({ 0, 1, -3 }, { 1, -2, -3 }, Line3::Type::PointAndVector);
-    EXPECT_EQ(findIntersection(q0_, q1_).first, Vector3f(0.f));
-    EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Same);
+    EXPECT_EQ(findIntersec(q0_, q1_).first, Vector3f(0.f));
+    EXPECT_EQ(findIntersec(q0_, q1_).second, Intersec::quantity::Same);
 }
 
 ///////////////////////////////////////////////////////////
@@ -499,11 +513,11 @@ TEST_F(TriangleTest, intersec)
 
     q0_.reup({ 1, 1, 1 }, { 2, 2, 0 }, { 6, 0, 1 });
     q1_.reup({ 1, 1, 1 }, { 2, 1, 0 }, { 6, 0, 1 });
-    EXPECT_TRUE (intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q0_, q1_));
 
     q0_.reup({ 1, 1, 1 }, { -2, 22, 0 }, { 6, 0, 1 });
     q1_.reup({ 1, 1, 1 }, { 2, 2, 0 }, { -6, 0, 1 });
-    EXPECT_TRUE (intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q0_, q1_));
 
     q1_.reup({ 1, 1, 1 }, { 2, 2, 0 }, { -6, 0, 1 });
     EXPECT_EQ(findIntersec(q1_, Line3({ 1, 1, 1 }, { 2, 2, 0 })).second, Intersec::quantity::Interval);
@@ -518,8 +532,11 @@ TEST_F(TriangleTest, intersec)
     q0_.reup({ 9, 1, -13 }, { 12, 2, -18 }, { 9, 7, -20 });
     q1_.reup({ 9, -4, -16 }, { 13, -5, -16 }, { 15, 0, -18 });
     EXPECT_EQ(intersec(q0_, q1_), intersec(q1_, q0_));
-    EXPECT_EQ(q0_.getPlane() == q1_.getPlane(), q1_.getPlane() == q0_.getPlane());
-    EXPECT_EQ(intersec(q0_.getPlane(), q1_.getPlane()), intersec(q1_.getPlane(), q0_.getPlane()));
+
+    q0_.reup({ -18, -8, 12 }, { -13, -14, 16 }, { -19, -14, 8 });
+    q1_.reup({ -14, -4, 2 }, { -17, -11, 7 }, { -20, -14, 10 });
+    EXPECT_EQ(intersec(q0_, q1_), intersec(q1_, q0_));
+
 }
 
 

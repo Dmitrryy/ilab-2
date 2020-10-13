@@ -73,9 +73,9 @@ namespace la
 				const Vector3f p1 = m_a + (((m_c + ((m_b - m_c) / 2.f)) - m_a) * 3.f / 5.f);
 				const LineSegment3 p1_vec(p1, _vec);
 
-				res = findIntersection(LineSegment3(m_b, m_a), p1_vec).second == Intersec::quantity::Nop;
-				res = res && findIntersection(LineSegment3(m_b, m_c), p1_vec).second == Intersec::quantity::Nop;
-				res = res && findIntersection(LineSegment3(m_a, m_c), p1_vec).second == Intersec::quantity::Nop;
+				res = findIntersec(LineSegment3(m_b, m_a), p1_vec).second == Intersec::quantity::Nop;
+				res = res && findIntersec(LineSegment3(m_b, m_c), p1_vec).second == Intersec::quantity::Nop;
+				res = res && findIntersec(LineSegment3(m_a, m_c), p1_vec).second == Intersec::quantity::Nop;
 			}
 		}
 
