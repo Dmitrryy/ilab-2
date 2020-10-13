@@ -40,7 +40,7 @@ namespace la {
 
         bool intersection(const LineSegment1& _rhs) const noexcept;
 
-        bool contein(double _x) const noexcept { return _x >= m_a && _x <= m_b; }
+        bool contein(double _x) const noexcept { return _x >= m_a - EPSILON && _x <= m_b + EPSILON; }
 
     };
 

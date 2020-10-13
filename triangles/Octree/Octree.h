@@ -40,7 +40,7 @@ namespace la
 		}
 
 		size_t split  ();
-		size_t split  (size_t _deep);
+		//size_t split  (size_t _deep);
 		size_t msplit ();
 
 		size_t size() const;
@@ -64,7 +64,7 @@ namespace la
 		//O(N^2)
 		IntersecC _intersecv_(const std::vector< T >& _vec) const;
 		IntersecC _intersecvv_(const std::vector< T >& _lhs, const std::vector< T >& _rhs) const;
-		IntersecC _intersecNv_(std::vector< std::vector< T > > _lhs, const std::vector< T >& _rhs)const ;
+		IntersecC _intersecNv_(const std::vector< std::vector< T > >& _lhs, const std::vector< T >& _rhs)const ;
 
 		IntersecC _getIntersecWith_(std::vector< std::vector< T > > _vec) const;
 
@@ -79,15 +79,6 @@ namespace la
 
 		if (!_tryAdd_(_elem, elem_area))
 		{
-			//if (la::intersec(m_area, elem_area))
-			//{
-			//	m_data.push_back(_elem);
-			//}
-			//else
-			//{
-			//	m_outside_data.push_back(_elem);
-			//	assert(m_parent == nullptr);
-			//}
 			throw std::logic_error(std::string("elem is outside: \n"));
 		}
 	}
@@ -159,8 +150,10 @@ namespace la
 	size_t Octree<T>::size() const
 	{
 		size_t res = m_data.size() + m_outside_data.size();
-		for (int i = 0; i < 8; i++) {
-			res += m_children.at(i).size();
+		if (haveChildren()) {
+			for (int i = 0; i < 8; i++) {
+				res += m_children.at(i)->size();
+			}
 		}
 		return res;
 	}
@@ -188,13 +181,13 @@ namespace la
 		std::vector< int > new_data;
 		for (size_t i = 0, n = m_data.size(); i < n; i++)
 		{
-			T& tmp = m_data[i];
+			T& tmp = m_data.at(i);
 			const Square esq = tmp.getArea();
 			uint16_t counter = 0u;
 			int num_target = 0;
 			for (int k = 0; k < 8; k++)
 			{
-				if (la::contein(squares[k], esq)) {
+				if (la::contein(squares.at(k), esq)) {
 					num_target = k;
 					counter++;
 				}
@@ -204,7 +197,7 @@ namespace la
 			}
 
 			if (counter == 1) {
-				new_chdata[num_target].push_back(i);
+				new_chdata.at(num_target).push_back(i);
 			}
 			else {
 				new_data.push_back(i);
@@ -220,19 +213,19 @@ namespace la
 
 			for (const int& id_elem : new_data)
 			{
-				m_data.push_back(std::move(tmp_data[id_elem]));
+				m_data.push_back(std::move(tmp_data.at(id_elem)));
 			}
 
 			for (int i = 0; i < 8; i++)
 			{
-				m_children[i] = new Octree(squares[i], this);
+				m_children.at(i) = new Octree(squares.at(i), this);
 			}
 
 			for (int i = 0; i < 8; i++)
 			{
-				for (const int& id_elem : new_chdata[i])
+				for (const int& id_elem : new_chdata.at(i))
 				{
-					const bool rest = m_children[i]->_tryAdd_(tmp_data[id_elem], tmp_data[id_elem].getArea());
+					const bool rest = m_children.at(i)->_tryAdd_(tmp_data.at(id_elem), tmp_data.at(id_elem).getArea());
 					assert(rest);
 				}
 			}
@@ -265,6 +258,7 @@ namespace la
 			tmp_data.emplace_back(m_data);
 			for (const Octree<T>* ch : m_children)
 			{
+				assert(ch != nullptr);
 				IntersecC tmp = ch->_getIntersecWith_(tmp_data);
 				res.insert(res.end(), std::make_move_iterator(tmp.begin()), std::make_move_iterator(tmp.end()));
 			}
@@ -284,14 +278,14 @@ namespace la
 		const double dz = m_area.getDZ();
 
 		std::vector<Square> squares(8);
-		squares[0] = Square(m_area.getA(), center);
-		squares[1] = Square(m_area.getA() + Vector3f(dx, 0, 0), center);
-		squares[2] = Square(m_area.getA() + Vector3f(dx, dy, 0), center);
-		squares[3] = Square(m_area.getA() + Vector3f(0, dy, 0), center);
-		squares[4] = Square(m_area.getB(), center);
-		squares[5] = Square(m_area.getB() - Vector3f(dx, 0, 0), center);
-		squares[6] = Square(m_area.getB() - Vector3f(dx, dy, 0), center);
-		squares[7] = Square(m_area.getB() - Vector3f(0, dy, 0), center);
+		squares.at(0) = Square(m_area.getA(), center);
+		squares.at(1) = Square(m_area.getA() + Vector3f(dx, 0, 0), center);
+		squares.at(2) = Square(m_area.getA() + Vector3f(dx, dy, 0), center);
+		squares.at(3) = Square(m_area.getA() + Vector3f(0, dy, 0), center);
+		squares.at(4) = Square(m_area.getB(), center);
+		squares.at(5) = Square(m_area.getB() - Vector3f(dx, 0, 0), center);
+		squares.at(6) = Square(m_area.getB() - Vector3f(dx, dy, 0), center);
+		squares.at(7) = Square(m_area.getB() - Vector3f(0, dy, 0), center);
 
 		return squares;
 	}
@@ -305,9 +299,9 @@ namespace la
 		for (size_t i = 0; i < _vec.size(); i++) {
 			for (size_t k = i + 1; k < _vec.size(); k++)
 			{
-				if (intersec(_vec[i], _vec[k]))
+				if (intersec(_vec.at(i), _vec.at(k)))
 				{
-					res.push_back(std::make_pair(_vec[i], _vec[k]));
+					res.push_back(std::make_pair(_vec.at(i), _vec.at(k)));
 				}
 			}
 		}
@@ -318,7 +312,7 @@ namespace la
 
 	template <typename T>
 	std::vector< std::pair< T, T > > Octree<T>::
-		_intersecNv_(std::vector< std::vector< T > > _lhs, const std::vector< T >& _rhs) const
+		_intersecNv_(const std::vector< std::vector< T > >& _lhs, const std::vector< T >& _rhs) const
 	{
 		IntersecC res;
 
@@ -339,9 +333,9 @@ namespace la
 
 		for (size_t i = 0; i < _lhs.size(); i++) {
 			for (size_t k = 0; k < _rhs.size(); k++) {
-				if (intersec(_lhs[i], _rhs[k]))
+				if (intersec(_lhs.at(i), _rhs.at(k)))
 				{
-					res.push_back(std::make_pair(_lhs[i], _rhs[k]));
+					res.push_back(std::make_pair(_lhs.at(i), _rhs.at(k)));
 				}
 			}
 		}
@@ -363,6 +357,7 @@ namespace la
 			_vec.emplace_back(m_data);
 			for (const Octree* ch : m_children)
 			{
+				assert(ch != nullptr);
 				IntersecC tmp = ch->_getIntersecWith_(_vec);
 				res.insert(res.end(), std::make_move_iterator(tmp.begin()), std::make_move_iterator(tmp.end()));
 			}

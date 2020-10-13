@@ -9,10 +9,31 @@
 #include "Octree/Octree.h"
 #include "tests/test_gen.h"
 
+//-1 -11 -11 5 -7 -17 -4 -5 -19 2 -5 -9 -1 -5 -14 0 -9 -17
+
+//15 21 -11 21 13 -14 22 16 -10 11 17 -17 13 19 -14 12 21 -23
+
+//9 1 -13 12 2 -18 9 7 -20 9 -4 -16 13 -5 -16 15 0 -18
+
 void intersectionN_N    (std::vector< std::pair< la::Triangle, bool > > data);
 void intersectionOctree (std::vector< std::pair< la::Triangle, bool > > data);
 
 extern size_t COUNT_TT_INTERSEC;
+
+
+template <typename Val_, typename Key_ = int>
+struct ValId
+{
+    Val_ val;
+    Key_ id;
+
+    la::Square getArea() const { return val.getArea(); }
+};
+bool intersec(const ValId<la::Triangle, size_t>& _lhs, const ValId<la::Triangle, size_t>& _rhs)
+{
+    return la::intersec(_lhs.val, _rhs.val);
+}
+
 
 int main()
 {
@@ -61,16 +82,21 @@ void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data)
 
     COUNT_TT_INTERSEC = 0u;
 
+    //std::cout << data[20].first << ' ' << data[62].first << std::endl;
+
+    std::vector< std::pair< ValId< la::Triangle, size_t >, ValId< la::Triangle, size_t > > > result_pair;
+    std::set<size_t> res_id;
+
     size_t counter_cmp = 0;
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
-        auto& lhs = data[i];
+        auto& lhs = data.at(i);
         if (lhs.second) {
             continue;
         }
-        for (int k = i + 1; k < n; k++)
+        for (size_t k = i + 1; k < n; k++)
         {
-            auto& rhs = data[k];
+            auto& rhs = data.at(k);
             if (lhs.second) {
                 break;
             }
@@ -78,7 +104,13 @@ void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data)
                 continue;
             }
 
-            lhs.second = rhs.second = la::intersec(lhs.first, rhs.first);
+            if (la::intersec(lhs.first, rhs.first))
+            {
+                result_pair.push_back(std::make_pair(ValId<la::Triangle, size_t>{lhs.first, i},
+                    ValId<la::Triangle, size_t>{rhs.first, k}));
+                res_id.insert(i);
+                res_id.insert(k);
+            }
             counter_cmp++;
         }
     }
@@ -87,12 +119,14 @@ void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data)
         << "N * N = " << n * n << '\n'
         << "num cmp = " << COUNT_TT_INTERSEC << '\n';
 
-    for (int i = 0; i < n; i++)
+    for (const auto& id : res_id)
     {
-        if (data[i].second) {
-            std::cout << i << ' ';
-        }
+        std::cout << id << ' ';
     }
+    //for (const auto& r : result_pair)
+    //{
+    //    std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
+    //}
     std::cout << std::endl;
 }
 
@@ -102,19 +136,6 @@ std::min(a, std::min(b, c))
 
 #define MAX(a, b, c) \
 std::max(a, std::max(b, c))
-
-template <typename Val_, typename Key_ = int>
-struct ValId
-{
-    Val_ val;
-    Key_ id;
-
-    la::Square getArea() const { return val.getArea(); }
-};
-bool intersec(const ValId<la::Triangle, size_t>& _lhs, const ValId<la::Triangle, size_t>& _rhs)
-{
-    return la::intersec(_lhs.val, _rhs.val);
-}
 
 void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data)
 {
@@ -127,11 +148,11 @@ void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data)
 
     if (!data.empty())
     {
-        la::Vector3f a = data[0].first.getA(), b = data[0].first.getB();
+        la::Vector3f a = data.at(0).first.getA(), b = data.at(0).first.getB();
 
         for (size_t i = 0, n = data.size(); i < n; ++i)
         {
-            const la::Triangle tr = data[i].first;
+            const la::Triangle tr = data.at(i).first;
             a.x = min(a.x, MIN(tr.getA().x, tr.getB().x, tr.getC().x));
             a.y = min(a.y, MIN(tr.getA().y, tr.getB().y, tr.getC().y));
             a.z = min(a.z, MIN(tr.getA().z, tr.getB().z, tr.getC().z));
@@ -144,7 +165,7 @@ void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data)
 
         for (size_t i = 0, n = data.size(); i < n; ++i)
         {
-            tree.add({ data[i].first, i});
+            tree.add({ data.at(i).first, i});
         }
 
         tree.msplit();
@@ -160,12 +181,17 @@ void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data)
         std::cout << "\nOctree\nN = " << n << '\n'
             << "N * N = " << n * n << '\n'
             << "num pair: " << res.size() << '\n'
-            << "num cmp: " << COUNT_TT_INTERSEC << '\n';
+            << "num cmp: " << COUNT_TT_INTERSEC << '\n'
+            << "size: " << tree.size() << '\n';
 
         for (const int& k : id_res)
         {
             std::cout << k << ' ';
         }
+        //for (const auto& r : res)
+        //{
+        //    std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
+        //}
         std::cout << std::endl;
     }
 
