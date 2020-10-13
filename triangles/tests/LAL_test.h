@@ -288,6 +288,7 @@ TEST_F(LineSegment3Test, contein)
     EXPECT_FALSE(q0_.contein({ 5, -5, -5 }));
     EXPECT_FALSE(q0_.contein({ 5, 5, 5 }));
     EXPECT_FALSE(q0_.contein({ -6, -6, -6 }));
+
 }
 
 TEST_F(LineSegment3Test, findintersection)
@@ -301,6 +302,13 @@ TEST_F(LineSegment3Test, findintersection)
     //q1_.reup({ 0, 1, -3 }, { 1, -2, -3 }, Line3::Type::PointAndVector);
     //EXPECT_EQ(findIntersection(q0_, q1_).first, Vector3f(0.f));
     //EXPECT_EQ(findIntersection(q0_, q1_).second, Intersec::quantity::Nop);
+
+    q0_.reup({ 14.129032258064516, -0.58064516129032240, -17.709677419354840 },
+        { 0.40140252454417968, -0.59326788218793813, 0.17924263674614238 }, la::LineSegment3::Type::PointAndVector);
+    q1_.reup({ 9, 7, -20 }, { 0, 0, 0 }, la::LineSegment3::Type::PointAndVector);
+    EXPECT_EQ(findIntersection(q0_, q1_), findIntersection(q1_, q0_));
+    EXPECT_EQ(findIntersection(q0_.toLine(), q1_.toLine()), 
+        findIntersection(q1_.toLine(), q0_.toLine()));
 
     q0_.reup({ 0, 1, -3 }, { -2, 4, 6 }, LineSegment3::Type::PointAndVector);
     q1_.reup({ 0, 1, -3 }, { -1, 2, 3 }, LineSegment3::Type::PointAndVector);
@@ -506,6 +514,12 @@ TEST_F(TriangleTest, intersec)
     q0_.reup({ 0, 0, 0 }, { -12, 5, 0 }, { 12, 5, 0 });
     q1_.reup({ 0, 0, 0 }, { 12, 231, 5 }, { 34, 9, 76 });
     EXPECT_TRUE(intersec(q0_, q1_));
+
+    q0_.reup({ 9, 1, -13 }, { 12, 2, -18 }, { 9, 7, -20 });
+    q1_.reup({ 9, -4, -16 }, { 13, -5, -16 }, { 15, 0, -18 });
+    EXPECT_EQ(intersec(q0_, q1_), intersec(q1_, q0_));
+    EXPECT_EQ(q0_.getPlane() == q1_.getPlane(), q1_.getPlane() == q0_.getPlane());
+    EXPECT_EQ(intersec(q0_.getPlane(), q1_.getPlane()), intersec(q1_.getPlane(), q0_.getPlane()));
 }
 
 

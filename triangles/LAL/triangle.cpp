@@ -24,9 +24,9 @@ namespace la
 		a.x = min(getA().x, min(getB().x, getC().x));
 		a.y = min(getA().y, min(getB().y, getC().y));
 		a.z = min(getA().z, min(getB().z, getC().z));
-		b.x = max(getA().x, min(getB().x, getC().x));
-		b.y = max(getA().y, min(getB().y, getC().y));
-		b.z = max(getA().z, min(getB().z, getC().z));
+		b.x = max(getA().x, max(getB().x, getC().x));
+		b.y = max(getA().y, max(getB().y, getC().y));
+		b.z = max(getA().z, max(getB().z, getC().z));
 
 		return { a, b };
 	}

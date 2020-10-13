@@ -769,8 +769,26 @@ namespace la
                 const auto res2 = findIntersec(_rhs, line_inters.first);
                 if (res2.second != Intersec::quantity::Nop)
                 {
-                    const auto findRes = findIntersection(res1.first, res2.first);
-                    if (findRes.second != Intersec::quantity::Nop) {
+                    Intersec::quantity mood = Intersec::quantity::Nop;
+                    if (res1.second == Intersec::quantity::One && res2.second != Intersec::quantity::One) {
+                        if (res2.first.contein(res1.first.getP())) {
+                            mood = Intersec::quantity::One;
+                        }
+                    }
+                    else if (res1.second != Intersec::quantity::One && res2.second == Intersec::quantity::One) {
+                        if (res1.first.contein(res2.first.getP())) {
+                            mood = Intersec::quantity::One;
+                        }
+                    }
+                    else if (res1.second == Intersec::quantity::One && res2.second == Intersec::quantity::One) {
+                        if (res1.first.getP() == res2.first.getP()) {
+                            mood = Intersec::quantity::One;
+                        }
+                    }
+                    else {
+                        mood = findIntersection(res1.first, res2.first).second;
+                    }
+                    if (mood != Intersec::quantity::Nop) {
                         result = true;
                     }
                 }
@@ -780,7 +798,7 @@ namespace la
         {
             result = false;
         }
-        
+
         return result;
     }
 
