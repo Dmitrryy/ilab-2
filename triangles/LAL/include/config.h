@@ -13,6 +13,7 @@ namespace la {
             , One
             , Interval
             , Same
+            , Error
         };
 
     }
