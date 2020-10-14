@@ -27,21 +27,25 @@ namespace la {
 
         double length() const noexcept { return m_b - m_a; }
 
-        double getA()   const noexcept { return m_a; }
-        double getB()   const noexcept { return m_b; }
+        bool   valid () const noexcept;
 
-        bool equal(const LineSegment1& _rhs) const noexcept {
-            return std::abs(m_a - _rhs.m_a) < EPSILON && std::abs(m_b - _rhs.m_b) < EPSILON;
-        }
+        double getA  ()   const noexcept { return m_a; }
+        double getB  ()   const noexcept { return m_b; }
 
-        void reup (double _a, double _b) noexcept { *this = LineSegment1(_a, _b); }
+        bool equal   (const LineSegment1& _rhs) const noexcept;
+
+        void reup    (double _a, double _b) noexcept { *this = LineSegment1(_a, _b); }
 
         bool operator == (const LineSegment1& _rhs) const noexcept { return equal(_rhs); }
 
         bool intersec(const LineSegment1& _rhs) const noexcept;
+        bool contein (double _x) const noexcept { return _x >= m_a - EPSILON && _x <= m_b + EPSILON; }
 
-        bool contein(double _x) const noexcept { return _x >= m_a - EPSILON && _x <= m_b + EPSILON; }
+        std::string dump () const;
 
+        friend std::ostream& operator<<(std::ostream& _stream, const LineSegment1& _targ) {
+            return _stream << _targ.dump();
+        }
     };
 
 
@@ -57,10 +61,7 @@ namespace la {
             , PointAndVector
         };
 
-        LineSegment2() noexcept
-            : m_p(0.f)
-            , m_v(0.f)
-        {}
+        LineSegment2() = default;
 
         LineSegment2 (la::Vector2f _p, la::Vector2f _v, Type _t = Type::TwoPoints) noexcept;
 
@@ -76,13 +77,12 @@ namespace la {
 
         bool operator == (const LineSegment2& _rhs) const noexcept { return equal(_rhs); }
 
-        bool contein(const Vector2f& _rhs) const;
+        bool contein (const Vector2f& _rhs) const noexcept;
 
+        std::string dump() const;
 
-        friend std::ostream& operator << (std::ostream& _stream, const LineSegment2& _goal) {
-            _stream << '[' << _goal.m_p << ", " << _goal.m_p + _goal.m_v << ']';
-
-            return _stream;
+        friend std::ostream& operator<<(std::ostream& _stream, const LineSegment2& _targ) {
+            return _stream << _targ.dump();
         }
     };
 
@@ -99,10 +99,7 @@ namespace la {
             , PointAndVector
         };
 
-        LineSegment3() noexcept
-            : m_p(0.f)
-            , m_v(0.f)
-        {}
+        LineSegment3() = default;
 
         LineSegment3(la::Vector3f _p, la::Vector3f _v, Type _t = Type::TwoPoints) noexcept;
 
@@ -118,13 +115,12 @@ namespace la {
 
         bool operator == (const LineSegment3& _rhs) const noexcept { return equal(_rhs); }
 
-        bool contein(const Vector3f& _rhs) const;
+        bool contein (const Vector3f& _rhs) const noexcept;
 
+        std::string dump() const;
 
-        friend std::ostream& operator << (std::ostream& _stream, const LineSegment3& _goal) {
-            _stream << '[' << _goal.m_p << ", " << _goal.m_p + _goal.m_v << ']';
-
-            return _stream;
+        friend std::ostream& operator<<(std::ostream& _stream, const LineSegment3& _targ) {
+            return _stream << _targ.dump();
         }
     };
 

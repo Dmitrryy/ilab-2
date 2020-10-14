@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "include/square.h"
 
 namespace la
@@ -44,10 +46,17 @@ namespace la
 		}
 	}
 
-	std::ostream& operator << (std::ostream& _stream, const Square& _sq)
+	bool Square::valid() const noexcept
 	{
-		_stream << '[' << _sq.getA() << ", " << _sq.getB() << ']';
-		return _stream;
+		return m_a.valid() && m_b.valid() && !(m_a == m_b);
+	}
+
+	std::string Square::dump() const
+	{
+		std::ostringstream out;
+
+		out << '[' << getA() << ", " << getB() << ']';
+		return out.str();
 	}
 
 }//namespace la

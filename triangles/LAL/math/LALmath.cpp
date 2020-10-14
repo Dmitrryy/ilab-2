@@ -515,7 +515,7 @@ namespace la
         return res;
     }
 
-    bool equal(const Plane& _lhs, const Plane& _rhs)
+    bool equal(const Plane& _lhs, const Plane& _rhs) noexcept
     {
         bool res = true;
 

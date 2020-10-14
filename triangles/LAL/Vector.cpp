@@ -1,13 +1,12 @@
 #include "include/Vector.h"
-
 #include "include/Line.h"
-
 #include "include/LALmath.h"
+
+#include <sstream>
 
 namespace la {
 
-    bool Vector3f::collinear(const la::Vector3f& _rhs) const noexcept
-    {
+    bool Vector3f::collinear(const la::Vector3f& _rhs) const noexcept {
         return product(*this, _rhs).isZero();
     }
 
@@ -19,6 +18,13 @@ namespace la {
         result &= std::abs(z - _rhs.z) < EPSILON;
 
         return result;
+    }
+
+    std::string Vector2f::dump() const
+    {
+        std::ostringstream out;
+        out << '(' << x << ", " << y << ')';
+        return out.str();
     }
 
     Vector3f& Vector3f::operator += (const la::Vector3f& _rhs) noexcept
@@ -74,6 +80,12 @@ namespace la {
         return result;
     }
 
+    std::string Vector3f::dump() const
+    {
+        std::ostringstream out;
+        out << '(' << x << ", " << y << ", " << z << ')';
+        return out.str();
+    }
 
     Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs) noexcept
     {

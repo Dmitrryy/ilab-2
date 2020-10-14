@@ -2,9 +2,12 @@
 #include "include/Line.h"
 
 #include "include/LALmath.h"
+
+#include <sstream>
+
 namespace la
 {
-	void Plane::reup(Vector3f _point, Vector3f _vec1, Vector3f _vec2, Type _t /*= Type::PointAndTwoVec*/)
+	void Plane::reup(Vector3f _point, Vector3f _vec1, Vector3f _vec2, Type _t /*= Type::PointAndTwoVec*/) noexcept
 	{
 		m_p = _point;
 
@@ -18,9 +21,13 @@ namespace la
 			m_a = _vec1;
 			m_b = _vec2;
 		}
-		//m_b = m_b - projection(m_b, Line3(Vector3f(0.f), m_a));
+
 		m_norm = product(m_a, m_b);
-		//m_norm = normalization(m_norm);
+	}
+
+	bool Plane::valid() const noexcept
+	{
+		return m_p.valid() && m_a.valid() && m_b.valid() && m_norm.valid() && !m_norm.isZero();
 	}
 
 	bool Plane::operator == (const Plane& _that) const noexcept
@@ -52,5 +59,13 @@ namespace la
 	//	m_norm = Vector3f(_a, _b, _c);
 	//	//m_norm = normalization(m_norm);
 	//}
+
+	std::string Plane::dump() const
+	{
+		std::ostringstream out;
+		
+		out << "P: " << m_p << " v1: " << m_a << " v2: " << m_b << " N: " << m_norm;
+		return out.str();
+	}
 
 }//namespace la

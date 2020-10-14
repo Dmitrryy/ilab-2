@@ -1,6 +1,7 @@
 #include "include/LineSegment.h"
 
 #include <cassert>
+#include <sstream>
 
 #include "include/LALmath.h"
 
@@ -20,6 +21,24 @@ namespace la
         return res;
     }
 
+    bool LineSegment1::valid() const noexcept
+    {
+        return (std::isnormal(m_a) && std::isnormal(m_b)) 
+            || (m_a == 0.0 && std::isnormal(m_b))
+            || (m_b == 0.0 && std::isnormal(m_a));
+    }
+
+    bool LineSegment1::equal(const LineSegment1& _rhs) const noexcept {
+        return std::abs(m_a - _rhs.m_a) < EPSILON && std::abs(m_b - _rhs.m_b) < EPSILON;
+    }
+
+    std::string LineSegment1::dump() const
+    {
+        std::ostringstream out;
+        out << '[' << m_a << ", " << m_b << ']';
+
+        return out.str();
+    }
 
     /////////////////////////////LineSegment2//////////////////////////////////
 
@@ -32,9 +51,7 @@ namespace la
         }
     }
 
-
-
-    bool LineSegment2::contein(const Vector2f& _rhs) const
+    bool LineSegment2::contein(const Vector2f& _rhs) const noexcept
     {
         bool res = false;
         if (toLine().contein(_rhs))
@@ -45,6 +62,14 @@ namespace la
             }
         }
         return res;
+    }
+
+    std::string LineSegment2::dump() const
+    {
+        std::ostringstream out;
+        out << '[' << m_p << ", " << m_p + m_v << ']';
+
+        return out.str();
     }
 
     /////////////////////////////LineSegment3//////////////////////////////////
@@ -58,7 +83,7 @@ namespace la
         }
     }
 
-    bool LineSegment3::contein(const Vector3f& _rhs) const
+    bool LineSegment3::contein(const Vector3f& _rhs) const noexcept
     {
         bool res = false;
         if (toLine().contein(_rhs))
@@ -69,6 +94,14 @@ namespace la
             }
         }
         return res;
+    }
+
+    std::string LineSegment3::dump() const
+    {
+        std::ostringstream out;
+        out << '[' << m_p << ", " << m_p + m_v << ']';
+
+        return out.str();
     }
 
 }//namespae la

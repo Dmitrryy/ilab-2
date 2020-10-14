@@ -6,16 +6,22 @@
 
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 namespace la
 {
+	bool Triangle::valid() const noexcept
+	{
+		return m_a.valid() && m_b.valid() && m_c.valid()
+			&& !(m_a - m_b).collinear(m_a - m_c);
+	}
 
 	Plane Triangle::getPlane() const noexcept 
 	{ 
 		return { m_a, m_b, m_c, Plane::Type::ThreePoints }; 
 	}
 
-	Square Triangle::getArea() const
+	Square Triangle::getArea() const noexcept
 	{
 		using std::min;
 		using std::max;
@@ -40,20 +46,14 @@ namespace la
 	{
 		std::vector<Vector3f> cnt = {_a, _b, _c};
 
-		std::sort(cnt.begin(), cnt.end(), [](auto _lhs, auto _rhs)
+		std::sort(cnt.begin(), cnt.end(), [](auto _lhs, auto _rhs) noexcept
 			{
 				return _lhs.modul() < _rhs.modul();
 			});
 
-		m_a = cnt[0];
-		m_b = cnt[1];
-		m_c = cnt[2];
-	}
-
-	std::ostream& operator << (std::ostream& _stream, const Triangle& _tar)
-	{
-		_stream << '[' << _tar.m_a << ", " << _tar.m_b << ", " << _tar.m_c << ']';
-		return _stream;
+		m_a = cnt.at(0);
+		m_b = cnt.at(1);
+		m_c = cnt.at(2);
 	}
 
 	bool Triangle::contein(const Vector3f& _vec) const
@@ -81,4 +81,12 @@ namespace la
 
 		return res;
 	}
+
+	std::string Triangle::dump() const
+	{
+		std::ostringstream out;
+		out << "A: " << m_a << " B: " << m_b << " C: " << m_c;
+		return out.str();
+	}
+
 } // namespace la

@@ -16,7 +16,12 @@ namespace la {
         }
     }
 
-    bool Line2::intersec(const Line2& _rhs) const
+    bool Line2::valid() const noexcept
+    {
+        return m_p.valid() && m_v.valid() && !m_v.isZero();
+    }
+
+    bool Line2::intersec(const Line2& _rhs) const noexcept
     {
         bool res = true;
 
@@ -48,6 +53,11 @@ namespace la {
         if (_t == Type::TwoPoints) {
             m_v = _p - _v;
         }
+    }
+
+    bool Line3::valid() const noexcept
+    {
+        return m_p.valid() && m_v.valid() && !m_v.isZero();
     }
 
     bool Line3::intersec(const Line3& _rhs) const

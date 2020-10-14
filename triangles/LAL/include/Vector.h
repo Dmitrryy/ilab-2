@@ -28,7 +28,7 @@ namespace la {
 
         double modul() const noexcept { return std::sqrt(x * x + y * y); }
 
-        bool valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
+        bool   valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
 
         bool      operator == (const la::Vector2f& _rhs) const noexcept { return equal(_rhs); }
         Vector2f& operator += (const la::Vector2f& _rhs) noexcept;
@@ -37,10 +37,10 @@ namespace la {
         bool equal     (const la::Vector2f& _rhs) const noexcept;
         bool isZero    () const noexcept { return equal(Vector2f(0.0)); }
 
-        friend std::ostream& operator << (std::ostream& _stream, const Vector2f& _vec)
-        {
-            _stream << '(' << _vec.x << "; " << _vec.y << ')';
-            return _stream;
+        std::string dump() const;
+
+        friend std::ostream& operator << (std::ostream& _stream, const Vector2f& _vec) {
+            return _stream << _vec.dump();
         }
     };
 
@@ -86,7 +86,7 @@ namespace la {
 
         double modul() const noexcept { return std::sqrt(x * x + y * y + z * z); }
 
-        bool valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
+        bool   valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
 
         bool       operator == (const la::Vector3f& _rhs) const noexcept { return equal(_rhs); }
         Vector3f&  operator += (const la::Vector3f& _rhs) noexcept;
@@ -96,10 +96,10 @@ namespace la {
         bool equal     (const la::Vector3f& _rhs) const noexcept;
         bool isZero    () const noexcept { return equal(Vector3f(0)); }
 
-        friend std::ostream& operator << (std::ostream& _stream, const Vector3f& _vec)
-        {
-            _stream << '(' << _vec.x << "; " << _vec.y << "; " << _vec.z << ')';
-            return _stream;
+        std::string dump() const;
+
+        friend std::ostream& operator << (std::ostream& _stream, const Vector3f& _vec) {
+            return _stream << _vec.dump();
         }
 
     };

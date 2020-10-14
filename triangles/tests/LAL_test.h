@@ -540,6 +540,15 @@ TEST_F(TriangleTest, intersec)
 }
 
 
+TEST_F(TriangleTest, valid)
+{
+    EXPECT_FALSE(q0_.valid());
+
+    q0_.reup({ 0, 0, 0 }, { 1, 1, 1 }, { 2, 2, 2 });
+    EXPECT_FALSE(q0_.valid());
+}
+
+
 ///////////////////////////////////////////////////////////////
 //
 // Test Square
@@ -569,4 +578,14 @@ TEST_F(SquareTest, contein)
     q1_.reup({ 4, 5, 5 }, { 2, 3, 4 });
     EXPECT_TRUE(contein(q0_, q0_));
     EXPECT_TRUE(contein(q0_, q1_));
+
+    q0_.reup({ 4, 5, 0 }, { 1, 2, 0 });
+    q1_.reup({ 4, 5, 0 }, { 2, 3, 0 });
+    q2_.reup({ 5, 6, 0 }, { 234, 932, 0 });
+    EXPECT_TRUE(contein(q0_, q0_));
+    EXPECT_TRUE(contein(q0_, q1_));
+
+    EXPECT_FALSE(intersec(q0_, q2_));
+    EXPECT_FALSE(intersec(q2_, q1_));
+    EXPECT_TRUE(intersec(q0_, q1_));
 }

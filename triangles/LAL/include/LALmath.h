@@ -143,7 +143,7 @@ namespace la
 
     double distance         (const Plane& _lhs, const Plane& _rhs);
 
-    bool   equal            (const Plane& _lhs, const Plane& _rhs);
+    bool   equal            (const Plane& _lhs, const Plane& _rhs) noexcept;
 
     std::pair<Line3, Intersec::quantity> 
         findIntersec(const Plane& _lhs, const Plane& _rhs);
