@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <sstream>
 
 #include "../LAL/include/LALmath.h"
 
@@ -13,20 +14,29 @@ namespace la
 	class Octree
 	{
 		std::vector<T> m_data;
-		std::vector<T> m_outside_data;
 
 		Square m_area;
 
-		size_t m_deep;
+		mutable size_t m_deep;
+		mutable bool m_deep_actual;
+
+		mutable size_t m_size;
+		mutable bool m_size_actual;
 
 		std::array< Octree< T >*, 8 > m_children;
 		Octree<T>* m_parent;
 
-		using IntersecC = std::vector< std::pair< T, T > >;
-
 	public:
 
-		Octree(Square _area, Octree* _parent = nullptr)
+		using IntersecC = std::vector< std::pair< T, T > >;
+
+		Octree            (const Octree& _that) = delete;   //not saported
+		Octree& operator= (const Octree&)       = delete;   //not saported
+		Octree            (Octree&& _that)      = delete;   //not saported
+		Octree& operator= (Octree&&)            = delete;   //not saported
+
+
+		Octree(Square _area, Octree* _parent = nullptr) noexcept
 			: m_data()
 			, m_area(_area)
 			, m_deep(0)
@@ -44,16 +54,18 @@ namespace la
 		size_t msplit ();
 
 		size_t size() const;
+		size_t deep() const noexcept;
 
-		bool haveChildren() const noexcept { return m_children.at(0) != nullptr; }
+		bool   haveChildren() const noexcept { return m_children.at(0) != nullptr; }
 
-		size_t getDeep() const noexcept { return m_deep; }
 		Square getArea() const noexcept { return m_area; }
 
-		void add(const T& _elem);
+		void   add(const T& _elem);
 
 		IntersecC getIntersections() const;
 
+		std::string dumpStr  () const;
+		void        dumpLaTex(std::ostream& _out) const; //todo
 
 	private:
 
@@ -126,6 +138,7 @@ namespace la
 				m_data.push_back(_elem);
 			}
 			res = true;
+			m_size_actual = false;
 		}
 
 		return res;
@@ -149,19 +162,44 @@ namespace la
 	template <typename T>
 	size_t Octree<T>::size() const
 	{
-		size_t res = m_data.size() + m_outside_data.size();
-		if (haveChildren()) {
-			for (int i = 0; i < 8; i++) {
-				res += m_children.at(i)->size();
+		if (!m_size_actual)
+		{
+			m_size = m_data.size();
+			if (haveChildren()) {
+				for (int i = 0; i < 8; i++) {
+					m_size += m_children.at(i)->size();
+				}
 			}
+			m_size_actual = true;
 		}
-		return res;
+		return m_size;
+	}
+
+
+	template <typename T>
+	size_t Octree<T>::deep() const noexcept
+	{
+		if (!m_deep_actual)
+		{
+			m_deep = 0;
+			if (haveChildren())
+			{
+				for (const auto& ch : m_children)
+				{
+					m_deep = std::max(ch->deep(), m_deep);
+				}
+			}
+			m_deep++;
+		} 
+		return m_deep;
 	}
 
 
 	template <typename T>
 	size_t Octree<T>::split()
 	{
+		m_deep_actual = false;
+
 		if (haveChildren()) 
 		{
 			size_t res = 0;
@@ -173,7 +211,6 @@ namespace la
 		if (m_data.size() < 2) {
 			return 0;
 		}
-
 
 		std::vector<Square> squares(_splitArea_());
 
@@ -364,6 +401,22 @@ namespace la
 		}
 
 		return res;
+	}
+
+
+	template <typename T>
+	std::string Octree<T>::dumpStr() const
+	{
+		std::ostringstream out;
+
+		out << "Octree:" << '\n'
+			<< "m_data.size() = " << m_data.size() << '\n'
+			<< "all size      = " << size() << '\n'
+			<< "max deep      = " << deep() << '\n'
+			<< "have children ? " << haveChildren() << '\n'
+			<< "parent ptr    = " << m_parent;
+
+		return out.str();
 	}
 
 }//namespace la

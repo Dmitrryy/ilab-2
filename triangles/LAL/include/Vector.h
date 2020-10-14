@@ -8,48 +8,50 @@ namespace la {
 
     struct Vector2f
     {
-    public:
+        double x;
+        double y;
 
-        Vector2f()
+        Vector2f() noexcept
             : x(0)
             , y(0)
         {};
 
-        Vector2f(double _x, double _y)
+        Vector2f(double _x, double _y) noexcept
             : x(_x)
             , y(_y)
         {};
 
-        explicit Vector2f(double _all)
+        explicit Vector2f(double _all) noexcept
             : x(_all)
             , y(_all)
         {};
 
         double modul() const noexcept { return std::sqrt(x * x + y * y); }
 
-        bool operator == (const la::Vector2f& _rhs) const noexcept { return equal(_rhs); }
+        bool   valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
+
+        bool      operator == (const la::Vector2f& _rhs) const noexcept { return equal(_rhs); }
         Vector2f& operator += (const la::Vector2f& _rhs) noexcept;
 
-        bool collinear(const la::Vector2f& _rhs) const noexcept;
-        bool equal(const la::Vector2f& _rhs) const noexcept;
-        bool isZero() const noexcept { return equal(Vector2f(0)); }
+        bool collinear (const la::Vector2f& _rhs) const noexcept;
+        bool equal     (const la::Vector2f& _rhs) const noexcept;
+        bool isZero    () const noexcept { return equal(Vector2f(0.0)); }
 
-        friend Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs);
-        friend Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs);
+        std::string dump() const;
 
-        friend std::ostream& operator << (std::ostream& _stream, const Vector2f& _vec)
-        {
-            _stream << '(' << _vec.x << "; " << _vec.y << ')';
-            return _stream;
+        friend std::ostream& operator << (std::ostream& _stream, const Vector2f& _vec) {
+            return _stream << _vec.dump();
         }
-
-
-        double x;
-        double y;
     };
 
+    Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs) noexcept;
+    Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs) noexcept;
+    Vector2f operator *  (const Vector2f& _lhs, double _n) noexcept;
+    inline Vector2f operator /  (const Vector2f& _lhs, double _n) noexcept { return _lhs * (1.0 / _n); };
+    inline Vector2f operator *  (double _n, const Vector2f& _lhs) noexcept { return _lhs * _n; }
+
   
-    /// ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     
 
     struct Vector3f
@@ -57,8 +59,6 @@ namespace la {
         double x;
         double y;
         double z;
-
-    public:
 
         Vector3f() noexcept
             : x(0)
@@ -84,26 +84,30 @@ namespace la {
             , z(_all)
         {};
 
-    public:
-
         double modul() const noexcept { return std::sqrt(x * x + y * y + z * z); }
 
-        bool  operator == (const la::Vector3f& _rhs) const noexcept { return equal(_rhs); }
+        bool   valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
+
+        bool       operator == (const la::Vector3f& _rhs) const noexcept { return equal(_rhs); }
         Vector3f&  operator += (const la::Vector3f& _rhs) noexcept;
+        Vector3f&  operator -= (const la::Vector3f& _rhs) noexcept;
 
-        friend Vector3f operator -  (const Vector3f& _lhs, const Vector3f& _rhs);
-        friend Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs);
+        bool collinear (const la::Vector3f& _rhs) const noexcept;
+        bool equal     (const la::Vector3f& _rhs) const noexcept;
+        bool isZero    () const noexcept { return equal(Vector3f(0)); }
 
-        bool collinear(const la::Vector3f& _rhs) const noexcept;
-        bool equal(const la::Vector3f& _rhs) const noexcept;
-        bool isZero() const noexcept { return equal(Vector3f(0)); }
+        std::string dump() const;
 
-        friend std::ostream& operator << (std::ostream& _stream, const Vector3f& _vec)
-        {
-            _stream << '(' << _vec.x << "; " << _vec.y << "; " << _vec.z << ')';
-            return _stream;
+        friend std::ostream& operator << (std::ostream& _stream, const Vector3f& _vec) {
+            return _stream << _vec.dump();
         }
 
     };
 
-}//namespace ezg
+    Vector3f operator -  (const Vector3f& _lhs, const Vector3f& _rhs) noexcept;
+    Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs) noexcept;
+    Vector3f operator *  (const Vector3f& _lhs, double _n) noexcept;
+    inline Vector3f operator /  (const Vector3f& _lhs, double _n) noexcept { return _lhs * (1 / _n); };
+    inline Vector3f operator *  (double _n, const Vector3f& _lhs) noexcept { return _lhs * _n; }
+
+}//namespace la

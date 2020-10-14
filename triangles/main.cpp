@@ -5,7 +5,8 @@
 #include <set>
 #include <fstream>
 
-//#include "LAL/include/LAL.h"
+//#define DEBUGG
+
 #include "Octree/Octree.h"
 #include "tests/test_gen.h"
 
@@ -15,11 +16,12 @@
 
 //9 1 -13 12 2 -18 9 7 -20 9 -4 -16 13 -5 -16 15 0 -18
 
+//-18 -8 12 -13 -14 16 -19 -14 8 -14 -4 2 -17 -11 7 -20 -14 10
+
 void intersectionN_N    (std::vector< std::pair< la::Triangle, bool > > data);
 void intersectionOctree (std::vector< std::pair< la::Triangle, bool > > data);
 
 extern size_t COUNT_TT_INTERSEC;
-
 
 template <typename Val_, typename Key_ = int>
 struct ValId
@@ -82,7 +84,7 @@ void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data)
 
     COUNT_TT_INTERSEC = 0u;
 
-    //std::cout << data[20].first << ' ' << data[62].first << std::endl;
+    //std::cout << data[26].first << ' ' << data[12].first << std::endl;
 
     std::vector< std::pair< ValId< la::Triangle, size_t >, ValId< la::Triangle, size_t > > > result_pair;
     std::set<size_t> res_id;
@@ -115,18 +117,28 @@ void intersectionN_N(std::vector< std::pair< la::Triangle, bool > > data)
         }
     }
 
-    std::cout << "\nN*N\nN = " << n << '\n'
-        << "N * N = " << n * n << '\n'
-        << "num cmp = " << COUNT_TT_INTERSEC << '\n';
+    std::cout 
+        << "\nN*N\n" 
+        << "N        = " << n << '\n'
+        << "N * N    = " << n * n << '\n'
+        << "num cmp  = " << COUNT_TT_INTERSEC << '\n';
+
+#ifdef DEBUGG
+
+    for (const auto& r : result_pair)
+    {
+        std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
+    }
+
+#else
 
     for (const auto& id : res_id)
     {
         std::cout << id << ' ';
     }
-    //for (const auto& r : result_pair)
-    //{
-    //    std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
-    //}
+
+#endif //DEBUGG
+
     std::cout << std::endl;
 }
 
@@ -144,7 +156,7 @@ void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data)
 
     COUNT_TT_INTERSEC = 0u;
 
-    size_t n = data.size();
+    const size_t n = data.size();
 
     if (!data.empty())
     {
@@ -178,20 +190,24 @@ void intersectionOctree(std::vector< std::pair< la::Triangle, bool > > data)
             id_res.insert(p.second.id);
         }
 
-        std::cout << "\nOctree\nN = " << n << '\n'
-            << "N * N = " << n * n << '\n'
-            << "num pair: " << res.size() << '\n'
-            << "num cmp: " << COUNT_TT_INTERSEC << '\n'
-            << "size: " << tree.size() << '\n';
+        std::cout << '\n';
+        std::cout << tree.dumpStr() << std::endl;
+        std::cout << "num cmp       = " << COUNT_TT_INTERSEC << std::endl;
 
+#ifdef DEBUGG
+        for (const auto& r : res)
+        {
+            std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
+        }
+#else
         for (const int& k : id_res)
         {
             std::cout << k << ' ';
         }
-        //for (const auto& r : res)
-        //{
-        //    std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
-        //}
+#endif // DEBUGG
+
+        COUNT_TT_INTERSEC = 0u;
+
         std::cout << std::endl;
     }
 

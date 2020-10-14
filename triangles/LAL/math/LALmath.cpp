@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////
 namespace la
 {
-    Vector3f normalization(const Vector3f& _that)
+    Vector3f normalization(const Vector3f& _that) noexcept
     {
         if (!_that.isZero())
         {
@@ -20,17 +20,17 @@ namespace la
         }
     }
 
-    double modul(const Vector3f& _v)
+    double modul(const Vector3f& _v) noexcept
     {
         return std::sqrt(_v.x * _v.x + _v.y * _v.y + _v.z * _v.z);
     }
 
-    bool codirected(const Vector3f& _lhs, const Vector3f& _rhs)
+    bool codirected(const Vector3f& _lhs, const Vector3f& _rhs) noexcept
     {
-        return collinear(_lhs, _rhs) && scalarProduct(_lhs, _rhs) >= 0.f;
+        return collinear(_lhs, _rhs) && dot(_lhs, _rhs) >= 0.f;
     }
 
-    Vector3f crossProduct(const Vector3f& _lhs, const Vector3f& _rhs)
+    Vector3f product(const Vector3f& _lhs, const Vector3f& _rhs) noexcept
     {
         auto res = Vector3f(_lhs.y * _rhs.z - _lhs.z * _rhs.y,
             _lhs.z * _rhs.x - _lhs.x * _rhs.z,
@@ -39,37 +39,14 @@ namespace la
         return res;
     }
 
-
-    double scalarProduct(const Vector3f& _lhs, const Vector3f& _rhs)
+    double dot(const Vector3f& _lhs, const Vector3f& _rhs) noexcept
     {
         return _lhs.x * _rhs.x + _lhs.y * _rhs.y + _lhs.z * _rhs.z;
     }
 
 
-    Vector3f operator -  (const Vector3f& _lhs, const Vector3f& _rhs) 
-    { 
-        return Vector3f(_lhs.x - _rhs.x, _lhs.y - _rhs.y, _lhs.z - _rhs.z); 
-    }
-    Vector3f operator +  (const Vector3f& _lhs, const Vector3f& _rhs) 
-    { 
-        return Vector3f(_lhs) += _rhs; 
-    }
-    Vector3f operator *  (const Vector3f& _lhs, const Vector3f& _rhs) 
-    { 
-        return crossProduct(_lhs, _rhs); 
-    }
-    Vector3f operator *  (const Vector3f& _lhs, double _n) 
-    { 
-        return { _lhs.x * _n, _lhs.y * _n, _lhs.z * _n }; 
-    }
-    double        operator ^  (const Vector3f& _lhs, const Vector3f& _rhs) 
-    { 
-        return scalarProduct(_lhs, _rhs); 
-    }
-
-
 //2D
-    Vector2f normalization(const Vector2f& _that)
+    Vector2f normalization(const Vector2f& _that) noexcept
     {
         if (!_that.isZero())
         {
@@ -82,44 +59,21 @@ namespace la
         }
     }
 
-    double modul(const Vector2f& _v) 
+    double modul(const Vector2f& _v) noexcept
     { 
         return std::sqrt(_v.x * _v.x + _v.y * _v.y); 
     }
 
 
-    Vector3f crossProduct(const Vector2f& _lhs, const Vector2f& _rhs)
+    Vector3f product(const Vector2f& _lhs, const Vector2f& _rhs) noexcept
     {
-        return crossProduct({ _lhs.x, _lhs.y, 0.f }, { _rhs.x, _rhs.y, 0.f });
+        return product({ _lhs.x, _lhs.y, 0.f }, { _rhs.x, _rhs.y, 0.f });
     }
 
-    double scalarProduct(const Vector2f& _lhs, const Vector2f& _rhs)
+    double dot(const Vector2f& _lhs, const Vector2f& _rhs) noexcept
     {
         return (_lhs.x * _rhs.x
             + _lhs.y * _rhs.y);
-    }
-
-
-    Vector2f operator -  (const Vector2f& _lhs, const Vector2f& _rhs) 
-    { 
-        return Vector2f(_lhs.x - _rhs.x, _lhs.y - _rhs.y);
-    }
-    Vector2f operator +  (const Vector2f& _lhs, const Vector2f& _rhs) 
-    { 
-        Vector2f tmp(_lhs);
-        return tmp += _rhs;
-    }
-    double        operator ^  (const Vector2f& _lhs, const Vector2f& _rhs) 
-    { 
-        return scalarProduct(_lhs, _rhs);
-    }
-    Vector3f operator *  (const Vector2f& _lhs, const Vector2f& _rhs)
-    { 
-        return crossProduct(_lhs, _rhs);
-    }
-    Vector2f operator *  (const Vector2f& _lhs, double _n) 
-    { 
-        return { _lhs.x * _n, _lhs.y * _n };
     }
 
 }//namespace la (Vector & Vector)
@@ -138,7 +92,7 @@ namespace la
     {
         const Vector3f tmp_lv = normalization(_line.getV());
 
-        const double s = scalarProduct(tmp_lv, _point - _line.getP());
+        const double s = dot(tmp_lv, _point - _line.getP());
 
         return _line.getP() + tmp_lv * s;
     }
@@ -154,7 +108,7 @@ namespace la
     {
         const Vector2f tmp_lv = normalization(_line.getV());
 
-        const double s = scalarProduct(tmp_lv, _point - _line.getP());
+        const double s = dot(tmp_lv, _point - _line.getP());
 
         return _line.getP() + tmp_lv * s;
     }
@@ -177,7 +131,7 @@ namespace la
 namespace la
 {
 //3D
-    std::pair<Vector3f, Intersec::quantity> findIntersection(const Line3& _lhs, const Line3& _rhs)
+    std::pair<Vector3f, Intersec::quantity> findIntersec(const Line3& _lhs, const Line3& _rhs)
     {
         //Q1 and Q2 are points -> dot(Q2 - Q1, V1) = 0 & dot(Q2 - Q1, V2) = 0
         //Q1 = P1 + S1 * V1
@@ -192,11 +146,11 @@ namespace la
         //S2 * b - S2 * d = f
 
         const Vector3f pp = _rhs.getP() - _lhs.getP();
-        const double a = scalarProduct(_lhs.getV(), _lhs.getV());
-        const double b = scalarProduct(_lhs.getV(), _rhs.getV());
-        const double c = scalarProduct(pp, _lhs.getV());
-        const double d = scalarProduct(_rhs.getV(), _rhs.getV());
-        const double f = scalarProduct(pp, _rhs.getV());
+        const double a = dot(_lhs.getV(), _lhs.getV());
+        const double b = dot(_lhs.getV(), _rhs.getV());
+        const double c = dot(pp, _lhs.getV());
+        const double d = dot(_rhs.getV(), _rhs.getV());
+        const double f = dot(pp, _rhs.getV());
         const double det = -a * d + b * b;
 
         std::pair<Vector3f, Intersec::quantity> res(0.f, Intersec::quantity::Nop);
@@ -246,11 +200,11 @@ namespace la
         //S2 * b - S2 * d = f
 
         const Vector3f pp = _rhs.getP() - _lhs.getP();
-        const double a = scalarProduct(_lhs.getV(), _lhs.getV());
-        const double b = scalarProduct(_lhs.getV(), _rhs.getV());
-        const double c = scalarProduct(pp, _lhs.getV());
-        const double d = scalarProduct(_rhs.getV(), _rhs.getV());
-        const double f = scalarProduct(pp, _rhs.getV());
+        const double a = dot(_lhs.getV(), _lhs.getV());
+        const double b = dot(_lhs.getV(), _rhs.getV());
+        const double c = dot(pp, _lhs.getV());
+        const double d = dot(_rhs.getV(), _rhs.getV());
+        const double f = dot(pp, _rhs.getV());
         const double det = -a * d + b * b;
 
         double res = 0.f;
@@ -265,7 +219,6 @@ namespace la
             }
             else
             {
-                const double S2 = 0.f;
                 const double S1 = c / a;
 
                 res = (_lhs.getP() + _lhs.getV() * S1 - _rhs.getP()).modul();
@@ -289,17 +242,17 @@ namespace la
     }
 
 //2D
-    std::pair<Vector2f, Intersec::quantity> findIntersection(const Line2& _lhs, const Line2& _rhs)
+    std::pair<Vector2f, Intersec::quantity> findIntersec(const Line2& _lhs, const Line2& _rhs)
     {
-        if (!_lhs.intersection(_rhs)) {
+        if (!_lhs.intersec(_rhs)) {
             return { {}, Intersec::quantity::Nop };
         }
 
         std::pair<Vector2f, Intersec::quantity> res({}, Intersec::quantity::Nop);
 
         if (!_lhs.getV().collinear(_rhs.getV())) {
-            const double t = crossProduct(_rhs.getP() - _lhs.getP(), _rhs.getV()).z
-                / crossProduct(_lhs.getV(), _rhs.getV()).z;
+            const double t = product(_rhs.getP() - _lhs.getP(), _rhs.getV()).z
+                / product(_lhs.getV(), _rhs.getV()).z;
             res.first = _lhs.getP() + t * _lhs.getV();
             res.second = Intersec::quantity::One;
         }
@@ -324,9 +277,9 @@ namespace la
 {
 //3D
     std::pair<LineSegment3, Intersec::quantity>
-        findIntersection(const LineSegment3& _lhs, const LineSegment3& _rhs)
+        findIntersec(const LineSegment3& _lhs, const LineSegment3& _rhs)
     {
-        const std::pair<Vector3f, Intersec::quantity> intersec_line = findIntersection(_lhs.toLine(), _rhs.toLine());
+        const std::pair<Vector3f, Intersec::quantity> intersec_line = findIntersec(_lhs.toLine(), _rhs.toLine());
 
         std::pair<LineSegment3, Intersec::quantity> res({}, Intersec::quantity::Nop);
         if (intersec_line.second == Intersec::quantity::Nop) 
@@ -346,13 +299,13 @@ namespace la
             double s0 = 0;
             double s1 = 0;
             if (_lhs.getV().modul() > EPSILON) {
-                s0 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP())
+                s0 = dot(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP())
                     / _lhs.getV().modul();
-                s1 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP())
+                s1 = dot(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP())
                     / _lhs.getV().modul();
             }
 
-            const auto inter_res = findIntersection({ 0.f, 1.f }, { s0, s1 });
+            const auto inter_res = findIntersec({ 0.f, 1.f }, { s0, s1 });
             if (inter_res.second != Intersec::quantity::Nop)
             {
                 res.second = inter_res.second;
@@ -367,9 +320,9 @@ namespace la
 
 //2D
     std::pair<LineSegment2, Intersec::quantity>
-        findIntersection(const LineSegment2& _lhs, const LineSegment2& _rhs)
+        findIntersec(const LineSegment2& _lhs, const LineSegment2& _rhs)
     {
-        const std::pair<Vector2f, Intersec::quantity> intersec_line = findIntersection(_lhs.toLine(), _rhs.toLine());
+        const std::pair<Vector2f, Intersec::quantity> intersec_line = findIntersec(_lhs.toLine(), _rhs.toLine());
 
         std::pair<LineSegment2, Intersec::quantity> res({}, Intersec::quantity::Nop);
         if (intersec_line.second == Intersec::quantity::Nop) {
@@ -385,10 +338,10 @@ namespace la
         }
         else if (intersec_line.second == Intersec::quantity::Same)
         {
-            const double s0 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP()) / _lhs.getV().modul();
-            const double s1 = scalarProduct(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP()) / _lhs.getV().modul();
+            const double s0 = dot(normalization(_lhs.getV()), _rhs.getP() - _lhs.getP()) / _lhs.getV().modul();
+            const double s1 = dot(normalization(_lhs.getV()), _rhs.getP() + _rhs.getV() - _lhs.getP()) / _lhs.getV().modul();
 
-            const auto inter_res = findIntersection({ 0.f, 1.f }, { s0, s1 });
+            const auto inter_res = findIntersec({ 0.f, 1.f }, { s0, s1 });
             if (inter_res.second != Intersec::quantity::Nop)
             {
                 res.second = inter_res.second;
@@ -401,11 +354,11 @@ namespace la
 
 //1D
     std::pair<LineSegment1, Intersec::quantity>
-        findIntersection(const LineSegment1& _lhs, const LineSegment1& _rhs)
+        findIntersec(const LineSegment1& _lhs, const LineSegment1& _rhs)
     {
         auto res = std::make_pair(LineSegment1(), Intersec::quantity::Nop);
 
-        if (!_lhs.intersection(_rhs)) {
+        if (!_lhs.intersec(_rhs)) {
             return res;
         }
 
@@ -416,15 +369,15 @@ namespace la
         // ...
         //      a2*-----------*b2
         //  a1*--------*b1
-        if (_lhs.getB() > _rhs.getA())
+        if (_lhs.getB() + EPSILON > _rhs.getA())
         {
-            if (_lhs.getA() < _rhs.getB()) {
-                if (_lhs.getA() < _rhs.getA())
+            if (_lhs.getA() < _rhs.getB() + EPSILON) {
+                if (_lhs.getA() < _rhs.getA() + EPSILON)
                     res_a = _rhs.getA();
                 else
                     res_a = _lhs.getA();
 
-                if (_lhs.getB() > _rhs.getB())
+                if (_lhs.getB() + EPSILON > _rhs.getB())
                     res_b = _rhs.getB();
                 else
                     res_b = _lhs.getB();
@@ -468,11 +421,11 @@ namespace la
 {
     //3D
     std::pair<Vector3f, Intersec::quantity>
-        findIntersection(const LineSegment3& _ls, const Line3& _line)
+        findIntersec(const LineSegment3& _ls, const Line3& _line)
     {
         auto result = std::make_pair(Vector3f(0.f), Intersec::quantity::Nop);
 
-        const auto tmp_res = findIntersection(_ls.toLine(), _line);
+        const auto tmp_res = findIntersec(_ls.toLine(), _line);
 
         if (tmp_res.second == Intersec::quantity::One)
         {
@@ -532,11 +485,11 @@ namespace la
             //det2 = q * s2 - s1 * w
             //...
 
-            const double q = scalarProduct(_lhs.getN(), _lhs.getN());
-            const double w = scalarProduct(_lhs.getN(), _rhs.getN());
-            const double l = scalarProduct(_rhs.getN(), _rhs.getN());
-            const double s1 = scalarProduct(_lhs.getP(), _lhs.getN());
-            const double s2 = scalarProduct(_rhs.getP(), _rhs.getN());
+            const double q = dot(_lhs.getN(), _lhs.getN());
+            const double w = dot(_lhs.getN(), _rhs.getN());
+            const double l = dot(_rhs.getN(), _rhs.getN());
+            const double s1 = dot(_lhs.getP(), _lhs.getN());
+            const double s2 = dot(_rhs.getP(), _rhs.getN());
 
             const double det = q * l - w * w;
             if (std::abs(det) < EPSILON)
@@ -553,7 +506,7 @@ namespace la
                 const double b = det2 / det;
 
                 const Vector3f e = _lhs.getN() * a + _rhs.getN() * b;
-                const Vector3f v = crossProduct(normalization(_lhs.getN()), normalization(_rhs.getN()));
+                const Vector3f v = product(normalization(_lhs.getN()), normalization(_rhs.getN()));
                 res.first.reup(e, v, Line3::Type::PointAndVector);
                 res.second = Intersec::quantity::Interval;
             }
@@ -562,12 +515,12 @@ namespace la
         return res;
     }
 
-    bool equal(const Plane& _lhs, const Plane& _rhs)
+    bool equal(const Plane& _lhs, const Plane& _rhs) noexcept
     {
         bool res = true;
 
-        res = res && _lhs.getN() * _rhs.getN() == Vector3f(0.f);
-        res = res && std::abs((_lhs.getP() - _rhs.getP()) ^ _lhs.getN()) < EPSILON;
+        res = res && product(_lhs.getN(), _rhs.getN()) == Vector3f(0.f);
+        res = res && std::abs(dot((_lhs.getP() - _rhs.getP()), _lhs.getN())) < EPSILON;
 
         return res;
     }
@@ -589,9 +542,9 @@ namespace la
             //
             // s * dot(_lhs.getN(), _rhs.getN()) =  dot(_rhs.getP(), _rhs.getN()) 
             //                                      - dot(_lhs.getP(), _rhs.getN())
-            const double a = scalarProduct(_lhs.getN(), _rhs.getN());
-            const double b = scalarProduct(_rhs.getP(), _rhs.getN());
-            const double c = scalarProduct(_lhs.getP(), _rhs.getN());
+            const double a = dot(_lhs.getN(), _rhs.getN());
+            const double b = dot(_rhs.getP(), _rhs.getN());
+            const double c = dot(_lhs.getP(), _rhs.getN());
 
             res = (b - c) / a;
         }
@@ -612,15 +565,12 @@ namespace la
 //3D
     bool contein(const Plane& _pl, const Vector3f& _point)
     {
-        return std::abs(scalarProduct(_pl.getP() - _point, _pl.getN())) < EPSILON;
+        return std::abs(dot(_pl.getP() - _point, _pl.getN())) < EPSILON;
     }
 
     Vector3f projection(const Vector3f& _point, const Plane& _pl)
     {
-        const Vector3f res = _point;
-
         const double s = distanceWithSign(_pl, _point);
-
 
         return _point - _pl.getN() * s;
     }
@@ -655,7 +605,7 @@ namespace la
         }
         else
         {
-            res = std::abs(scalarProduct(_pl.getN(), _ln.getV())) > EPSILON;
+            res = std::abs(dot(_pl.getN(), _ln.getV())) > EPSILON;
         }
 
         return res;
@@ -686,7 +636,7 @@ namespace la
             //<=> 
             //s = (a - b) / c;
 
-            const double c = _pl.getN() ^ _ln.getV();
+            const double c = dot(_pl.getN(), _ln.getV());
 
             if (std::abs(c) < EPSILON)
             {
@@ -696,8 +646,8 @@ namespace la
             {
                 res.second = Intersec::quantity::One;
 
-                const double a = _pl.getN() ^ _pl.getP();
-                const double b = _pl.getN() ^ _ln.getP();
+                const double a = dot(_pl.getN(), _pl.getP());
+                const double b = dot(_pl.getN(), _ln.getP());
 
                 const double s = (a - b) / c;
                 res.first = _ln.getP() + s * _ln.getV();
@@ -786,7 +736,8 @@ namespace la
                         }
                     }
                     else {
-                        mood = findIntersection(res1.first, res2.first).second;
+                        const auto tm = findIntersec(res1.first, res2.first);
+                        mood = tm.second;
                     }
                     if (mood != Intersec::quantity::Nop) {
                         result = true;
@@ -909,22 +860,22 @@ namespace la
 
                 if (a_dist * b_dist > 0.f)
                 {
-                    const auto res_ca = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getA()));
-                    const auto res_cb = findIntersection(_line, LineSegment3(_tr.getC(), _tr.getB()));
+                    const auto res_ca = findIntersec(_line, LineSegment3(_tr.getC(), _tr.getA()));
+                    const auto res_cb = findIntersec(_line, LineSegment3(_tr.getC(), _tr.getB()));
 
                     result.first.reup(res_ca.first, res_cb.first);
                 }
                 else if (b_dist * c_dist > 0.f)
                 {
-                    const auto res_ab = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getB()));
-                    const auto res_ac = findIntersection(_line, LineSegment3(_tr.getA(), _tr.getC()));
+                    const auto res_ab = findIntersec(_line, LineSegment3(_tr.getA(), _tr.getB()));
+                    const auto res_ac = findIntersec(_line, LineSegment3(_tr.getA(), _tr.getC()));
 
                     result.first.reup(res_ab.first, res_ac.first);
                 }
                 else if (c_dist * a_dist > 0.f)
                 {
-                    const auto res_bc = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getC()));
-                    const auto res_ba = findIntersection(_line, LineSegment3(_tr.getB(), _tr.getA()));
+                    const auto res_bc = findIntersec(_line, LineSegment3(_tr.getB(), _tr.getC()));
+                    const auto res_ba = findIntersec(_line, LineSegment3(_tr.getB(), _tr.getA()));
 
                     result.first.reup(res_ba.first, res_bc.first);
                 }

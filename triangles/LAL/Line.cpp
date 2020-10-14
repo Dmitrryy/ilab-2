@@ -1,12 +1,13 @@
+#include <fstream>
+#include <sstream>
 
 #include "include/Line.h"
 
 #include "include/LALmath.h"
 
-
 namespace la {
 
-    Line2::Line2(la::Vector2f _p, la::Vector2f _v, Type _t /*= Type::TwoPoints*/)
+    Line2::Line2(la::Vector2f _p, la::Vector2f _v, Type _t /*= Type::TwoPoints*/) noexcept
         : m_p(_p)
         , m_v(_v)
     {
@@ -15,7 +16,12 @@ namespace la {
         }
     }
 
-    bool Line2::intersection(const Line2& _rhs) const
+    bool Line2::valid() const noexcept
+    {
+        return m_p.valid() && m_v.valid() && !m_v.isZero();
+    }
+
+    bool Line2::intersec(const Line2& _rhs) const noexcept
     {
         bool res = true;
 
@@ -31,8 +37,16 @@ namespace la {
         return res;
     }
 
+    std::string Line2::dump() const
+    {
+        std::ostringstream out;
+        out << '[' << m_p << ", " << m_p + m_v << ']';
 
-    Line3::Line3(la::Vector3f _p, la::Vector3f _v, Type _t /*= Type::TwoPoints*/)
+        return out.str();
+    }
+
+
+    Line3::Line3(la::Vector3f _p, la::Vector3f _v, Type _t /*= Type::TwoPoints*/) noexcept
         : m_p(_p)
         , m_v(_v)
     {
@@ -41,15 +55,28 @@ namespace la {
         }
     }
 
-    bool Line3::intersection(const Line3& _rhs) const
+    bool Line3::valid() const noexcept
     {
-        auto res_find = findIntersection(*this, _rhs);
+        return m_p.valid() && m_v.valid() && !m_v.isZero();
+    }
+
+    bool Line3::intersec(const Line3& _rhs) const
+    {
+        const auto res_find = findIntersec(*this, _rhs);
 
         bool res = false;
         res = res || res_find.second == Intersec::quantity::One;
         res = res || res_find.second == Intersec::quantity::Same;
 
         return res;
+    }
+
+    std::string Line3::dump() const
+    {
+        std::ostringstream out;
+        out << '[' << m_p << ", " << m_p + m_v << ']';
+
+        return out.str();
     }
 
 }//namespace la
