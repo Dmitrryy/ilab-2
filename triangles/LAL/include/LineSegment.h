@@ -28,6 +28,7 @@ namespace la {
         double length() const noexcept { return m_b - m_a; }
 
         bool   valid () const noexcept;
+        bool isPoint() const noexcept { return m_a == m_b; }
 
         double getA  ()   const noexcept { return m_a; }
         double getB  ()   const noexcept { return m_b; }
@@ -65,6 +66,9 @@ namespace la {
 
         LineSegment2 (la::Vector2f _p, la::Vector2f _v, Type _t = Type::TwoPoints) noexcept;
 
+        bool valid() const;
+        bool isPoint() const noexcept { return m_v.isZero(); }
+
         double length() const noexcept { return m_v.modul(); }
 
         bool equal   (const LineSegment2& _rhs) const noexcept { return m_p == _rhs.m_p && m_v == _rhs.m_v; }
@@ -78,6 +82,12 @@ namespace la {
         bool operator == (const LineSegment2& _rhs) const noexcept { return equal(_rhs); }
 
         bool contein (const Vector2f& _rhs) const noexcept;
+
+        static LineSegment2 make_invalid() 
+        { 
+            return { Vector2f::make_invalid(), Vector2f::make_invalid() }; 
+        }
+
 
         std::string dump() const;
 
@@ -103,6 +113,9 @@ namespace la {
 
         LineSegment3(la::Vector3f _p, la::Vector3f _v, Type _t = Type::TwoPoints) noexcept;
 
+        bool valid() const noexcept;
+        bool isPoint() const noexcept { return m_v.isZero(); }
+
         double length() const noexcept { return m_v.modul(); }
 
         bool   equal (const LineSegment3& _rhs) const noexcept { return m_p == _rhs.m_p && m_v == _rhs.m_v; }
@@ -116,6 +129,11 @@ namespace la {
         bool operator == (const LineSegment3& _rhs) const noexcept { return equal(_rhs); }
 
         bool contein (const Vector3f& _rhs) const noexcept;
+
+        static LineSegment3 make_invalid()
+        {
+            return { Vector3f::make_invalid(), Vector3f::make_invalid() };
+        }
 
         std::string dump() const;
 

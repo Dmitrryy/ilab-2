@@ -20,6 +20,13 @@ namespace la {
         return result;
     }
 
+    bool Vector3f::valid() const noexcept
+    {
+        return (std::isnormal(x) || x == 0.0)
+            && (std::isnormal(y) || y == 0.0)
+            && (std::isnormal(z) || z == 0.0);
+    }
+
     std::string Vector2f::dump() const
     {
         std::ostringstream out;
@@ -64,6 +71,13 @@ namespace la {
 
         return *this;
     }
+
+    bool Vector2f::valid() const noexcept 
+    { 
+        return (std::isnormal(x) || x == 0.0) 
+            && (std::isnormal(y) || y == 0.0); 
+    }
+
 
     bool Vector2f::collinear(const la::Vector2f& _rhs) const noexcept
     {

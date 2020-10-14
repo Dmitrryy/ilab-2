@@ -9,15 +9,13 @@ namespace la
 {
     Vector3f normalization(const Vector3f& _that) noexcept
     {
-        if (!_that.isZero())
+        if (_that.valid() && !_that.isZero())
         {
             const double m = _that.modul();
             return Vector3f(_that.x / m, _that.y / m, _that.z / m);
         }
-        else
-        {
-            return Vector3f(0.f);
-        }
+
+        return Vector3f(NAN);
     }
 
     double modul(const Vector3f& _v) noexcept
@@ -32,7 +30,7 @@ namespace la
 
     Vector3f product(const Vector3f& _lhs, const Vector3f& _rhs) noexcept
     {
-        auto res = Vector3f(_lhs.y * _rhs.z - _lhs.z * _rhs.y,
+        Vector3f res(_lhs.y * _rhs.z - _lhs.z * _rhs.y,
             _lhs.z * _rhs.x - _lhs.x * _rhs.z,
             _lhs.x * _rhs.y - _lhs.y * _rhs.x);
 
@@ -48,14 +46,14 @@ namespace la
 //2D
     Vector2f normalization(const Vector2f& _that) noexcept
     {
-        if (!_that.isZero())
+        if (_that.valid() && !_that.isZero())
         {
             const double m = _that.modul();
             return Vector2f(_that.x / m, _that.y / m);
         }
         else
         {
-            return Vector2f(0.f);
+            return Vector2f(NAN);
         }
     }
 
@@ -88,35 +86,53 @@ namespace la
 namespace la
 {
 //3D
-    Vector3f projection(const Vector3f& _point, const Line3& _line)
+    Vector3f projection(const Vector3f& _point, const Line3& _line) noexcept
     {
-        const Vector3f tmp_lv = normalization(_line.getV());
+        if (_line.valid() && _point.valid())
+        {
+            const Vector3f tmp_lv = normalization(_line.getV());
+            const double s = dot(tmp_lv, _point - _line.getP());
 
-        const double s = dot(tmp_lv, _point - _line.getP());
-
-        return _line.getP() + tmp_lv * s;
+            return _line.getP() + tmp_lv * s;
+        }
+        return Vector3f(NAN);
     }
 
 
-    double distance(const Vector3f& _point, const Line3& _line)
+    double distance(const Vector3f& _point, const Line3& _line) noexcept
     {
-        return (_point - projection(_point, _line)).modul();
+        double res = NAN;
+
+        if (_line.valid() && _point.valid())
+        {
+            res = (_point - projection(_point, _line)).modul();
+        }
+        return res;
     }
 
 //2D
-    Vector2f projection(const Vector2f& _point, const Line2& _line)
+    Vector2f projection(const Vector2f& _point, const Line2& _line) noexcept
     {
-        const Vector2f tmp_lv = normalization(_line.getV());
+        if (_point.valid() && _line.valid())
+        {
+            const Vector2f tmp_lv = normalization(_line.getV());
+            const double s = dot(tmp_lv, _point - _line.getP());
 
-        const double s = dot(tmp_lv, _point - _line.getP());
-
-        return _line.getP() + tmp_lv * s;
+            return _line.getP() + tmp_lv * s;
+        }
+        return Vector2f(NAN);
     }
 
 
-    double distance(const Vector2f& _point, const Line2& _line)
+    double distance(const Vector2f& _point, const Line2& _line) noexcept
     {
-        return (_point - projection(_point, _line)).modul();
+        double res = NAN;
+
+        if (_point.valid() && _line.valid())
+        {
+            res = (_point - projection(_point, _line)).modul();
+        }
+        return res;
     }
 
 }//namespace la (Vector & Line)
@@ -131,8 +147,12 @@ namespace la
 namespace la
 {
 //3D
-    std::pair<Vector3f, Intersec::quantity> findIntersec(const Line3& _lhs, const Line3& _rhs)
+    std::pair<Vector3f, Intersec::quantity> findIntersec(const Line3& _lhs, const Line3& _rhs) noexcept
     {
+        if (!_lhs.valid() || !_rhs.valid())
+        {
+            return { Vector3f(NAN), Intersec::quantity::Error };
+        }
         //Q1 and Q2 are points -> dot(Q2 - Q1, V1) = 0 & dot(Q2 - Q1, V2) = 0
         //Q1 = P1 + S1 * V1
         //Q2 = P2 + S2 * V2
@@ -185,8 +205,12 @@ namespace la
         return res;
     }
 
-    double distance(const Line3& _lhs, const Line3& _rhs)
+    double distance(const Line3& _lhs, const Line3& _rhs) noexcept
     {
+        if (!_lhs.valid() || !_rhs.valid())
+        {
+            return NAN;
+        }
         //Q1 and Q2 are points -> dot(Q2 - Q1, V1) = 0 & dot(Q2 - Q1, V2) = 0
         //Q1 = P1 + S1 * V1
         //Q2 = P2 + S2 * V2
@@ -242,15 +266,22 @@ namespace la
     }
 
 //2D
-    std::pair<Vector2f, Intersec::quantity> findIntersec(const Line2& _lhs, const Line2& _rhs)
+    std::pair<Vector2f, Intersec::quantity> findIntersec(const Line2& _lhs, const Line2& _rhs) noexcept
     {
+        if (!_lhs.valid() || !_rhs.valid())
+        {
+            return { Vector2f(NAN), Intersec::quantity::Error };
+        }
+
+
         if (!_lhs.intersec(_rhs)) {
             return { {}, Intersec::quantity::Nop };
         }
 
         std::pair<Vector2f, Intersec::quantity> res({}, Intersec::quantity::Nop);
 
-        if (!_lhs.getV().collinear(_rhs.getV())) {
+        if (!_lhs.getV().collinear(_rhs.getV())) 
+        {
             const double t = product(_rhs.getP() - _lhs.getP(), _rhs.getV()).z
                 / product(_lhs.getV(), _rhs.getV()).z;
             res.first = _lhs.getP() + t * _lhs.getV();
@@ -279,9 +310,46 @@ namespace la
     std::pair<LineSegment3, Intersec::quantity>
         findIntersec(const LineSegment3& _lhs, const LineSegment3& _rhs)
     {
-        const std::pair<Vector3f, Intersec::quantity> intersec_line = findIntersec(_lhs.toLine(), _rhs.toLine());
-
+        if (!_lhs.valid() || !_rhs.valid()) {
+            return { LineSegment3::make_invalid(), Intersec::quantity::Error };
+        }
+        
         std::pair<LineSegment3, Intersec::quantity> res({}, Intersec::quantity::Nop);
+
+        if (_lhs.isPoint() && _rhs.isPoint())
+        {
+            if (_lhs.getP() == _rhs.getP()) {
+                return { LineSegment3(_lhs.getP(), _lhs.getP()), Intersec::quantity::One };
+            }
+            else {
+                return res;
+            }
+        }
+        else if (_lhs.isPoint()) 
+        {
+            if (_rhs.contein(_lhs.getP())) {
+                return { LineSegment3(_lhs.getP(), _lhs.getP()), Intersec::quantity::One };
+            }
+            else
+            {
+                return res;
+            }
+        }
+        else if (_rhs.isPoint())
+        {
+            if (_lhs.contein(_rhs.getP())) {
+                return { LineSegment3(_rhs.getP(), _rhs.getP()), Intersec::quantity::One };
+            }
+            else
+            {
+                return res;
+            }
+        }
+
+        const std::pair<Vector3f, Intersec::quantity> intersec_line 
+            = findIntersec(_lhs.toLine(), _rhs.toLine());
+        assert(intersec_line.second != Intersec::quantity::Error);
+
         if (intersec_line.second == Intersec::quantity::Nop) 
         {
             /*nop*/
@@ -322,9 +390,46 @@ namespace la
     std::pair<LineSegment2, Intersec::quantity>
         findIntersec(const LineSegment2& _lhs, const LineSegment2& _rhs)
     {
-        const std::pair<Vector2f, Intersec::quantity> intersec_line = findIntersec(_lhs.toLine(), _rhs.toLine());
+        if (!_lhs.valid() || !_rhs.valid()) {
+            return { LineSegment2::make_invalid(), Intersec::quantity::Error };
+        }
 
         std::pair<LineSegment2, Intersec::quantity> res({}, Intersec::quantity::Nop);
+
+        if (_lhs.isPoint() && _rhs.isPoint())
+        {
+            if (_lhs.getP() == _rhs.getP()) {
+                return { LineSegment2(_lhs.getP(), _lhs.getP()), Intersec::quantity::One };
+            }
+            else {
+                return res;
+            }
+        }
+        else if (_lhs.isPoint())
+        {
+            if (_rhs.contein(_lhs.getP())) {
+                return { LineSegment2(_lhs.getP(), _lhs.getP()), Intersec::quantity::One };
+            }
+            else
+            {
+                return res;
+            }
+        }
+        else if (_rhs.isPoint())
+        {
+            if (_lhs.contein(_rhs.getP())) {
+                return { LineSegment2(_rhs.getP(), _rhs.getP()), Intersec::quantity::One };
+            }
+            else
+            {
+                return res;
+            }
+        }
+
+        const std::pair<Vector2f, Intersec::quantity> intersec_line 
+            = findIntersec(_lhs.toLine(), _rhs.toLine());
+        assert(intersec_line.second != Intersec::quantity::Error);
+
         if (intersec_line.second == Intersec::quantity::Nop) {
             /*nop*/
         }
@@ -456,12 +561,20 @@ namespace la
 {
     bool intersec(const Plane& _lhs, const Plane& _rhs)
     {
-        return intersec(_lhs, Line3(_rhs.getP(), _rhs.getA(), Line3::Type::PointAndVector))
-            || intersec(_lhs, Line3(_rhs.getP(), _rhs.getB(), Line3::Type::PointAndVector));
+        if (_rhs.valid()) {
+            return intersec(_lhs, Line3(_rhs.getP(), _rhs.getA(), Line3::Type::PointAndVector))
+                || intersec(_lhs, Line3(_rhs.getP(), _rhs.getB(), Line3::Type::PointAndVector));
+        }
+        return false;
     }
 
     std::pair<Line3, Intersec::quantity> findIntersec(const Plane& _lhs, const Plane& _rhs)
     {
+        if (!_lhs.valid() || !_rhs.valid())
+        {
+            return { {}, Intersec::quantity::Error };
+        }
+
         auto res = std::make_pair(Line3(), Intersec::quantity::Nop);
 
         if (intersec(_lhs, _rhs))
@@ -517,10 +630,13 @@ namespace la
 
     bool equal(const Plane& _lhs, const Plane& _rhs) noexcept
     {
-        bool res = true;
+        bool res = false;
 
-        res = res && product(_lhs.getN(), _rhs.getN()) == Vector3f(0.f);
-        res = res && std::abs(dot((_lhs.getP() - _rhs.getP()), _lhs.getN())) < EPSILON;
+        if (_lhs.valid() && _rhs.valid()) 
+        {
+            res = product(_lhs.getN(), _rhs.getN()) == Vector3f(0.f);
+            res = res && std::abs(dot((_lhs.getP() - _rhs.getP()), _lhs.getN())) < EPSILON;
+        }
 
         return res;
     }
@@ -532,6 +648,10 @@ namespace la
 
     double distanceWithSign(const Plane& _lhs, const Plane& _rhs)
     {
+        if (!_lhs.valid() || !_rhs.valid()) {
+            return NAN;
+        }
+
         double res = 0.f;
 
         if (!intersec(_lhs, _rhs))
@@ -563,9 +683,12 @@ namespace la
 namespace la
 {
 //3D
-    bool contein(const Plane& _pl, const Vector3f& _point)
+    bool contein(const Plane& _pl, const Vector3f& _point) noexcept
     {
-        return std::abs(dot(_pl.getP() - _point, _pl.getN())) < EPSILON;
+        if (_pl.valid()) {
+            return std::abs(dot(_pl.getP() - _point, _pl.getN())) < EPSILON;
+        }
+        return false;
     }
 
     Vector3f projection(const Vector3f& _point, const Plane& _pl)
@@ -599,13 +722,15 @@ namespace la
     {
         bool res = false;
 
-        if (contein(_pl, _ln))
-        {
-            res = true;
-        }
-        else
-        {
-            res = std::abs(dot(_pl.getN(), _ln.getV())) > EPSILON;
+        if (_pl.valid() && _ln.valid()) {
+            if (contein(_pl, _ln))
+            {
+                res = true;
+            }
+            else
+            {
+                res = std::abs(dot(_pl.getN(), _ln.getV())) > EPSILON;
+            }
         }
 
         return res;
@@ -622,6 +747,10 @@ namespace la
     std::pair<Vector3f, Intersec::quantity>
         findIntersec(const Plane& _pl, const Line3& _ln)
     {
+        if (!_pl.valid() || !_ln.valid()) {
+            return { Vector3f{NAN}, Intersec::quantity::Error };
+        }
+
         auto res = std::make_pair(Vector3f(0.f), Intersec::quantity::Nop);
 
         if (intersec(_pl, _ln)) {
@@ -659,6 +788,10 @@ namespace la
 
     double distanceWithSign(const Plane& _pl, const Line3 _ln)
     {
+        if (!_pl.valid() || !_ln.valid()) {
+            return NAN;
+        }
+
         double res = 0.f;
 
         if (!_ln.getV().collinear(_pl.getA()))
@@ -678,7 +811,7 @@ namespace la
         return std::abs(distanceWithSign(_pl, _ln));
     }
 
-    bool contein(const Plane& _pl, const Line3& _ln)
+    bool contein(const Plane& _pl, const Line3& _ln) noexcept
     {
         return contein(_pl, _ln.getP()) && contein(_pl, _ln.getP() + _ln.getV());
     }
@@ -712,33 +845,38 @@ namespace la
             const auto line_inters = findIntersec(_lhs.getPlane(), _rhs.getPlane());
             assert(line_inters.second != Intersec::quantity::Nop);
             assert(line_inters.second != Intersec::quantity::Same);
+            assert(line_inters.second != Intersec::quantity::Error);
 
             const auto res1 = findIntersec(_lhs, line_inters.first);
+            assert(res1.second != Intersec::quantity::Error);
+
             if (res1.second != Intersec::quantity::Nop)
             {
                 const auto res2 = findIntersec(_rhs, line_inters.first);
+                assert(res2.second != Intersec::quantity::Error);
+
                 if (res2.second != Intersec::quantity::Nop)
                 {
                     Intersec::quantity mood = Intersec::quantity::Nop;
-                    if (res1.second == Intersec::quantity::One && res2.second != Intersec::quantity::One) {
-                        if (res2.first.contein(res1.first.getP())) {
-                            mood = Intersec::quantity::One;
-                        }
-                    }
-                    else if (res1.second != Intersec::quantity::One && res2.second == Intersec::quantity::One) {
-                        if (res1.first.contein(res2.first.getP())) {
-                            mood = Intersec::quantity::One;
-                        }
-                    }
-                    else if (res1.second == Intersec::quantity::One && res2.second == Intersec::quantity::One) {
-                        if (res1.first.getP() == res2.first.getP()) {
-                            mood = Intersec::quantity::One;
-                        }
-                    }
-                    else {
+                    //if (res1.second == Intersec::quantity::One && res2.second != Intersec::quantity::One) {
+                    //    if (res2.first.contein(res1.first.getP())) {
+                    //        mood = Intersec::quantity::One;
+                    //    }
+                    //}
+                    //else if (res1.second != Intersec::quantity::One && res2.second == Intersec::quantity::One) {
+                    //    if (res1.first.contein(res2.first.getP())) {
+                    //        mood = Intersec::quantity::One;
+                    //    }
+                    //}
+                    //else if (res1.second == Intersec::quantity::One && res2.second == Intersec::quantity::One) {
+                    //    if (res1.first.getP() == res2.first.getP()) {
+                    //        mood = Intersec::quantity::One;
+                    //    }
+                    //}
+                    //else {
                         const auto tm = findIntersec(res1.first, res2.first);
                         mood = tm.second;
-                    }
+                    //}
                     if (mood != Intersec::quantity::Nop) {
                         result = true;
                     }
@@ -766,6 +904,10 @@ namespace la
     std::pair<LineSegment3, Intersec::quantity> findIntersec(const Triangle& _tr, const Line3& _line)
     {
         const auto line_plane = findIntersec(_line, _tr.getPlane());
+        if (line_plane.second == Intersec::quantity::Error) {
+            return { LineSegment3(line_plane.first, line_plane.first), Intersec::quantity::Error };
+        }
+
         auto result = std::make_pair(LineSegment3(), Intersec::quantity::Nop);
 
         if (line_plane.second == Intersec::quantity::One)

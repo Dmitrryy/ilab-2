@@ -36,7 +36,7 @@ namespace la {
 
         bool intersec (const Line2& _rhs) const noexcept;
 
-        bool contein  (const Vector2f& _rhs) const noexcept { return (m_p - _rhs).collinear(m_v); }
+        bool contein(const Vector2f& _rhs) const noexcept;
 
         std::string dump  () const;
         

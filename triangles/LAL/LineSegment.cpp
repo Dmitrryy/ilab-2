@@ -25,7 +25,8 @@ namespace la
     {
         return (std::isnormal(m_a) && std::isnormal(m_b)) 
             || (m_a == 0.0 && std::isnormal(m_b))
-            || (m_b == 0.0 && std::isnormal(m_a));
+            || (m_b == 0.0 && std::isnormal(m_a))
+            || (m_a == 0.0 && m_b == 0.0);
     }
 
     bool LineSegment1::equal(const LineSegment1& _rhs) const noexcept {
@@ -49,6 +50,11 @@ namespace la
         if (_t == Type::TwoPoints) {
             m_v = _v - _p;
         }
+    }
+
+    bool LineSegment2::valid() const
+    {
+        return m_p.valid() && m_v.valid();
     }
 
     bool LineSegment2::contein(const Vector2f& _rhs) const noexcept
@@ -81,6 +87,11 @@ namespace la
         if (_t == Type::TwoPoints) {
             m_v = _v - _p;
         }
+    }
+
+    bool LineSegment3::valid() const noexcept
+    {
+        return m_p.valid() && m_v.valid();
     }
 
     bool LineSegment3::contein(const Vector3f& _rhs) const noexcept

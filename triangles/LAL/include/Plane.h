@@ -44,6 +44,10 @@ namespace la
 
 		void reup (Vector3f _point, Vector3f _vec1, Vector3f _vec2, Type _t = Type::PointAndTwoVec) noexcept;
 		
+		static Plane make_invalid() { 
+			return Plane(Vector3f::make_invalid(), Vector3f::make_invalid(), Vector3f::make_invalid());
+		}
+
 		std::string dump() const;
 
 		friend std::ostream& operator << (std::ostream& _stream, const Plane& _target) {

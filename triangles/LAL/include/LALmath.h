@@ -54,17 +54,17 @@ namespace la
 namespace la
 {
 //3D
-    double        distance   (const Vector3f& _point, const Line3& _line);
-    Vector3f      projection (const Vector3f& _point, const Line3& _line);
+    double        distance   (const Vector3f& _point, const Line3& _line) noexcept;
+    Vector3f      projection (const Vector3f& _point, const Line3& _line) noexcept;
 
-    inline double distance   (const Line3& _line, const Vector3f& _point) { return distance(_point, _line); }
+    inline double distance   (const Line3& _line, const Vector3f& _point) noexcept { return distance(_point, _line); }
 
 
 //2D
-    double        distance   (const Vector2f& _point, const Line2& _line);
-    Vector2f      projection (const Vector2f& _point, const Line2& _line);
+    double        distance   (const Vector2f& _point, const Line2& _line) noexcept;
+    Vector2f      projection (const Vector2f& _point, const Line2& _line) noexcept;
 
-    inline double distance   (const Line2& _line, const Vector2f& _point) { return distance(_point, _line); }
+    inline double distance   (const Line2& _line, const Vector2f& _point) noexcept { return distance(_point, _line); }
 
 }//namespace la (Vector & Line)
 
@@ -77,14 +77,14 @@ namespace la
 namespace la
 {
 //3D
-    double distance      (const Line3& _lhs, const Line3& _rhs);
+    double distance      (const Line3& _lhs, const Line3& _rhs) noexcept;
 
     std::pair<Vector3f, Intersec::quantity> 
-        findIntersec (const Line3& _lhs, const Line3& _rhs);
+        findIntersec (const Line3& _lhs, const Line3& _rhs) noexcept;
 
 //2D
     std::pair<Vector2f, Intersec::quantity> 
-        findIntersec (const Line2& _lhs, const Line2& _rhs);
+        findIntersec (const Line2& _lhs, const Line2& _rhs) noexcept;
 
 }//namespace la (Line& Line)
 
@@ -167,7 +167,7 @@ namespace la
 
     Vector3f projection (const Vector3f& _point, const Plane& _pl);
 
-    bool contein (const Plane& _pl, const Vector3f& _point);
+    bool contein (const Plane& _pl, const Vector3f& _point) noexcept;
 
 }//namespace la (Plane & Vector)
 
@@ -196,7 +196,7 @@ namespace la
     inline std::pair<Vector3f, Intersec::quantity> 
         findIntersec (const Line3& _ln, const Plane& _pl) { return findIntersec(_pl, _ln); }
 
-    bool contein (const Plane& _pl, const Line3& _ln);
+    bool contein (const Plane& _pl, const Line3& _ln) noexcept;
 
 }//namespace la (Plane & Line)
 

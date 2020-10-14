@@ -16,6 +16,15 @@ namespace la {
         }
     }
 
+    bool Line2::contein(const Vector2f& _rhs) const noexcept 
+    { 
+        if (valid()) {
+            return (m_p - _rhs).collinear(m_v);
+        }
+        return false;
+    }
+
+
     bool Line2::valid() const noexcept
     {
         return m_p.valid() && m_v.valid() && !m_v.isZero();
@@ -23,7 +32,7 @@ namespace la {
 
     bool Line2::intersec(const Line2& _rhs) const noexcept
     {
-        bool res = true;
+        bool res = valid() && _rhs.valid();
 
         //parallel or same
         if (m_v.collinear(_rhs.getV()))

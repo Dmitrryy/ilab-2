@@ -28,7 +28,7 @@ namespace la {
 
         double modul() const noexcept { return std::sqrt(x * x + y * y); }
 
-        bool   valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
+        bool   valid() const noexcept;
 
         bool      operator == (const la::Vector2f& _rhs) const noexcept { return equal(_rhs); }
         Vector2f& operator += (const la::Vector2f& _rhs) noexcept;
@@ -36,6 +36,8 @@ namespace la {
         bool collinear (const la::Vector2f& _rhs) const noexcept;
         bool equal     (const la::Vector2f& _rhs) const noexcept;
         bool isZero    () const noexcept { return equal(Vector2f(0.0)); }
+
+        static Vector2f make_invalid() { return Vector2f(NAN); }
 
         std::string dump() const;
 
@@ -86,7 +88,7 @@ namespace la {
 
         double modul() const noexcept { return std::sqrt(x * x + y * y + z * z); }
 
-        bool   valid() const noexcept { return (std::isnormal(x) && std::isnormal(y)) || isZero(); }
+        bool   valid() const noexcept;
 
         bool       operator == (const la::Vector3f& _rhs) const noexcept { return equal(_rhs); }
         Vector3f&  operator += (const la::Vector3f& _rhs) noexcept;
@@ -95,6 +97,8 @@ namespace la {
         bool collinear (const la::Vector3f& _rhs) const noexcept;
         bool equal     (const la::Vector3f& _rhs) const noexcept;
         bool isZero    () const noexcept { return equal(Vector3f(0)); }
+
+        static Vector3f make_invalid() { return Vector3f(NAN); }
 
         std::string dump() const;
 
