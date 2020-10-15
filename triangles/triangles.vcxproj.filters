@@ -22,9 +22,6 @@
     <Filter Include="Header Files\tests">
       <UniqueIdentifier>{07f9fdf4-0f6b-4db7-a95d-3ce328e1af91}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Octree">
-      <UniqueIdentifier>{dbc84b60-022e-4461-afaa-ce933ad3f04a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -47,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="LAL\triangle.cpp">
       <Filter>Source Files\LALsource</Filter>
-    </ClCompile>
-    <ClCompile Include="Octree\Octree.cpp">
-      <Filter>Source Files\Octree</Filter>
     </ClCompile>
     <ClCompile Include="LAL\square.cpp">
       <Filter>Source Files\LALsource</Filter>

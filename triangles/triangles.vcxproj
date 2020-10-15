@@ -154,7 +154,6 @@
     <ClCompile Include="LAL\triangle.cpp" />
     <ClCompile Include="LAL\Vector.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Octree\Octree.cpp" />
     <ClCompile Include="other.cpp" />
     <ClCompile Include="tests\test_gen.cpp" />
   </ItemGroup>
