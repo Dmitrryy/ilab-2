@@ -698,12 +698,12 @@ namespace la
         return _point - _pl.getN() * s;
     }
 
-    double distance(const Plane& _pl, const Vector3f _point)
+    double distance(const Plane& _pl, const Vector3f& _point)
     {
         return distance(_pl, Plane(_point, _pl.getA(), _pl.getB()));
     }
 
-    double distanceWithSign(const Plane& _pl, const Vector3f _point)
+    double distanceWithSign(const Plane& _pl, const Vector3f& _point)
     {
         return distanceWithSign(_pl, Plane(_point, _pl.getA(), _pl.getB()));
     }
@@ -786,7 +786,7 @@ namespace la
         return res;
     }
 
-    double distanceWithSign(const Plane& _pl, const Line3 _ln)
+    double distanceWithSign(const Plane& _pl, const Line3& _ln)
     {
         if (!_pl.valid() || !_ln.valid()) {
             return NAN;
@@ -806,7 +806,7 @@ namespace la
         return res;
     }
 
-    double distance(const Plane& _pl, const Line3 _ln)
+    double distance(const Plane& _pl, const Line3& _ln)
     {
         return std::abs(distanceWithSign(_pl, _ln));
     }

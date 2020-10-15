@@ -56,7 +56,7 @@ namespace la
 		size_t size() const;
 		size_t deep() const noexcept;
 
-		bool   haveChildren() const noexcept { return m_children.at(0) != nullptr; }
+		bool   haveChildren() const { return m_children.at(0) != nullptr; }
 
 		Square getArea() const noexcept { return m_area; }
 

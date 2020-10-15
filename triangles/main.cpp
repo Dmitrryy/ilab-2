@@ -45,7 +45,6 @@ int main()
     //}
     //out.close();
 
-
     //std::ifstream in("tests/010rr.txt");
     auto data = getData(std::cin);
     //in.close();

@@ -159,11 +159,11 @@ namespace la
 namespace la
 {
 //3D
-    double        distance (const Plane& _pl, const Vector3f _point);
-    inline double distance (const Vector3f _point, const Plane& _pl) { return distance(_pl, _point); }
+    double        distance (const Plane& _pl, const Vector3f& _point);
+    inline double distance (const Vector3f& _point, const Plane& _pl) { return distance(_pl, _point); }
 
-    double        distanceWithSign (const Plane& _pl, const Vector3f _point);
-    inline double distanceWithSign (const Vector3f _point, const Plane& _pl) { return distanceWithSign(_pl, _point); }
+    double        distanceWithSign (const Plane& _pl, const Vector3f& _point);
+    inline double distanceWithSign (const Vector3f& _point, const Plane& _pl) { return distanceWithSign(_pl, _point); }
 
     Vector3f projection (const Vector3f& _point, const Plane& _pl);
 
@@ -183,11 +183,11 @@ namespace la
     bool        intersec (const Plane& _pl, const Line3& _ln);
     inline bool intersec (const Line3& _ln, const Plane& _pl) { return intersec(_pl, _ln); }
 
-    double        distanceWithSign (const Plane& _pl, const Line3 _ln);
+    double        distanceWithSign (const Plane& _pl, const Line3& _ln);
     inline double distanceWithSign (const Line3& _ln, const Plane& _pl) { return distanceWithSign(_pl, _ln); }
 
-    double        distance (const Plane& _pl, const Line3 _ln);
-    inline double distance (const Line3 _ln, const Plane& _pl) { return distance(_pl, _ln); }
+    double        distance (const Plane& _pl, const Line3& _ln);
+    inline double distance (const Line3& _ln, const Plane& _pl) { return distance(_pl, _ln); }
 
     Line3 projection (const Line3& _line, const Plane& _pl);
 
