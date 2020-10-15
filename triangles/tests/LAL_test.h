@@ -627,6 +627,35 @@ TEST_F(TriangleTest, intersec)
     q1_.reup({ -14, -4, 2 }, { -17, -11, 7 }, { -20, -14, 10 });
     EXPECT_EQ(intersec(q0_, q1_), intersec(q1_, q0_));
 
+    q0_.reup({ 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 });
+    q1_.reup({ 5, 5, 5 }, { 0, 0, 0 }, { 5, 0, 0 });
+    EXPECT_TRUE(intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q1_, q0_));
+
+    q0_.reup({ 1, 0, 0 }, { 0, 0.9, 0 }, { 0, 0, 0.8 });
+    q1_.reup({ 5, 5, 5 }, { 0, 0, 0 }, { 5, 0, 0 });
+    EXPECT_TRUE(intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q1_, q0_));
+
+    q0_.reup({ 1, 0, 0 }, { 0, 0.8, 0 }, { 0, 0, 0.9 });
+    q1_.reup({ 5, 5, 5 }, { 0, 0, 0 }, { 5, 0, 0 });
+    EXPECT_TRUE(intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q1_, q0_));
+
+    q0_.reup({ 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 });
+    q1_.reup({ 5, 5, 5 }, { 1, 0, 0 }, { 5, 0, 0 });
+    EXPECT_TRUE(intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q1_, q0_));
+
+    q0_.reup({ 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 });
+    q1_.reup({ 5, 5, 5 }, { 0, 1, 0 }, { 5, 0, 0 });
+    EXPECT_TRUE(intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q1_, q0_));
+
+    q0_.reup({ 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 });
+    q1_.reup({ 5, 5, 5 }, { 0.3333333333333, 0.333333333, 0.3333333333 }, { 5, 0, 0 });
+    EXPECT_TRUE(intersec(q0_, q1_));
+    EXPECT_TRUE(intersec(q1_, q0_));
 }
 
 

@@ -25,7 +25,7 @@ namespace la
 
     bool codirected(const Vector3f& _lhs, const Vector3f& _rhs) noexcept
     {
-        return collinear(_lhs, _rhs) && dot(_lhs, _rhs) >= 0.f;
+        return collinear(_lhs, _rhs) && dot(_lhs, _rhs) >= 0.0;
     }
 
     Vector3f product(const Vector3f& _lhs, const Vector3f& _rhs) noexcept
@@ -846,6 +846,8 @@ namespace la
             assert(line_inters.second != Intersec::quantity::Nop);
             assert(line_inters.second != Intersec::quantity::Same);
             assert(line_inters.second != Intersec::quantity::Error);
+            assert(contein(_lhs.getPlane(), line_inters.first));
+            assert(contein(_rhs.getPlane(), line_inters.first));
 
             const auto res1 = findIntersec(_lhs, line_inters.first);
             assert(res1.second != Intersec::quantity::Error);
@@ -928,15 +930,18 @@ namespace la
             const Vector3f bsh_to_b = _tr.getB() - b_shtrix;
             const Vector3f csh_to_c = _tr.getC() - c_shtrix;
 
-            const double a_dist = (ash_to_a).modul();
-            const double b_dist = (bsh_to_b).modul() * ((codirected(ash_to_a, bsh_to_b) ? 1 : -1));
-            const double c_dist = (csh_to_c).modul() * ((codirected(ash_to_a, csh_to_c) ? 1 : -1));
+            const Vector3f norm_line = product(_tr.getPlane().getN(), _line.getV());
+
+            const double a_dist = (ash_to_a).modul() * ((codirected(norm_line, ash_to_a) ? 1 : -1));
+            const double b_dist = (bsh_to_b).modul() * ((codirected(norm_line, bsh_to_b) ? 1 : -1));
+            const double c_dist = (csh_to_c).modul() * ((codirected(norm_line, csh_to_c) ? 1 : -1));
 
             const double a_mdist = std::abs(a_dist);
             const double b_mdist = std::abs(b_dist);
             const double c_mdist = std::abs(c_dist);
 
-            if (a_dist * b_dist * c_dist > EPSILON)
+            if (std::abs(a_dist) > EPSILON && std::abs(b_dist) > EPSILON && std::abs(c_dist) > EPSILON 
+                && a_dist * b_dist > 0.0 && a_dist * c_dist > 0.0)
             {
                 /*nop*/
             }
