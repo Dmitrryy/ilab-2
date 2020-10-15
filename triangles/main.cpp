@@ -16,10 +16,16 @@ void intersectionN_N    (std::vector< la::Triangle > data);
 void intersectionOctree (std::vector< la::Triangle > data);
 std::vector< la::Triangle > getData(std::istream& _source);
 
+/*
+2
+1 0 0 0 1 0 0 0 1
+5 5 5 0 0 0 5 0 0
+*/
+
 int main()
 {
     //size_t num = 1000u;
-    //double ax = -1000, ay = -1000, az = -1000, bx = 1000, by = 1000, bz = 1000;
+    //double ax = -100, ay = -100, az = -100, bx = 100, by = 100, bz = 100;
     ////std::cin >> num >> ax >> ay >> az >> bx >> by >> bz;
     //std::ofstream out("tests/010rr.txt", std::ios::trunc);
     //if (out.is_open())
@@ -44,7 +50,7 @@ int main()
     auto data = getData(std::cin);
     //in.close();
 
-    intersectionN_N(data);
+    //intersectionN_N(data);
 
     intersectionOctree(data);
 

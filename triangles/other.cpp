@@ -79,13 +79,13 @@ void intersectionN_N(std::vector< la::Triangle > data)
         }
     }
 
+#ifdef DEBUGG
+
     std::cout
         << "\nN*N\n"
         << "N        = " << n << '\n'
         << "N * N    = " << n * n << '\n'
         << "num cmp  = " << COUNT_TT_INTERSEC << '\n';
-
-#ifdef DEBUGG
 
     for (const auto& r : result_pair)
     {
@@ -96,7 +96,7 @@ void intersectionN_N(std::vector< la::Triangle > data)
 
     for (const auto& id : res_id)
     {
-        std::cout << id << ' ';
+        std::cout << id << '\n';
     }
 
 #endif //DEBUGG
@@ -152,11 +152,12 @@ void intersectionOctree(std::vector< la::Triangle > data)
             id_res.insert(p.second.id);
         }
 
+#ifdef DEBUGG
+
         std::cout << '\n';
         std::cout << tree.dumpStr() << std::endl;
         std::cout << "num cmp       = " << COUNT_TT_INTERSEC << std::endl;
 
-#ifdef DEBUGG
         for (const auto& r : res)
         {
             std::cout << '(' << r.first.id << ", " << r.second.id << ") ";
@@ -164,7 +165,7 @@ void intersectionOctree(std::vector< la::Triangle > data)
 #else
         for (const int& k : id_res)
         {
-            std::cout << k << ' ';
+            std::cout << k << '\n';
         }
 #endif // DEBUGG
 
