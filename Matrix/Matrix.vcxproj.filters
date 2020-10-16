@@ -24,9 +24,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="matrix\Matrix.cpp">
-      <Filter>Source Files\Matrix</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="matrix\Matrix.h">
@@ -35,5 +32,10 @@
     <ClInclude Include="tests\Matrix_test.h">
       <Filter>Header Files\tests</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="matrix\Matrix.inl">
+      <Filter>Source Files\Matrix</Filter>
+    </None>
   </ItemGroup>
 </Project>
