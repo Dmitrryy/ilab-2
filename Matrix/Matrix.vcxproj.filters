@@ -27,12 +27,18 @@
     <ClCompile Include="matrix\Matrix_other.cpp">
       <Filter>Source Files\Matrix</Filter>
     </ClCompile>
+    <ClCompile Include="tests\gen_test.cpp">
+      <Filter>Header Files\tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="matrix\Matrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tests\Matrix_test.h">
+      <Filter>Header Files\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\gen_test.h">
       <Filter>Header Files\tests</Filter>
     </ClInclude>
   </ItemGroup>

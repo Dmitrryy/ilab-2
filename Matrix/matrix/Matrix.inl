@@ -138,6 +138,24 @@ void Matrix<T>::resize(size_t y_, size_t x_)
 
 
 template <typename T>
+T Matrix<T>::trace() const noexcept
+{
+	if (m_nlines != m_ncolumns || m_nlines == 0) {
+		return {};
+	}
+
+	T result = at(0, 0);
+
+	for (size_t i = 1; i < m_nlines && result != T{}; i++)
+	{
+		result *= at(i, i);
+	}
+
+	return result;
+}
+
+
+template <typename T>
 T Matrix<T>::determinanteSloww() const
 {
 	T result = T();
@@ -160,6 +178,69 @@ T Matrix<T>::determinanteSloww() const
 	return result;
 }
 
+
+template <typename T>
+T Matrix<T>::determinante() const
+{
+	if (m_nlines != m_ncolumns) {
+		return {};
+	}
+
+	Matrix<T> tr_mtr(*this);
+	const size_t N = m_nlines;
+	bool minus = false;
+	for (size_t cl = 0; cl < N; cl++)
+	{
+		//find a*0 != 0
+		for (size_t k = cl; k < N; k++)
+		{
+			if (tr_mtr.at(k, cl) != T{}) {
+				if (k != cl) {
+					tr_mtr.swopLines(cl, k);
+					minus = !minus;
+					//std::cout << tr_mtr.dumpStr() << std::endl;
+				}
+				break;
+			}
+		}
+		//det = 0;
+		//std::cout << tr_mtr.dumpStr() << std::endl;
+		if (tr_mtr.at(cl, cl) == T{}) {
+			return T{};
+		}
+
+		const T& cur_elem = tr_mtr.at(cl, cl);
+		for (size_t ln = cl + 1; ln < N; ln++)
+		{
+			T multiplier = tr_mtr.at(ln, cl) / cur_elem;
+			for (size_t c = 0; c < N; c++)
+			{
+				tr_mtr.at(ln, c) -= tr_mtr.at(cl, c) * multiplier;
+				//std::cout << tr_mtr.dumpStr() << std::endl;
+			}
+		}
+	}
+
+	return tr_mtr.trace() * ((minus) ? -1 : 1);
+}
+
+
+template <typename T>
+void Matrix<T>::swopLines(size_t l1_, size_t l2_)
+{
+	for (size_t k = 0; k < m_ncolumns; k++) {
+		std::swap(at(l1_, k), at(l2_, k));
+	}
+}
+
+
+template <typename T>
+void Matrix<T>::swopColumns(size_t cl1_, size_t cl2_)
+{
+	for (size_t k = 0; k < m_nlines; k++) {
+		std::swap(at(k, cl1_), at(k, cl2_));
+	}
+}
 
 template <typename T>
 Matrix<T> Matrix<T>::submatrix(size_t deleted_line, size_t deleted_column) const
@@ -253,6 +334,58 @@ Matrix<T>& Matrix<T>::negate()&
 	{
 		m_data[k] = -m_data[k];
 	}
+	return *this;
+}
+
+
+template <typename T>
+Matrix<T>& Matrix<T>::add(const Matrix& rhs_)&
+{
+	if (m_order == Order::Row) {
+		for (size_t i = 0; i < m_nlines; i++)
+		{
+			for (size_t k = 0; k < m_ncolumns; k++)
+			{
+				at(i, k) += rhs_.at(i, k);
+			}
+		}
+	}
+	else if (m_order == Order::Column) {
+		for (size_t i = 0; i < m_ncolumns; i++)
+		{
+			for (size_t k = 0; k < m_nlines; k++)
+			{
+				at(k, i) += rhs_.at(k, i);
+			}
+		}
+	}
+
+	return *this;
+}
+
+
+template <typename T>
+Matrix<T>& Matrix<T>::sub(const Matrix& rhs_)&
+{
+	if (m_order == Order::Row) {
+		for (size_t i = 0; i < m_nlines; i++)
+		{
+			for (size_t k = 0; k < m_ncolumns; k++)
+			{
+				at(i, k) -= rhs_.at(i, k);
+			}
+		}
+	}
+	else if (m_order == Order::Column) {
+		for (size_t i = 0; i < m_ncolumns; i++)
+		{
+			for (size_t k = 0; k < m_nlines; k++)
+			{
+				at(k, i) -= rhs_.at(k, i);
+			}
+		}
+	}
+
 	return *this;
 }
 

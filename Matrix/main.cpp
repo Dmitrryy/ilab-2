@@ -1,33 +1,25 @@
 #include <iostream>
 
 #include "matrix/Matrix.h"
-#include "tests/Matrix_test.h"
+//#include "tests/gen_test.h"
 
 using matrix::Matrix;
 using matrix::Order;
 
 int main()
 {
-	Matrix<double> m(4, 4);
-	Matrix<double> y(4, 4);
+	size_t mat_size = 0;
+	std::cin >> mat_size;
 
-	Matrix<double> c(6, 6, Order::Column);
+	Matrix<double> m(mat_size, mat_size);
 
-	c = {
-		{1, 2},
-		{2, 0}
-	};
+	for (size_t i = 0; i < mat_size; i++) {
+		for (size_t l = 0; l < mat_size; l++) {
+			std::cin >> m.at(i, l);
+		}
+	}
 
-	m.at(2, 0) = 1;
-	m.at(1, 2) = 2;
-	m.at(3, 3) = 3;
-	m.resize(5, 5);
-
-
-	m.setOrder(Order::Column);
-	m.setOrder(Order::Row);
-
-	std::cout << m.dumpStr();
+	std::cout << m.determinante() << std::endl;
 
 	return 0;
 }

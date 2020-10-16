@@ -16,6 +16,8 @@ namespace matrix
 		, Column
 	};
 
+	constexpr double EPSIL = 0.000001;
+
 	template <typename T = double>
 	class Matrix
 	{
@@ -52,6 +54,7 @@ namespace matrix
 		size_t getNLines  () const noexcept { return m_nlines; }
 		size_t getNColumns() const noexcept { return m_ncolumns; }
 		Order  getOrder   () const noexcept { return m_order; }
+		T      trace      () const noexcept;
 
 		void   resize(size_t y_, size_t x_);
 		void   clear ();
@@ -70,14 +73,17 @@ namespace matrix
 
 		std::string dumpStr () const;
 
+		void swopLines  (size_t l1_, size_t l2_);
+		void swopColumns(size_t cl1_, size_t cl2_);
+
 		Matrix<T> submatrix (size_t deleted_column, size_t deleted_line) const;
 
 		T determinanteSloww () const;
+		T determinante() const;
 
 	public:
 
-		bool operator == (const Matrix<T>& that_) const 
-		{ 
+		bool operator == (const Matrix<T>& that_) const { 
 			return equal(that_); 
 		}
 
@@ -88,8 +94,8 @@ namespace matrix
 	private:
 
 		static void copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_ = false);
-
 	};
+
 
 	template <typename T>
 	Matrix<T>::Matrix()
