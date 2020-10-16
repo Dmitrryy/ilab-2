@@ -8,21 +8,17 @@
 
 #include <string.h>
 
-namespace ezg
+namespace matrix
 {
+	enum class Order
+	{
+		Row
+		, Column
+	};
 
-	template <typename T>
+	template <typename T = double>
 	class Matrix
 	{
-	public:
-
-		enum class Order
-		{
-			  Row
-			, Column
-		};
-
-	private:
 
 		T*     m_data;
 
@@ -35,65 +31,20 @@ namespace ezg
 
 	public:
 
-		Matrix(size_t num_lines, size_t num_column, Order order_ = Order::Row)
-			: m_data(new T[num_lines * num_column]())
-			, m_capacity(num_lines * num_column)
-			, m_size(num_lines * num_column)
-			, m_ncolumns(num_column)
-			, m_nlines(num_lines)
-			, m_order(order_)
-		{
-			
-		}
+		Matrix ();
 
-		Matrix()
-			: m_data(nullptr)
-			, m_capacity(0)
-			, m_size(0)
-			, m_ncolumns(0)
-			, m_nlines(0)
-			, m_order(Order::Row)
-		{
-			static_assert(!std::is_integral<T>::value, "trying to create a matrix of integers");
-		}
+		Matrix (size_t num_lines, size_t num_column, Order order_ = Order::Row);
 
-		Matrix(const Matrix& that_)
-		{
-			copy__(*this, that_, false);
-		}
+		Matrix (const std::initializer_list< std::initializer_list< T > >& list_, Order order_ = Order::Row);
+		Matrix& operator = (const std::initializer_list< std::initializer_list< T > >& list_);
 
-		Matrix& operator= (const Matrix& that_)
-		{
-			if (this == &that_)
-				return *this;
+		Matrix             (const Matrix& that_);
+		Matrix& operator=  (const Matrix& that_);
 
-			copy__(*this, that_, false);
-		}
+		Matrix             (Matrix&& that_);
+		Matrix& operator=  (Matrix&& that_);
 
-		Matrix(Matrix&& that_)
-		{
-			std::swap(m_data, that_.m_data);
-
-			m_order = that_.m_order;
-			m_size = that_.m_size;
-			m_nlines = that_.m_nlines;
-			m_ncolumns = that_.m_ncolumns;
-		}
-
-		Matrix& operator= (Matrix&& that_)
-		{
-			if (this == &that_)
-				return *this;
-
-			std::swap(m_data, that_.m_data);
-
-			m_order = that_.m_order;
-			m_size = that_.m_size;
-			m_nlines = that_.m_nlines;
-			m_ncolumns = that_.m_ncolumns;
-		}
-
-		~Matrix() {
+		~Matrix () {
 			delete[] m_data;
 		}
 
@@ -105,13 +56,30 @@ namespace ezg
 
 		void   resize(size_t y_, size_t x_);
 		void   clear ();
+		bool   equal (const Matrix<T>& that_) const;
 
-		T&       at(size_t y_, size_t x_) &;
-		const T& at(size_t y_, size_t x_) const&;
+		T&       at  (size_t y_, size_t x_) &;
+		const T& at  (size_t y_, size_t x_) const&;
 
 		void setOrder(Order order_);
 
-		std::string dumpStr() const;
+		std::string dumpStr () const;
+
+		Matrix<T> submatrix (size_t y1_, size_t x1_, size_t y2_, size_t x2_);
+		Matrix<T> submatrix (size_t deleted_column, size_t deleted_line) const;
+
+		T determinanteSloww () const;
+
+	public:
+
+		bool operator == (const Matrix<T>& that_) const 
+		{ 
+			return equal(that_); 
+		}
+
+		friend std::ostream& operator << (std::ostream& stream_, const Matrix<T>& mtr_) {
+			return stream_ << mtr_.dumpStr();
+		}
 
 	private:
 
@@ -120,179 +88,113 @@ namespace ezg
 
 
 	template <typename T>
-	T& Matrix<T>::at(size_t y_, size_t x_)&
+	Matrix<T>::Matrix()
+		: m_data(nullptr)
+		, m_capacity(0)
+		, m_size(0)
+		, m_ncolumns(0)
+		, m_nlines(0)
+		, m_order(Order::Row)
 	{
-		return const_cast< T& >(static_cast< const Matrix<T>* >(this)->at(y_, x_));
+		static_assert(!std::is_integral<T>::value, "trying to create a matrix of integers");
 	}
 
 
 	template <typename T>
-	const T& Matrix<T>::at(size_t y_, size_t x_) const&
+	Matrix<T>::Matrix(size_t num_lines, size_t num_column, Order order_ /*= Order::Row*/)
+		: m_data(nullptr)
+		, m_capacity(num_lines* num_column)
+		, m_size(num_lines* num_column)
+		, m_ncolumns(num_column)
+		, m_nlines(num_lines)
+		, m_order(order_)
 	{
-		if (y_ >= m_nlines || x_ >= m_ncolumns) {
-			throw std::out_of_range("Out of range valid value.");
+		if (m_size != 0) {
+			m_data = new T[num_lines * num_column]();
 		}
-
-		if (m_order == Order::Row)
-		{
-			return *(m_data + y_ * m_ncolumns + x_);
-		}
-		else if (m_order == Order::Column)
-		{
-			return *(m_data + x_ * m_nlines + y_);
-		}
-		else { assert(0); }
-
-	}
-
-
-	template <typename T>
-	void Matrix<T>::clear()
-	{
-		*this = std::move(Matrix<T>());
-	}
-
-
-	template <typename T>
-	void Matrix<T>::setOrder(Order order_)
-	{
-		if (order_ != m_order)
-		{
-			Matrix<T> tmp(m_nlines, m_ncolumns, order_);
-			copy__(tmp, *this, true);
-			*this = std::move(tmp);
+		else {
+			m_ncolumns = m_nlines = 0;
 		}
 	}
 
 
 	template <typename T>
-	void Matrix<T>::resize(size_t y_, size_t x_)
+	Matrix<T>::Matrix(const std::initializer_list< std::initializer_list< T > >& list_, Order order_/* = Order::Row*/)
+		: Matrix(0, 0, order_)
 	{
-		if (y_ == 0 || x_ == 0) {
-			clear();
-			return;
+		size_t new_y = 0, new_x = list_.size();
+		for (const auto& l : list_) {
+			new_y = std::max(new_y, l.size());
 		}
+		resize(new_y, new_x);
 
-		if (m_order == Order::Row && m_ncolumns == x_ && m_nlines >= y_)
+		size_t cur_y = 0, cur_x = 0;
+		for (const auto& str : list_)
 		{
-			m_nlines = y_;
-		}
-		else if (m_order == Order::Row && m_ncolumns == x_ && x_ * y_ <= m_capacity)
-		{
-			for (size_t i = 0; i < m_ncolumns; i++) {
-				for (size_t k = m_nlines; k < y_; k++) {
-					at(k, i) = T();
-				}
-			}
-			m_nlines = y_;
-		}
-		else if (m_order == Order::Column && m_nlines == y_ && m_ncolumns >= x_)
-		{
-			m_ncolumns = x_;
-		}
-		else if (m_order == Order::Column && m_nlines == y_ && x_ * y_ <= m_capacity)
-		{
-			for (size_t i = 0; i < m_nlines; i++) {
-				for (size_t k = m_ncolumns; k < x_; k++) {
-					at(i, k) = T();
-				}
-			}
-			m_ncolumns = x_;
-		}
-		else
-		{
-			Matrix<T> tmp(y_, x_, m_order);
-			copy__(tmp, *this, true);
-			*this = std::move(tmp);
-		}
-		m_size = x_ * y_;
-	}
-
-
-	template <typename T>
-	std::string Matrix<T>::dumpStr() const
-	{
-		std::ostringstream out;
-
-		out << "size: " << m_nlines << " x " << m_ncolumns << '\n'
-			<< "order " << m_order << '\n'
-			<< "Data:" << '\n';
-
-		for (size_t y = 0; y < m_nlines; y++)
-		{
-			out << "| ";
-			for (size_t x = 0; x < m_ncolumns; x++)
+			for (const auto& elem : str)
 			{
-				out << std::setw(6) << at(y, x) << ' ';
+				at(cur_y, cur_x) = elem;
+				cur_x++;
 			}
-			out << "|\n";
+			cur_x = 0;
+			cur_y++;
 		}
+	}
 
-		return out.str();
+	template <typename T>
+	Matrix<T>& Matrix<T>::operator = (const std::initializer_list< std::initializer_list< T > >& list_)
+	{
+		return *this = std::move(Matrix(list_, m_order));
 	}
 
 
 	template <typename T>
-	void Matrix<T>::
-		copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_/* = false*/)
+	Matrix<T>::Matrix(const Matrix& that_)
+		: Matrix()
 	{
-		const size_t min_y = std::min(source_.getNLines(), dest_.getNLines());
-		const size_t min_x = std::min(source_.getNColumns(), dest_.getNColumns());
+		resize(that_.getNLines(), that_.getNColumns());
+		copy__(*this, that_, false);
+	}
 
-		if (save_order_) {
-			if (source_.getOrder() == Order::Row) {
-				for (size_t i = 0; i < min_y; i++)
-				{
-					for (size_t k = 0; k < min_x; k++)
-					{
-						dest_.at(i, k) = source_.at(i, k);
-					}
-				}
-			}
-			else if (source_.getOrder() == Order::Column) {
-				for (size_t i = 0; i < min_x; i++)
-				{
-					for (size_t k = 0; k < min_y; k++)
-					{
-						dest_.at(k, i) = source_.at(k, i);
-					}
-				}
-			}
-			else {
-				assert(0);
-			}
-		}
-		else
-		{
-			dest_.setOrder(source_.getOrder());
-			copy__(dest_, source_, true);
-		}
+	template <typename T>
+	Matrix<T>& Matrix<T>::operator= (const Matrix& that_)
+	{
+		if (this == &that_)
+			return *this;
+
+		resize(that_.getNLines(), that_.getNColumns());
+		copy__(*this, that_, false);
 	}
 
 
-#define orCase(a) \
-case Matrix<T>::Order::a: \
-res = #a; \
-break;
-
-	template <typename T = float>
-	std::string toString(typename Matrix<T>::Order order_)
+	template <typename T>
+	Matrix<T>::Matrix(Matrix&& that_)
+		: m_data(nullptr)
+		, m_capacity(that_.m_capacity)
+		, m_size(that_.m_size)
+		, m_ncolumns(that_.m_ncolumns)
+		, m_nlines(that_.m_nlines)
+		, m_order(that_.m_order)
 	{
-		std::string res;
-
-		switch (order_)
-		{
-			orCase(Row);
-			orCase(Column);
-		}
-
-		return res;
+		std::swap(m_data, that_.m_data);
 	}
 
-	template <typename T = float>
-	std::ostream& operator << (std::ostream& stream_, typename Matrix<T>::Order order_)
+	template <typename T>
+	Matrix<T>& Matrix<T>::operator= (Matrix&& that_)
 	{
-		return stream_ << toString(order_);
+		if (this == &that_)
+			return *this;
+
+		std::swap(m_data, that_.m_data);
+
+		m_order = that_.m_order;
+		m_size = that_.m_size;
+		m_nlines = that_.m_nlines;
+		m_ncolumns = that_.m_ncolumns;
+		m_capacity = that_.m_capacity;
 	}
 
-}//namespace ezg
+
+#include "Matrix.inl"
+
+}//namespace matrix
