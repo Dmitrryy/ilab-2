@@ -16,6 +16,9 @@
     <Filter Include="Source Files\Matrix">
       <UniqueIdentifier>{93392755-a268-4448-b625-20d45d6941b5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tests">
+      <UniqueIdentifier>{b3525493-c95f-4646-9838-22271786a3aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -28,6 +31,9 @@
   <ItemGroup>
     <ClInclude Include="matrix\Matrix.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tests\Matrix_test.h">
+      <Filter>Header Files\tests</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
