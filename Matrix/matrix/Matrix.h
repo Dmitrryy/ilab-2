@@ -16,10 +16,11 @@ namespace matrix
 		, Column
 	};
 
+	constexpr double EPSIL = 0.000001;
+
 	template <typename T = double>
 	class Matrix
 	{
-
 		T*     m_data;
 
 		size_t m_capacity;
@@ -53,6 +54,7 @@ namespace matrix
 		size_t getNLines  () const noexcept { return m_nlines; }
 		size_t getNColumns() const noexcept { return m_ncolumns; }
 		Order  getOrder   () const noexcept { return m_order; }
+		T      trace      () const noexcept;
 
 		void   resize(size_t y_, size_t x_);
 		void   clear ();
@@ -63,17 +65,25 @@ namespace matrix
 
 		void setOrder(Order order_);
 
+		Matrix& add(const Matrix& rhs_)&;
+		Matrix& sub(const Matrix& rhs_)&;
+
+		Matrix& transpose()&;
+		Matrix& negate   ()&;
+
 		std::string dumpStr () const;
 
-		Matrix<T> submatrix (size_t y1_, size_t x1_, size_t y2_, size_t x2_);
+		void swopLines  (size_t l1_, size_t l2_);
+		void swopColumns(size_t cl1_, size_t cl2_);
+
 		Matrix<T> submatrix (size_t deleted_column, size_t deleted_line) const;
 
 		T determinanteSloww () const;
+		T determinante() const;
 
 	public:
 
-		bool operator == (const Matrix<T>& that_) const 
-		{ 
+		bool operator == (const Matrix<T>& that_) const { 
 			return equal(that_); 
 		}
 
@@ -193,6 +203,11 @@ namespace matrix
 		m_ncolumns = that_.m_ncolumns;
 		m_capacity = that_.m_capacity;
 	}
+
+
+
+	std::string toString(typename Order order_);
+	std::ostream& operator << (std::ostream& stream_, matrix::Order order_);
 
 
 #include "Matrix.inl"

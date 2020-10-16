@@ -62,5 +62,169 @@ TEST_F(MatrixTest, setOrder)
 
 TEST_F(MatrixTest, submatrix)
 {
+	q0_ = {
+		{ 1, 2, 3},
+		{ 4, 5, 6},
+		{ 7, 8, 9}
+	};
 
+	q1_ = {
+		{ 1, 3 },
+		{ 7, 9 }
+	};
+	q2_ = q0_.submatrix(1, 1);
+	EXPECT_EQ(q2_, q1_);
+
+	q1_ = {
+		{5, 6},
+		{8, 9}
+	};
+	q2_ = q0_.submatrix(0, 0);
+	EXPECT_EQ(q2_, q1_);
+
+	q1_ = {
+		{1, 2},
+		{4, 5}
+	};
+	q2_ = q0_.submatrix(2, 2);
+	EXPECT_EQ(q2_, q1_);
+
+	q1_ = {
+		{4, 5},
+		{7, 8}
+	};
+	q2_ = q0_.submatrix(0, 2);
+	EXPECT_EQ(q2_, q1_);
+}
+
+
+TEST_F(MatrixTest, determSloww)
+{
+	//EXPECT_EQ(q1_.determinanteSloww(), q2_.determinanteSloww());
+
+	q0_ = {
+		{1, 1},
+		{1, 1}
+	};
+	EXPECT_EQ(q0_.determinanteSloww(), 0);
+
+	q0_ = {
+	{1, 2},
+	{1, 1}
+	};
+	EXPECT_EQ(q0_.determinanteSloww(), -1);
+
+	q0_ = {
+	{0, 0},
+	{1, 1}
+	};
+	EXPECT_EQ(q0_.determinanteSloww(), 0);
+
+	q0_ = {
+		{2, 3, 4},
+		{8, 4, 5},
+		{8, 5, 7}
+	};
+	EXPECT_EQ(q0_.determinanteSloww(), -10);
+
+	q0_ = {
+		{2, 3, 4},
+		{0, 4, 5},
+		{0, 0, 7}
+	};
+	EXPECT_EQ(q0_.determinanteSloww(), 56);
+}
+
+TEST_F(MatrixTest, determ)
+{
+	q0_ = {
+		{1, 2},
+		{3, 4}
+	};
+	EXPECT_EQ(q0_.determinante(), -2);
+}
+
+TEST_F(MatrixTest, swap)
+{
+	q0_ = {
+	{2, 3, 4},
+	{0, 4, 5},
+	{0, 0, 7}
+	};
+	q1_ = {
+	{2, 3, 4},
+		{0, 0, 7},
+	{0, 4, 5}
+	};
+	q0_.swopLines(1, 2);
+	EXPECT_EQ(q0_, q1_);
+}
+
+TEST_F(MatrixTest, transpose)
+{
+	q0_ = {
+		{0, 0},
+		{1, 1}
+	};
+	q1_ = {
+		{0, 1},
+		{0, 1}
+	};
+	EXPECT_EQ(q0_, q1_.transpose());
+
+	q0_ = {
+		{2, 3, 4},
+		{0, 4, 5},
+		{0, 0, 7}
+	};
+	q1_ = {
+		{2, 0, 0},
+		{3, 4, 0},
+		{4, 5, 7}
+	};
+	EXPECT_EQ(q0_, q1_.transpose());
+
+	q0_ = {
+		{2, 3, 4},
+		{0, 4, 5},
+		{0, 0, 7}
+	};
+	q1_ = {
+		{2, 3, 4},
+		{0, 4, 5},
+		{0, 0, 7}
+	};
+	EXPECT_EQ(q0_, q1_.transpose().transpose());
+}
+
+TEST_F(MatrixTest, negate)
+{
+	q0_ = {
+		{1, 1},
+		{1, 1}
+	};
+	q1_ = {
+		{-1, -1},
+		{-1, -1}
+	};
+	EXPECT_EQ(q1_, q0_.negate());
+}
+
+TEST_F(MatrixTest, addSub)
+{
+	q0_ = {
+		{0, 0},
+		{1, 1}
+	};
+	q3_ = q0_;
+	q1_ = {
+		{0, 1},
+		{0, 1}
+	};
+	q2_ = {
+		{0, 1},
+		{1, 2}
+	};
+	EXPECT_EQ(q0_.add(q1_), q2_);
+	EXPECT_EQ(q0_.sub(q1_), q3_);
 }
