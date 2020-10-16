@@ -19,7 +19,6 @@ namespace matrix
 	template <typename T = double>
 	class Matrix
 	{
-
 		T*     m_data;
 
 		size_t m_capacity;
@@ -63,9 +62,14 @@ namespace matrix
 
 		void setOrder(Order order_);
 
+		Matrix& add(const Matrix& rhs_)&;
+		Matrix& sub(const Matrix& rhs_)&;
+
+		Matrix& transpose()&;
+		Matrix& negate   ()&;
+
 		std::string dumpStr () const;
 
-		Matrix<T> submatrix (size_t y1_, size_t x1_, size_t y2_, size_t x2_);
 		Matrix<T> submatrix (size_t deleted_column, size_t deleted_line) const;
 
 		T determinanteSloww () const;
@@ -84,8 +88,8 @@ namespace matrix
 	private:
 
 		static void copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_ = false);
-	};
 
+	};
 
 	template <typename T>
 	Matrix<T>::Matrix()
@@ -193,6 +197,11 @@ namespace matrix
 		m_ncolumns = that_.m_ncolumns;
 		m_capacity = that_.m_capacity;
 	}
+
+
+
+	std::string toString(typename Order order_);
+	std::ostream& operator << (std::ostream& stream_, matrix::Order order_);
 
 
 #include "Matrix.inl"

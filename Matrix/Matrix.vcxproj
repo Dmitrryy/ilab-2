@@ -142,6 +142,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="matrix\Matrix_other.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="matrix\Matrix.h" />

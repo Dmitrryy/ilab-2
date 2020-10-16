@@ -152,7 +152,7 @@ T Matrix<T>::determinanteSloww() const
 		{
 			for (size_t k = 0; k < m_nlines; k++)
 			{
-				result += (submatrix(k, 0).determinanteSloww()) * ((k % 2) ? -1 : 1);
+				result += at(0, k) * (submatrix(0 , k).determinanteSloww()) * ((k % 2) ? -1 : 1);
 			}
 		}
 	}
@@ -162,7 +162,7 @@ T Matrix<T>::determinanteSloww() const
 
 
 template <typename T>
-Matrix<T> Matrix<T>::submatrix(size_t deleted_column, size_t deleted_line) const
+Matrix<T> Matrix<T>::submatrix(size_t deleted_line, size_t deleted_column) const
 {
 	if (m_ncolumns == 0 || m_nlines == 0) {
 		return {};
@@ -228,29 +228,32 @@ copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_/* = false*/)
 }
 
 
-#define orCase(a) \
-case matrix::Order::a: \
-res = #a; \
-break;
-
-
-std::string toString(typename Order order_)
+template <typename T>
+Matrix<T>& Matrix<T>::transpose() &
 {
-	std::string res;
-
-	switch (order_)
+	std::swap(m_ncolumns, m_nlines);
+	if (m_order == Order::Column)
 	{
-		orCase(Row);
-		orCase(Column);
+		m_order = Order::Row;
 	}
+	else if (m_order == Order::Row)
+	{
+		m_order = Order::Column;
+	}
+	else { assert(0); }
 
-	return res;
+	return *this;
 }
 
 
-std::ostream& operator << (std::ostream& stream_, matrix::Order order_)
+template <typename T>
+Matrix<T>& Matrix<T>::negate()&
 {
-	return stream_ << matrix::toString(order_);
+	for (size_t k = 0; k < m_size; k++)
+	{
+		m_data[k] = -m_data[k];
+	}
+	return *this;
 }
 
 

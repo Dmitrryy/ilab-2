@@ -14,13 +14,9 @@ int main()
 	Matrix<double> c(6, 6, Order::Column);
 
 	c = {
-		{1, 2, 3},
-		{4, 5, 6},
-		{7, 8, 9}
+		{1, 2},
+		{2, 0}
 	};
-
-	std::cout << c.dumpStr();
-
 
 	m.at(2, 0) = 1;
 	m.at(1, 2) = 2;
