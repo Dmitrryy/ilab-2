@@ -37,7 +37,7 @@ namespace matrix
 		Matrix (size_t num_lines, size_t num_column, Order order_ = Order::Row);
 
 		Matrix (const std::initializer_list< std::initializer_list< T > >& list_, Order order_ = Order::Row);
-		Matrix& operator = (const std::initializer_list< std::initializer_list< T > >& list_);
+		Matrix& operator=  (const std::initializer_list< std::initializer_list< T > >& list_);
 
 		Matrix             (const Matrix& that_);
 		Matrix& operator=  (const Matrix& that_);
@@ -67,6 +67,7 @@ namespace matrix
 
 		Matrix& add(const Matrix& rhs_)&;
 		Matrix& sub(const Matrix& rhs_)&;
+		Matrix& mul(const T& num_)&;
 
 		Matrix& transpose()&;
 		Matrix& negate   ()&;
@@ -83,9 +84,15 @@ namespace matrix
 
 	public:
 
-		bool operator == (const Matrix<T>& that_) const { 
-			return equal(that_); 
-		}
+		T&       operator () (size_t _y, size_t _x)&;
+		const T& operator () (size_t _y, size_t _x) const&;
+
+		Matrix<T>& operator += (const Matrix& that_)&;
+		Matrix<T>& operator -= (const Matrix& that_)&;
+		Matrix<T>& operator *= (const T& num_)&;
+
+		bool operator == (const Matrix<T>& that_) const;
+		bool operator != (const Matrix<T>& that_) const;
 
 		friend std::ostream& operator << (std::ostream& stream_, const Matrix<T>& mtr_) {
 			return stream_ << mtr_.dumpStr();
@@ -206,10 +213,9 @@ namespace matrix
 
 
 
-	std::string toString(typename Order order_);
+	std::string toString(Order order_);
 	std::ostream& operator << (std::ostream& stream_, matrix::Order order_);
 
+}//namespace matrix
 
 #include "Matrix.inl"
-
-}//namespace matrix
