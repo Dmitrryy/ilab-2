@@ -605,7 +605,7 @@ namespace la
             const double s2 = dot(_rhs.getP(), _rhs.getN());
 
             const double det = q * l - w * w;
-            if (std::abs(det) < EPSILON)
+            if (std::abs(det) < EPSILON / 100000.0)
             {
                 res.second = Intersec::quantity::Same;
                 assert(_lhs == _rhs);

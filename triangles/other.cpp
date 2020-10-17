@@ -12,7 +12,13 @@
 
 extern size_t COUNT_TT_INTERSEC;
 
-
+/*
+2
+10.3949 53.7716 44.5702 10.8135 53.8315 44.775 11.2476 54.2272 44.8065
+17.5453 73.4349 5.06346 17.9191 73.4929 5.24661 18.0148 73.5748 5.29431
+*/
+//1303 7140
+//8723 4198
 
 std::vector< la::Triangle > getData(std::istream& _source)
 {
@@ -54,7 +60,7 @@ void intersectionN_N(std::vector< la::Triangle > data)
 
     COUNT_TT_INTERSEC = 0u;
 
-    //std::cout << data[26].first << ' ' << data[12].first << std::endl;
+    //std::cout << data[0].first << ' ' << data[204].first << std::endl;
 
     std::vector< std::pair< ValId< la::Triangle, size_t >, ValId< la::Triangle, size_t > > > result_pair;
     std::set<size_t> res_id;
@@ -117,6 +123,8 @@ void intersectionOctree(std::vector< la::Triangle > data)
     using std::max;
 
     COUNT_TT_INTERSEC = 0u;
+
+    //std::cout << data[0] << '\n' << data[204] << '\n';
 
     const size_t n = data.size();
 

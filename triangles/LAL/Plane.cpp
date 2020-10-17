@@ -21,7 +21,7 @@ namespace la
 			m_a = _vec1;
 			m_b = _vec2;
 		}
-
+		
 		m_norm = product(m_a, m_b);
 	}
 
