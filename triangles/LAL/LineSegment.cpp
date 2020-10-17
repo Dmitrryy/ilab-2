@@ -100,7 +100,7 @@ namespace la
         if (toLine().contein(_rhs))
         {
             const double s = dot(normalization(m_v), _rhs - m_p) / m_v.modul();
-            if (s >= 0.f && s <= 1.f + EPSILON) {
+            if (s >= -EPSILON && s <= 1.f + EPSILON) {
                 res = true;
             }
         }
