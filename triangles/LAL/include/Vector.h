@@ -26,7 +26,7 @@ namespace la {
             , y(_all)
         {};
 
-        double modul() const noexcept { return std::sqrt(x * x + y * y); }
+        double modul() const { return std::sqrt(x * x + y * y); }
 
         bool   valid() const noexcept;
 
@@ -37,7 +37,7 @@ namespace la {
         bool equal     (const la::Vector2f& _rhs) const noexcept;
         bool isZero    () const noexcept { return equal(Vector2f(0.0)); }
 
-        static Vector2f make_invalid() { return Vector2f(NAN); }
+        static Vector2f make_invalid() noexcept { return Vector2f(NAN); }
 
         std::string dump() const;
 
@@ -86,7 +86,7 @@ namespace la {
             , z(_all)
         {};
 
-        double modul() const noexcept { return std::sqrt(x * x + y * y + z * z); }
+        double modul() const { return std::sqrt(x * x + y * y + z * z); }
 
         bool   valid() const noexcept;
 

@@ -91,7 +91,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab 2\triangles\LAL;C:\Users\dadro\source\repos\ilab 2\triangles\LAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab 2\Matrix\tests;C:\Users\dadro\source\repos\ilab 2\Matrix\matrix;C:\Users\dadro\source\repos\ilab 2\triangles\LAL;C:\Users\dadro\source\repos\ilab 2\triangles\LAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -122,7 +122,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab 2\triangles\LAL;C:\Users\dadro\source\repos\ilab 2\triangles\LAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab 2\Matrix\tests;C:\Users\dadro\source\repos\ilab 2\Matrix\matrix;C:\Users\dadro\source\repos\ilab 2\triangles\LAL;C:\Users\dadro\source\repos\ilab 2\triangles\LAL\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
