@@ -7,10 +7,10 @@ using namespace matrix;
 
 void RunTest(size_t num_tests, size_t mat_size)
 {
-	Random r(-10, 10);
+	Random r(-5, 5);
 
-	Matrix<double> m(mat_size, mat_size);
-
+	Matrix<double> m{ mat_size, mat_size };
+	size_t count_wrong = 0;
 	for (size_t k = 0; k < num_tests; k++)
 	{
 
@@ -22,6 +22,8 @@ void RunTest(size_t num_tests, size_t mat_size)
 
 		const double res1 = m.determinante();
 		const double res2 = m.determinanteSloww();
+		//double res2 = res1;
+
 		if (std::abs(res1 - res2) > EPSIL)
 		{
 			std::string fname = std::string("tests/bad") + std::to_string(k) + ".txt";
@@ -32,14 +34,15 @@ void RunTest(size_t num_tests, size_t mat_size)
 					out << m.at(i, l) << ' ';
 				}
 			}
-
+			count_wrong++;
 			std::cout << "bad test: " << fname << " || " << res1 << "!=" << res2 << std::endl;
 			//break;
 		}
 		else
 		{
-			std::cout << "OK: " << k << '\n';
+			std::cout << "OK: " << k << std::endl;
 		}
 	}
+	std::cout << "miss: " << count_wrong << std::endl;
 
 }
