@@ -46,7 +46,7 @@ struct ValId
     Val_ val;
     Key_ id;
 
-    la::Square getArea() const noexcept { return val.getArea(); }
+    la::Rectangle3 getArea() const noexcept { return val.getArea(); }
 };
 bool intersec(const ValId<la::Triangle, size_t>& _lhs, const ValId<la::Triangle, size_t>& _rhs)
 {
@@ -143,7 +143,7 @@ void intersectionOctree(std::vector< la::Triangle > data)
             b.z = max(b.z, MAX(tr.getA().z, tr.getB().z, tr.getC().z));
         }
 
-        la::Octree< ValId< la::Triangle, size_t > > tree(la::Square(a, b));
+        la::Octree< ValId< la::Triangle, size_t > > tree(la::Rectangle3(a, b));
 
         for (size_t i = 0, n = data.size(); i < n; ++i)
         {
@@ -158,6 +158,10 @@ void intersectionOctree(std::vector< la::Triangle > data)
         {
             id_res.insert(p.first.id);
             id_res.insert(p.second.id);
+            if (!la::intersec(p.first.getArea(), p.second.getArea()))
+            {
+                std::cout << p.first.val << '\n' << p.second.val << std::endl;
+            }
         }
 
 #ifdef DEBUGG
