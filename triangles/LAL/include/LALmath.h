@@ -233,15 +233,20 @@ namespace la
 
 ///////////////////////////////////////////////////////////////
 //
-// Square & Square
+// Rectangle & Rectangle
 //
 ///////////////////////////////////////////////////////////////
 namespace la
 {
     //3D
-    bool intersec (const Square& _lhs, const Square& _rhs);
+    bool intersec (const Rectangle3& _lhs, const Rectangle3& _rhs);
 
-    bool contein  (const Square& _lhs, const Square& _rhs);
-    bool contein  (const Square& _sq, const Vector3f& _vec);
+    bool contein  (const Rectangle3& _lhs, const Rectangle3& _rhs);
+    bool contein  (const Rectangle3& _sq, const Vector3f& _vec);
 
+    //2D
+    bool intersec(const Rectangle2& _lhs, const Rectangle2& _rhs);
+
+    bool contein(const Rectangle2& _lhs, const Rectangle2& _rhs);
+    bool contein(const Rectangle2& _sq, const Vector2f& _vec);
 }//namespace la (Square & Square)

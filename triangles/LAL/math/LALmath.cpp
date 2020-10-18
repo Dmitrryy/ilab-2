@@ -832,8 +832,12 @@ namespace la
     {
         bool result = false;
         COUNT_TT_INTERSEC++;
+
+        if (!intersec(_lhs.getArea(), _rhs.getArea())) {
+            /*nop*/
+        }
         //2D
-        if (_lhs.getPlane() == _rhs.getPlane())
+        else if (_lhs.getPlane() == _rhs.getPlane())
         {
             result = result || _lhs.contein(_rhs.getA());
             result = result || _lhs.contein(_rhs.getB());
@@ -1046,23 +1050,55 @@ namespace la
 namespace la
 {
     //3D
-    bool intersec(const Square& _lhs, const Square& _rhs)
+    bool intersec(const Rectangle3& _lhs, const Rectangle3& _rhs)
     {
-        return contein(_lhs, _rhs.getA()) || contein(_lhs, _rhs.getB())
-            || contein(_rhs, _lhs.getA()) || contein(_rhs, _lhs.getB());
+        const LineSegment1 xl(_lhs.getA().x, _lhs.getB().x);
+        const LineSegment1 xr(_rhs.getA().x, _rhs.getB().x);
+
+        const LineSegment1 yl(_lhs.getA().y, _lhs.getB().y);
+        const LineSegment1 yr(_rhs.getA().y, _rhs.getB().y);
+
+        const LineSegment1 zl(_lhs.getA().z, _lhs.getB().z);
+        const LineSegment1 zr(_rhs.getA().z, _rhs.getB().z);
+
+        return intersec(xl, xr) && intersec(yl, yr) && intersec(zl, zr);
     }
 
-    bool contein(const Square& _lhs, const Square& _rhs) 
+    bool contein(const Rectangle3& _lhs, const Rectangle3& _rhs) 
     {
         return contein(_lhs, _rhs.getA()) && contein(_lhs, _rhs.getB());
     }
-    bool contein(const Square& _sq, const Vector3f& _vec)
+    bool contein(const Rectangle3& _sq, const Vector3f& _vec)
     {
         const LineSegment1 dx(_sq.getA().x, _sq.getB().x);
         const LineSegment1 dy(_sq.getA().y, _sq.getB().y);
         const LineSegment1 dz(_sq.getA().z, _sq.getB().z);
 
         return dx.contein(_vec.x) && dy.contein(_vec.y) && dz.contein(_vec.z);
+    }
+
+    //2D
+    bool intersec(const Rectangle2& _lhs, const Rectangle2& _rhs)
+    {
+        const LineSegment1 xl(_lhs.getA().x, _lhs.getB().x);
+        const LineSegment1 xr(_rhs.getA().x, _rhs.getB().x);
+
+        const LineSegment1 yl(_lhs.getA().y, _lhs.getB().y);
+        const LineSegment1 yr(_rhs.getA().y, _rhs.getB().y);
+
+        return intersec(xl, xr) && intersec(yl, yr);
+    }
+
+    bool contein(const Rectangle2& _lhs, const Rectangle2& _rhs)
+    {
+        return contein(_lhs, _rhs.getA()) && contein(_lhs, _rhs.getB());
+    }
+    bool contein(const Rectangle2& _sq, const Vector2f& _vec)
+    {
+        const LineSegment1 dx(_sq.getA().x, _sq.getB().x);
+        const LineSegment1 dy(_sq.getA().y, _sq.getB().y);
+
+        return dx.contein(_vec.x) && dy.contein(_vec.y);
     }
 
 }//namespace la (Square & Square)

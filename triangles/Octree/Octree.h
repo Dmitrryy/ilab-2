@@ -15,7 +15,7 @@ namespace la
 	{
 		std::vector<T> m_data;
 
-		Square m_area;
+		Rectangle3 m_area;
 
 		mutable size_t m_deep;
 		mutable bool m_deep_actual;
@@ -36,7 +36,7 @@ namespace la
 		Octree& operator= (Octree&&)            = delete;   //not saported
 
 
-		Octree(Square _area, Octree* _parent = nullptr) noexcept
+		Octree(Rectangle3 _area, Octree* _parent = nullptr) noexcept
 			: m_data()
 			, m_area(_area)
 			, m_deep(0)
@@ -58,7 +58,7 @@ namespace la
 
 		bool   haveChildren() const { return m_children.at(0) != nullptr; }
 
-		Square getArea() const noexcept { return m_area; }
+		Rectangle3 getArea() const noexcept { return m_area; }
 
 		void   add(const T& _elem);
 
@@ -69,9 +69,9 @@ namespace la
 
 	private:
 
-		bool _tryAdd_(const T& _elem, const Square& elem_area);
-		bool _tryAndNotAdd_(const T& _elem, const Square& elem_area) const;
-		std::vector< Square > _splitArea_() const;
+		bool _tryAdd_(const T& _elem, const Rectangle3& elem_area);
+		bool _tryAndNotAdd_(const T& _elem, const Rectangle3& elem_area) const;
+		std::vector< Rectangle3 > _splitArea_() const;
 
 		//O(N^2)
 		IntersecC _intersecv_(const std::vector< T >& _vec) const;
@@ -97,7 +97,7 @@ namespace la
 
 
 	template <typename T>
-	bool Octree<T>::_tryAdd_(const T& _elem, const Square& elem_area)
+	bool Octree<T>::_tryAdd_(const T& _elem, const Rectangle3& elem_area)
 	{
 		bool res = false;
 
@@ -146,7 +146,7 @@ namespace la
 
 
 	template <typename T>
-	bool Octree<T>::_tryAndNotAdd_(const T& _elem, const Square& elem_area) const
+	bool Octree<T>::_tryAndNotAdd_(const T& _elem, const Rectangle3& elem_area) const
 	{
 		bool res = false;
 
@@ -212,14 +212,14 @@ namespace la
 			return 0;
 		}
 
-		std::vector<Square> squares(_splitArea_());
+		std::vector<Rectangle3> squares(_splitArea_());
 
 		std::vector< std::vector< int > > new_chdata(8);
 		std::vector< int > new_data;
 		for (size_t i = 0, n = m_data.size(); i < n; i++)
 		{
 			T& tmp = m_data.at(i);
-			const Square esq = tmp.getArea();
+			const Rectangle3 esq = tmp.getArea();
 			uint16_t counter = 0u;
 			int num_target = 0;
 			for (int k = 0; k < 8; k++)
@@ -306,7 +306,7 @@ namespace la
 
 
 	template <typename T>
-	std::vector< Square > Octree<T>::_splitArea_() const
+	std::vector< Rectangle3 > Octree<T>::_splitArea_() const
 	{
 		const la::Vector3f center = (m_area.getA() + m_area.getB()) / 2.0;
 
@@ -314,15 +314,15 @@ namespace la
 		const double dy = m_area.getDY();
 		const double dz = m_area.getDZ();
 
-		std::vector<Square> squares(8);
-		squares.at(0) = Square(m_area.getA(), center);
-		squares.at(1) = Square(m_area.getA() + Vector3f(dx, 0, 0), center);
-		squares.at(2) = Square(m_area.getA() + Vector3f(dx, dy, 0), center);
-		squares.at(3) = Square(m_area.getA() + Vector3f(0, dy, 0), center);
-		squares.at(4) = Square(m_area.getB(), center);
-		squares.at(5) = Square(m_area.getB() - Vector3f(dx, 0, 0), center);
-		squares.at(6) = Square(m_area.getB() - Vector3f(dx, dy, 0), center);
-		squares.at(7) = Square(m_area.getB() - Vector3f(0, dy, 0), center);
+		std::vector<Rectangle3> squares(8);
+		squares.at(0) = Rectangle3(m_area.getA(), center);
+		squares.at(1) = Rectangle3(m_area.getA() + Vector3f(dx, 0, 0), center);
+		squares.at(2) = Rectangle3(m_area.getA() + Vector3f(dx, dy, 0), center);
+		squares.at(3) = Rectangle3(m_area.getA() + Vector3f(0, dy, 0), center);
+		squares.at(4) = Rectangle3(m_area.getB(), center);
+		squares.at(5) = Rectangle3(m_area.getB() - Vector3f(dx, 0, 0), center);
+		squares.at(6) = Rectangle3(m_area.getB() - Vector3f(dx, dy, 0), center);
+		squares.at(7) = Rectangle3(m_area.getB() - Vector3f(0, dy, 0), center);
 
 		return squares;
 	}

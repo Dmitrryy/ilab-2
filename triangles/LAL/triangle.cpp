@@ -21,21 +21,6 @@ namespace la
 		return { m_a, m_b, m_c, Plane::Type::ThreePoints }; 
 	}
 
-	Square Triangle::getArea() const noexcept
-	{
-		using std::min;
-		using std::max;
-
-		Vector3f a, b;
-		a.x = min(getA().x, min(getB().x, getC().x));
-		a.y = min(getA().y, min(getB().y, getC().y));
-		a.z = min(getA().z, min(getB().z, getC().z));
-		b.x = max(getA().x, max(getB().x, getC().x));
-		b.y = max(getA().y, max(getB().y, getC().y));
-		b.z = max(getA().z, max(getB().z, getC().z));
-
-		return { a, b };
-	}
 
 	bool Triangle::equal(const Triangle& _that) const noexcept
 	{
@@ -54,6 +39,8 @@ namespace la
 		m_a = cnt.at(0);
 		m_b = cnt.at(1);
 		m_c = cnt.at(2);
+
+		upArea__();
 	}
 
 	bool Triangle::contein(const Vector3f& _vec) const
@@ -87,6 +74,22 @@ namespace la
 		std::ostringstream out;
 		out << "A: " << m_a << " B: " << m_b << " C: " << m_c;
 		return out.str();
+	}
+
+	void Triangle::upArea__()
+	{
+		using std::min;
+		using std::max;
+
+		Vector3f a, b;
+		a.x = min(getA().x, min(getB().x, getC().x));
+		a.y = min(getA().y, min(getB().y, getC().y));
+		a.z = min(getA().z, min(getB().z, getC().z));
+		b.x = max(getA().x, max(getB().x, getC().x));
+		b.y = max(getA().y, max(getB().y, getC().y));
+		b.z = max(getA().z, max(getB().z, getC().z));
+
+		m_area.reup(a, b);
 	}
 
 } // namespace la

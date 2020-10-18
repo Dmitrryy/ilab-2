@@ -27,7 +27,7 @@ test_class(Line2);
 test_class(Line3);
 test_class(Plane);
 test_class(Triangle);
-test_class(Square);
+test_class(Rectangle3);
 
 
 TEST_F(Vector3fTest, Construct)
@@ -673,7 +673,7 @@ TEST_F(TriangleTest, valid)
 // Test Square
 //
 ///////////////////////////////////////////////////////////////
-TEST_F(SquareTest, construct)
+TEST_F(Rectangle3Test, construct)
 {
     q0_.reup({ 1, 2, -3 }, { 8, 0, 9 });
     q1_.reup({ 8, 0, 9 } , { 1, 2, -3 });
@@ -684,7 +684,7 @@ TEST_F(SquareTest, construct)
 }
 
 
-TEST_F(SquareTest, contein)
+TEST_F(Rectangle3Test, contein)
 {
     q0_.reup({ 5, 5, 5 }, { -6, -7, 0 });
     EXPECT_TRUE(contein(q0_, { 5, 5, 5 }));

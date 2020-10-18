@@ -16,6 +16,8 @@ namespace la
 		Vector3f m_b;
 		Vector3f m_c;
 
+		Rectangle3 m_area;
+
 	public:
 
 		Triangle() = default;
@@ -42,7 +44,7 @@ namespace la
 
 		bool   contein(const Vector3f& _vec) const;
 
-		Square getArea() const noexcept;
+		Rectangle3 getArea() const noexcept { return m_area; }
 
 		bool   equal  (const Triangle& _that) const noexcept;
 
@@ -53,6 +55,10 @@ namespace la
 		friend std::ostream& operator << (std::ostream& _stream, const Triangle& _tar) {
 			return _stream << _tar.dump();
 		}
+
+	private:
+
+		void upArea__();
 	};
    
 }//namespace la

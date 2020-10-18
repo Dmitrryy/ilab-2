@@ -31,5 +31,5 @@ private:
     std::uniform_int_distribution<> m_dist;
 };
 
-std::vector<int> testGenTriangles(la::Square _area, size_t num, size_t rad = 5u);
-la::Vector3f genPoint3f(la::Square _area);
+std::vector<int> testGenTriangles(la::Rectangle3 _area, size_t num, size_t rad = 5u);
+la::Vector3f genPoint3f(la::Rectangle3 _area);
