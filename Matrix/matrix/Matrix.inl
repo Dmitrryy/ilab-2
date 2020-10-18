@@ -159,7 +159,7 @@ namespace matrix
 	}
 
 
-	template <typename T>
+	template <typename T >
 	T Matrix<T>::determinanteSloww() const
 	{
 		T result = T();
@@ -187,6 +187,7 @@ namespace matrix
 
 
 	template <typename T>
+	template <typename/* = std::enable_if_t< !std::is_integral_v<T> >*/ >
 	T Matrix<T>::determinante() const
 	{
 		if (m_nlines != m_ncolumns) {
@@ -286,10 +287,10 @@ namespace matrix
 		return result;
 	}
 
-
 	template <typename T>
+	template <typename U>
 	void Matrix<T>::
-		copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_/* = false*/)
+		copy__(Matrix<T>& dest_, const Matrix<U>& source_, bool save_order_/* = false*/)
 	{
 		const size_t min_y = std::min(source_.getNLines(), dest_.getNLines());
 		const size_t min_x = std::min(source_.getNColumns(), dest_.getNColumns());

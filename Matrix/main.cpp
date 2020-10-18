@@ -18,7 +18,6 @@ int main()
 	}
 	std::cout << m.determinante() << std::endl;
 
-
 	//RunTest(1000, 5);
 
 	return 0;

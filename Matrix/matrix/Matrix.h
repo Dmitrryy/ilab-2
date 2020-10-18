@@ -80,6 +80,8 @@ namespace matrix
 		Matrix<T> submatrix (size_t deleted_column, size_t deleted_line) const;
 
 		T determinanteSloww () const;
+
+		template <typename = std::enable_if_t< !std::is_integral_v<T> > >
 		T determinante() const;
 
 	public:
@@ -100,7 +102,8 @@ namespace matrix
 
 	private:
 
-		static void copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_ = false);
+		template <typename U>
+		static void copy__(Matrix<T>& dest_, const Matrix<U>& source_, bool save_order_ = false);
 	};
 
 
@@ -113,7 +116,7 @@ namespace matrix
 		, m_nlines(0)
 		, m_order(Order::Row)
 	{
-		static_assert(!std::is_integral<T>::value, "trying to create a matrix of integers");
+		//static_assert(!std::is_integral<T>::value, "trying to create a matrix of integers");
 	}
 
 
