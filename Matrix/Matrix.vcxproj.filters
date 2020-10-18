@@ -47,4 +47,7 @@
       <Filter>Source Files\Matrix</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CmakeLists.txt" />
+  </ItemGroup>
 </Project>
