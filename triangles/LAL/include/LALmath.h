@@ -249,4 +249,5 @@ namespace la
 
     bool contein(const Rectangle2& _lhs, const Rectangle2& _rhs);
     bool contein(const Rectangle2& _sq, const Vector2f& _vec);
-}//namespace la (Square & Square)
+
+}//namespace la (Rectangle & Rectangle)

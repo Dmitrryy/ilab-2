@@ -864,25 +864,9 @@ namespace la
                 if (res2.second != Intersec::quantity::Nop)
                 {
                     Intersec::quantity mood = Intersec::quantity::Nop;
-                    //if (res1.second == Intersec::quantity::One && res2.second != Intersec::quantity::One) {
-                    //    if (res2.first.contein(res1.first.getP())) {
-                    //        mood = Intersec::quantity::One;
-                    //    }
-                    //}
-                    //else if (res1.second != Intersec::quantity::One && res2.second == Intersec::quantity::One) {
-                    //    if (res1.first.contein(res2.first.getP())) {
-                    //        mood = Intersec::quantity::One;
-                    //    }
-                    //}
-                    //else if (res1.second == Intersec::quantity::One && res2.second == Intersec::quantity::One) {
-                    //    if (res1.first.getP() == res2.first.getP()) {
-                    //        mood = Intersec::quantity::One;
-                    //    }
-                    //}
-                    //else {
-                        const auto tm = findIntersec(res1.first, res2.first);
-                        mood = tm.second;
-                    //}
+                    const auto tm = findIntersec(res1.first, res2.first);
+                    mood = tm.second;
+                    
                     if (mood != Intersec::quantity::Nop) {
                         result = true;
                     }

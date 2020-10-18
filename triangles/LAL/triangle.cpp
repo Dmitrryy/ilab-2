@@ -31,7 +31,7 @@ namespace la
 	{
 		std::vector<Vector3f> cnt = {_a, _b, _c};
 
-		std::sort(cnt.begin(), cnt.end(), [](auto _lhs, auto _rhs) noexcept
+		std::sort(cnt.begin(), cnt.end(), [](auto _lhs, auto _rhs) 
 			{
 				return _lhs.modul() < _rhs.modul();
 			});
