@@ -81,8 +81,9 @@ namespace matrix
 
 		T determinanteSloww () const;
 
-		template <typename = std::enable_if_t< !std::is_integral_v<T> > >
-		T determinante() const;
+		//if T is equal to integral type, then Ret = double
+		template <typename Ret = std::conditional_t< !std::is_integral_v<T>, T, double > >
+		Ret determinante () const;
 
 	public:
 
@@ -100,7 +101,7 @@ namespace matrix
 			return stream_ << mtr_.dumpStr();
 		}
 
-	private:
+	public:
 
 		template <typename U>
 		static void copy__(Matrix<T>& dest_, const Matrix<U>& source_, bool save_order_ = false);
@@ -109,12 +110,12 @@ namespace matrix
 
 	template <typename T>
 	Matrix<T>::Matrix()
-		: m_data(nullptr)
+		: m_data    (nullptr)
 		, m_capacity(0)
-		, m_size(0)
+		, m_size    (0)
 		, m_ncolumns(0)
-		, m_nlines(0)
-		, m_order(Order::Row)
+		, m_nlines  (0)
+		, m_order   (Order::Row)
 	{
 		//static_assert(!std::is_integral<T>::value, "trying to create a matrix of integers");
 	}
@@ -122,12 +123,12 @@ namespace matrix
 
 	template <typename T>
 	Matrix<T>::Matrix(size_t num_lines, size_t num_column, Order order_ /*= Order::Row*/)
-		: m_data(nullptr)
+		: m_data    (nullptr)
 		, m_capacity(num_lines* num_column)
-		, m_size(num_lines* num_column)
+		, m_size    (num_lines* num_column)
 		, m_ncolumns(num_column)
-		, m_nlines(num_lines)
-		, m_order(order_)
+		, m_nlines  (num_lines)
+		, m_order   (order_)
 	{
 		if (m_size != 0) {
 			m_data = new T[num_lines * num_column]();
@@ -189,12 +190,12 @@ namespace matrix
 
 	template <typename T>
 	Matrix<T>::Matrix(Matrix&& that_)
-		: m_data(nullptr)
+		: m_data    (nullptr)
 		, m_capacity(that_.m_capacity)
-		, m_size(that_.m_size)
+		, m_size    (that_.m_size)
 		, m_ncolumns(that_.m_ncolumns)
-		, m_nlines(that_.m_nlines)
-		, m_order(that_.m_order)
+		, m_nlines  (that_.m_nlines)
+		, m_order   (that_.m_order)
 	{
 		std::swap(m_data, that_.m_data);
 	}
