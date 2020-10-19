@@ -82,7 +82,7 @@ namespace matrix
 		T determinanteSloww () const;
 
 		//if T is equal to integral type, then Ret = double
-		template <typename Ret = std::conditional_t< !std::is_integral_v<T>, T, double > >
+		template <typename Ret = std::conditional_t< !std::is_integral_v< T >, T, double > >
 		Ret determinante () const;
 
 	public:
