@@ -4,11 +4,9 @@
 
 ### in developing
 
-* LALib (triangles) - LVL 1
+* LALib (triangles) - LVL 2
 * Matrix ------------ LVL 1
   
 ### done
 
-* cache_2Q
-* cache_LFU
-  
+* cache
