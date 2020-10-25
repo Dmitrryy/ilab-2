@@ -15,12 +15,12 @@ void intersectionOctree (std::vector< la::Triangle > data);
 std::vector< la::Triangle > getData(std::istream& _source);
 
 
-//int main()
-//{
-//    std::ifstream in("tests/10000.1.txt");
-//    auto data = getData(std::cin);
-//    in.close();
-//    intersectionOctree(data);
-//
-//    return 0;
-//}
+int main()
+{
+    //std::ifstream in("tests/10000.1.txt");
+    auto data = getData(std::cin);
+    //in.close();
+    intersectionOctree(data);
+
+    return 0;
+}
