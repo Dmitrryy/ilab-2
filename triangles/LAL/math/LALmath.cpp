@@ -833,11 +833,11 @@ namespace la
         bool result = false;
         COUNT_TT_INTERSEC++;
 
-        if (!intersec(_lhs.getArea(), _rhs.getArea())) {
-            /*nop*/
-        }
-        //2D
-        else if (_lhs.getPlane() == _rhs.getPlane())
+        //if (!intersec(_lhs.getArea(), _rhs.getArea())) {
+        //    /*nop*/
+        //}
+        ////2D
+        if (_lhs.getPlane() == _rhs.getPlane())
         {
             result = result || _lhs.contein(_rhs.getA());
             result = result || _lhs.contein(_rhs.getB());
@@ -864,25 +864,9 @@ namespace la
                 if (res2.second != Intersec::quantity::Nop)
                 {
                     Intersec::quantity mood = Intersec::quantity::Nop;
-                    //if (res1.second == Intersec::quantity::One && res2.second != Intersec::quantity::One) {
-                    //    if (res2.first.contein(res1.first.getP())) {
-                    //        mood = Intersec::quantity::One;
-                    //    }
-                    //}
-                    //else if (res1.second != Intersec::quantity::One && res2.second == Intersec::quantity::One) {
-                    //    if (res1.first.contein(res2.first.getP())) {
-                    //        mood = Intersec::quantity::One;
-                    //    }
-                    //}
-                    //else if (res1.second == Intersec::quantity::One && res2.second == Intersec::quantity::One) {
-                    //    if (res1.first.getP() == res2.first.getP()) {
-                    //        mood = Intersec::quantity::One;
-                    //    }
-                    //}
-                    //else {
-                        const auto tm = findIntersec(res1.first, res2.first);
-                        mood = tm.second;
-                    //}
+                    const auto tm = findIntersec(res1.first, res2.first);
+                    mood = tm.second;
+                    
                     if (mood != Intersec::quantity::Nop) {
                         result = true;
                     }
@@ -939,7 +923,7 @@ namespace la
             const double a_dist = (ash_to_a).modul() * ((codirected(norm_line, ash_to_a) ? 1 : -1));
             const double b_dist = (bsh_to_b).modul() * ((codirected(norm_line, bsh_to_b) ? 1 : -1));
             const double c_dist = (csh_to_c).modul() * ((codirected(norm_line, csh_to_c) ? 1 : -1));
-
+            std::cout << normalization(_line.getV()) << std::endl;
             const double a_mdist = std::abs(a_dist);
             const double b_mdist = std::abs(b_dist);
             const double c_mdist = std::abs(c_dist);
@@ -1020,7 +1004,7 @@ namespace la
                 {
                     const auto res_ab = findIntersec(_line, LineSegment3(_tr.getA(), _tr.getB()));
                     const auto res_ac = findIntersec(_line, LineSegment3(_tr.getA(), _tr.getC()));
-
+                    std::cout << normalization(_line.getV()) << std::endl;
                     result.first.reup(res_ab.first, res_ac.first);
                 }
                 else if (c_dist * a_dist > 0.f)

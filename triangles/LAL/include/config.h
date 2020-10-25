@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 namespace la {
 	static constexpr double EPSILON = 0.00001;
