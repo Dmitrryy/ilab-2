@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.10)
+
+# set the project name
+project(Matrix)
+
+# specify the C++ standard
+set(Matrix CMAKE_CXX_STANDARD 17)
+set(Matrix CMAKE_CXX_STANDARD_REQUIRED True)
+
+# add the executable
+add_executable(Matrix main.cpp tests/gen_test.cpp)

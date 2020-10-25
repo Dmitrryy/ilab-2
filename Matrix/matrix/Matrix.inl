@@ -159,7 +159,7 @@ namespace matrix
 	}
 
 
-	template <typename T>
+	template <typename T >
 	T Matrix<T>::determinanteSloww() const
 	{
 		T result = T();
@@ -187,18 +187,19 @@ namespace matrix
 
 
 	template <typename T>
-	T Matrix<T>::determinante() const
+	template <typename Ret /*= std::conditional_t< !std::is_integral_v<T>, T, double >*/ >
+	Ret Matrix<T>::determinante() const
 	{
 		if (m_nlines != m_ncolumns) {
 			return {};
 		}
 
-		T one{};
+		Ret one{};
 		one++;
-		T epsilon = one * 0.000001;
+		Ret epsilon = one * 0.000001;
 
-		Matrix<T> tr_mtr(m_nlines, m_ncolumns, Order::Row);
-		copy__(tr_mtr, *this, true);
+		Matrix<Ret> tr_mtr(m_nlines, m_ncolumns, Order::Row);
+		Matrix<>::copy__<T>(tr_mtr, *this, true);
 
 		const size_t N = m_nlines;
 		bool minus = false;
@@ -219,13 +220,13 @@ namespace matrix
 			//det = 0;
 			//std::cout << tr_mtr.dumpStr() << std::endl;
 			if (std::abs(tr_mtr.at(cl, cl)) < epsilon) {
-				return T{};
+				return Ret{};
 			}
 
-			const T& cur_elem = tr_mtr.at(cl, cl);
+			const Ret& cur_elem = tr_mtr.at(cl, cl);
 			for (size_t ln = cl + 1; ln < N; ln++)
 			{
-				T multiplier = tr_mtr.at(ln, cl) / cur_elem;
+				Ret multiplier = tr_mtr.at(ln, cl) / cur_elem;
 				for (size_t c = 0; c < N; c++)
 				{
 					tr_mtr.at(ln, c) -= tr_mtr.at(cl, c) * multiplier;
@@ -286,10 +287,10 @@ namespace matrix
 		return result;
 	}
 
-
 	template <typename T>
+	template <typename U>
 	void Matrix<T>::
-		copy__(Matrix<T>& dest_, const Matrix<T>& source_, bool save_order_/* = false*/)
+		copy__(Matrix<T>& dest_, const Matrix<U>& source_, bool save_order_/* = false*/)
 	{
 		const size_t min_y = std::min(source_.getNLines(), dest_.getNLines());
 		const size_t min_x = std::min(source_.getNColumns(), dest_.getNColumns());

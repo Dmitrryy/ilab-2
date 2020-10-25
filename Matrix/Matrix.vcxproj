@@ -155,6 +155,9 @@
   <ItemGroup>
     <None Include="matrix\Matrix.inl" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="CmakeLists.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

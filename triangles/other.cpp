@@ -12,13 +12,7 @@
 
 extern size_t COUNT_TT_INTERSEC;
 
-/*
-2
-10.3949 53.7716 44.5702 10.8135 53.8315 44.775 11.2476 54.2272 44.8065
-17.5453 73.4349 5.06346 17.9191 73.4929 5.24661 18.0148 73.5748 5.29431
-*/
-//1303 7140
-//8723 4198
+
 
 std::vector< la::Triangle > getData(std::istream& _source)
 {
@@ -32,7 +26,7 @@ std::vector< la::Triangle > getData(std::istream& _source)
         _source >> a.x >> a.y >> a.z
             >> b.x >> b.y >> b.z
             >> c.x >> c.y >> c.z;
-        data.push_back(la::Triangle(a, b, c));
+        data.emplace_back(la::Triangle(a, b, c));
     }
 
     return data;

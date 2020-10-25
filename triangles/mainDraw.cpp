@@ -353,7 +353,7 @@ private:
         appInfo.pEngineName = "No Engine";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.apiVersion = VK_API_VERSION_1_0;
-       
+
         VkInstanceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.pApplicationInfo = &appInfo;
@@ -659,6 +659,7 @@ private:
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
+      
         viewport.width = (float)swapChainExtent.width / 2;
         viewport.height = (float)swapChainExtent.height / 2;
         viewport.minDepth = 0.0f;
@@ -751,8 +752,10 @@ private:
 
         for (size_t i = 0; i < swapChainImageViews.size(); i++) {
             std::array<VkImageView, 2> attachments = {
+
                 swapChainImageViews[i],
                 depthImageView
+
             };
 
             VkFramebufferCreateInfo framebufferInfo{};
@@ -821,7 +824,7 @@ private:
         int texWidth, texHeight, texChannels;
         stbi_uc* pixels = stbi_load("resource/textures/images.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
         VkDeviceSize imageSize = texWidth * texHeight * 4;
-        
+
         if (!pixels) {
             throw std::runtime_error("failed to load texture image!");
         }
@@ -965,6 +968,7 @@ private:
         }
 
         vkCmdPipelineBarrier(
+
             commandBuffer,
             sourceStage, destinationStage,
             0,
