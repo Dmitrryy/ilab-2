@@ -7,8 +7,8 @@
 #include <chrono>
 
 
-#include "Octree/Octree.h"
-#include "tests/test_gen.h"
+#include <Octree.h>
+#include <test_gen.h>
 
 void intersectionN_N    (std::vector< la::Triangle > data);
 void intersectionOctree (std::vector< la::Triangle > data);

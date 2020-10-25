@@ -4,6 +4,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
-project(cashe)
+project(Cache)
 
-add_executable(cashe main.cpp)
+add_executable(Cache main.cpp)

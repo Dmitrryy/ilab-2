@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "../LAL/include/LALmath.h"
+#include <LALmath.h>
 
 namespace la
 {
