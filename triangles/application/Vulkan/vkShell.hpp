@@ -14,6 +14,8 @@ namespace vks
 
 	class Sight_t
 	{
+	public:
+
 		glm::vec3 m_position;
 		glm::vec3 m_direction;
 		

@@ -6,7 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/triangles)
 
-###
+
+#================================================================
+#
+#Triangles LVL2
+#
+#================================================================
 project(vkShell)
 
 find_package(Vulkan REQUIRED)
@@ -36,11 +41,16 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/resource $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource)
 
-###
+target_include_directories(${PROJECT_NAME} PRIVATE LAL/include)
+target_include_directories(${PROJECT_NAME} PRIVATE Octree)
+
+
+
+#================================================================
 #
 #Triangles LVL1
 #
-###
+#================================================================
 project(TrianglesLVL1)
 
 add_executable(${PROJECT_NAME}

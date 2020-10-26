@@ -132,6 +132,24 @@ const std::vector<uint16_t> indices = {
     4, 5, 6, 6, 7, 4
 };
 
+void keyCallback (GLFWwindow * window, int key, int scancode, int action, int mode)
+{
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+struct Sight_t
+{
+    glm::vec3 m_position = {};
+    glm::vec3 m_direction = {};
+
+    glm::vec3 m_topDirection = glm::vec3(0.f, 0.f, 1.f);
+    float m_fovy = 0.f;
+    float m_aspect = 0.f;
+    float m_near = 0.f;
+    float m_far = 0.f;
+};
+
 class HelloTriangleApplication {
 public:
     void run() {
@@ -198,6 +216,8 @@ private:
 
     bool framebufferResized = false;
 
+    Sight_t m_sight;
+
     void initWindow() {
         glfwInit();
 
@@ -206,6 +226,12 @@ private:
         window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
         glfwSetWindowUserPointer(window, this);
         glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+        glfwSetInputMode (window, GLFW_STICKY_KEYS, 1);
+
+        glfwSetKeyCallback(window, keyCallback);
+
+        m_sight.m_position = glm::vec4(2.f, 2.f, 2.f, 1.f);
+        m_sight.m_direction = glm::vec3(-1.f, -1.f, -1.f);
     }
 
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
@@ -239,10 +265,68 @@ private:
         createSyncObjects();
     }
 
-    void mainLoop() {
+    void mainLoop()
+    {
+        glfwSetCursorPos(window, WIDTH / 2.f, HEIGHT / 2.f);
         while (!glfwWindowShouldClose(window)) 
         {
+            static auto startTime = std::chrono::high_resolution_clock::now();
+
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+            startTime = currentTime;
+
             glfwPollEvents();
+
+            {
+                double x, y;
+                glfwGetCursorPos(window, &x, &y);
+                const float dx = WIDTH / 2.f - x;
+                const float dy = HEIGHT / 2.f - y;
+
+                if (std::abs(m_sight.m_direction.z) < 1.f) {
+                    m_sight.m_direction.z += dy / HEIGHT;
+                }
+                m_sight.m_direction =
+                        glm::rotate(glm::mat4(1.f), glm::radians(90.f) * dx / HEIGHT, glm::vec3(0.f, 0.f, 1.f))
+                        * glm::vec4(m_sight.m_direction, 0.f);
+                m_sight.m_direction = glm::normalize(m_sight.m_direction);
+
+                glfwSetCursorPos(window, WIDTH / 2.f, HEIGHT / 2.f);
+            }
+
+            {
+                bool forward = glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS;
+                bool back = glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS;
+                if (forward && back) { forward = back = false; }
+
+                bool left = glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS;
+                bool right = glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS;
+                if (left && right) { left = right = false; }
+
+
+                if (forward || back)
+                {
+                    m_sight.m_position += m_sight.m_direction * time * ((back) ? -1.f : 1.f);
+                }
+                if (left || right)
+                {
+                    glm::vec3 perp_dir = glm::normalize(glm::vec3(-m_sight.m_direction.y, m_sight.m_direction.x, 0.f));
+                    m_sight.m_position += perp_dir * time * ((right) ? -1.f : 1.f);
+                }
+            }
+
+            {
+                bool down = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+                bool up = glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS;
+                if (down && up) { down = up = false; }
+
+                if (down || up)
+                {
+                    m_sight.m_position.z += 1.f * time * ((down) ? -1.f : 1.f);
+                }
+            }
+            //std::cout << m_sight.m_direction.x << " | " << m_sight.m_direction.y << " | " << m_sight.m_direction.z << '\n';
             drawFrame();
         }
 
@@ -661,8 +745,8 @@ private:
         viewport.x = 0.0f;
         viewport.y = 0.0f;
       
-        viewport.width = (float)swapChainExtent.width / 2;
-        viewport.height = (float)swapChainExtent.height / 2;
+        viewport.width = (float)swapChainExtent.width;
+        viewport.height = (float)swapChainExtent.height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
         
@@ -1288,12 +1372,12 @@ private:
 
         UniformBufferObject ubo{};
         const glm::mat4 TranslationMatr = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 0.f));
-        const glm::mat4 RotationMat = glm::rotate(glm::mat4(1.f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        const glm::mat4 RotationMat = glm::rotate(glm::mat4(1.f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         const glm::mat4 ScaleMat = glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f));
         ubo.model = TranslationMatr * RotationMat * ScaleMat;
         //                     position of camera           direction
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 0.25f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
-        ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+        ubo.view = glm::lookAt(m_sight.m_position, m_sight.m_position + m_sight.m_direction, m_sight.m_topDirection);
+        ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 100.0f);
         ubo.proj[1][1] *= -1;
 
         void* data;
