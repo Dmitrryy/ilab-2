@@ -7,5 +7,7 @@ project(Matrix)
 set(Matrix CMAKE_CXX_STANDARD 17)
 set(Matrix CMAKE_CXX_STANDARD_REQUIRED True)
 
+set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Matrix)
+
 # add the executable
 add_executable(Matrix main.cpp tests/gen_test.cpp)
