@@ -8,7 +8,7 @@ break;
 namespace matrix
 {
 
-	std::string toString(typename Order order_)
+	std::string toString(Order order_)
 	{
 		std::string res;
 

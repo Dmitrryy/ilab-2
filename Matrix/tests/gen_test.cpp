@@ -46,3 +46,44 @@ void RunTest(size_t num_tests, size_t mat_size)
 	std::cout << "miss: " << count_wrong << std::endl;
 
 }
+
+
+Matrix<double> genMatrix(size_t size_, MType type_, long long int *det_ /*= nullptr*/)
+{
+    Matrix<double> res(size_, size_);
+    Random r(1, 3);
+    if (det_ != nullptr) { *det_ = 1;}
+
+    if (type_ == MType::Diagonal)
+    {
+        for (size_t i = 0u; i < size_; ++i)
+        {
+            res(i, i) = r();
+            if (det_ != nullptr)
+            {
+                *det_ *= res(i, i);
+            }
+        }
+    }
+    else if (type_ == MType::LowTriangle)
+    {
+        for (size_t i = 0u; i < size_; ++i)
+        {
+            for (size_t k = 0u; k <= i; ++k)
+            {
+                res(i, k) = r();
+            }
+            if (det_ != nullptr)
+            {
+                *det_ *= res(i, i);
+            }
+        }
+    }
+    else if (type_ == MType::UpTriangle)
+    {
+        res = genMatrix(size_, MType::LowTriangle, det_);
+        res.transpose();
+    }
+
+    return res;
+}

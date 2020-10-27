@@ -22,6 +22,11 @@
 #include <optional>
 #include <set>
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+#define VK_EPSILON 0.000001f
+
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
@@ -143,6 +148,9 @@ struct Sight_t
     glm::vec3 m_position = {};
     glm::vec3 m_direction = {};
 
+    float m_angle_xy = 0.f;
+    float m_angle_zx = 0.f;
+
     glm::vec3 m_topDirection = glm::vec3(0.f, 0.f, 1.f);
     float m_fovy = 0.f;
     float m_aspect = 0.f;
@@ -230,8 +238,9 @@ private:
 
         glfwSetKeyCallback(window, keyCallback);
 
-        m_sight.m_position = glm::vec4(2.f, 2.f, 2.f, 1.f);
-        m_sight.m_direction = glm::vec3(-1.f, -1.f, -1.f);
+        m_sight.m_position = glm::vec4(2.f, 0.f, 2.f, 1.f);
+        m_sight.m_angle_xy = -3.14f;
+        m_sight.m_angle_zx = M_PI_4;
     }
 
     static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
@@ -284,13 +293,13 @@ private:
                 const float dx = WIDTH / 2.f - x;
                 const float dy = HEIGHT / 2.f - y;
 
-                if (std::abs(m_sight.m_direction.z) < 1.f) {
-                    m_sight.m_direction.z += dy / HEIGHT;
-                }
-                m_sight.m_direction =
-                        glm::rotate(glm::mat4(1.f), glm::radians(90.f) * dx / HEIGHT, glm::vec3(0.f, 0.f, 1.f))
-                        * glm::vec4(m_sight.m_direction, 0.f);
-                m_sight.m_direction = glm::normalize(m_sight.m_direction);
+                m_sight.m_angle_xy += glm::radians(90.f * dx / WIDTH);
+                while (m_sight.m_angle_xy > 2.f * M_PI) { m_sight.m_angle_xy -= 2.f * M_PI; }
+                while (m_sight.m_angle_xy < 0.f) { m_sight.m_angle_xy += 2.f * M_PI; }
+
+                m_sight.m_angle_zx -= glm::radians(90.f * dy / HEIGHT);
+                if (m_sight.m_angle_zx >  M_PI_2 - VK_EPSILON) { m_sight.m_angle_zx = M_PI_2 - VK_EPSILON; }
+                if (m_sight.m_angle_zx < -M_PI_2 + VK_EPSILON) { m_sight.m_angle_zx = -M_PI_2 + VK_EPSILON; }
 
                 glfwSetCursorPos(window, WIDTH / 2.f, HEIGHT / 2.f);
             }
@@ -327,6 +336,7 @@ private:
                 }
             }
             //std::cout << m_sight.m_direction.x << " | " << m_sight.m_direction.y << " | " << m_sight.m_direction.z << '\n';
+            //std::cout << m_sight.m_angle_xy << " | " << m_sight.m_angle_zx << '\n';
             drawFrame();
         }
 
@@ -1369,6 +1379,14 @@ private:
 
         auto currentTime = std::chrono::high_resolution_clock::now();
         float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+        m_sight.m_direction =
+                glm::rotate(glm::mat4(1.f), m_sight.m_angle_zx, glm::vec3(0.f, 1.f, 0.f))
+                * glm::vec4(1.f, 0.f, 0.f, 0.f);
+        m_sight.m_direction =
+                glm::rotate(glm::mat4(1.f), m_sight.m_angle_xy, glm::vec3(0.f, 0.f, 1.f))
+                * glm::vec4(m_sight.m_direction, 0.f);
+        m_sight.m_direction = glm::normalize(m_sight.m_direction);
 
         UniformBufferObject ubo{};
         const glm::mat4 TranslationMatr = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 0.f));

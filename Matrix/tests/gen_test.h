@@ -3,6 +3,7 @@
 #include <functional>
 #include <random>
 #include <vector>
+#include <Matrix.h>
 
 
 class Random
@@ -29,4 +30,12 @@ private:
     std::uniform_int_distribution<> m_dist;
 };
 
+enum class MType
+{
+    LowTriangle
+    , UpTriangle
+    , Diagonal
+};
+
 void RunTest(size_t num_tests, size_t mat_size);
+matrix::Matrix<double> genMatrix(size_t size_, MType type_, long long int *det_ = nullptr);

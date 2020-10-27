@@ -39,11 +39,11 @@ namespace matrix
 		Matrix (const std::initializer_list< std::initializer_list< T > >& list_, Order order_ = Order::Row);
 		Matrix& operator=  (const std::initializer_list< std::initializer_list< T > >& list_);
 
-		Matrix             (const Matrix& that_);
-		Matrix& operator=  (const Matrix& that_);
+		Matrix             (const Matrix& that_) noexcept;
+		Matrix& operator=  (const Matrix& that_) noexcept;
 
-		Matrix             (Matrix&& that_);
-		Matrix& operator=  (Matrix&& that_);
+		Matrix             (Matrix&& that_) noexcept;
+		Matrix& operator=  (Matrix&& that_) noexcept;
 
 		~Matrix () {
 			delete[] m_data;
@@ -81,7 +81,7 @@ namespace matrix
 
 		T determinanteSloww () const;
 
-		//if T is equal to integral type, then Ret = double
+		//if T is equal to integral type, then Ret = long long int
 		template <typename Ret = std::conditional_t< !std::is_integral_v<T>, T, double > >
 		Ret determinante () const;
 
@@ -170,26 +170,35 @@ namespace matrix
 
 
 	template <typename T>
-	Matrix<T>::Matrix(const Matrix& that_)
+	Matrix<T>::Matrix(const Matrix& that_) noexcept
 		: Matrix()
 	{
-		resize(that_.getNLines(), that_.getNColumns());
-		copy__(*this, that_, false);
+		*this = that_;
 	}
 
 	template <typename T>
-	Matrix<T>& Matrix<T>::operator= (const Matrix& that_)
+	Matrix<T>& Matrix<T>::operator= (const Matrix& that_) noexcept
 	{
 		if (this == &that_)
 			return *this;
 
-		resize(that_.getNLines(), that_.getNColumns());
-		copy__(*this, that_, false);
+		delete [] m_data;
+		m_data = new T[that_.m_size];
+		for (size_t i = 0; i < that_.m_size; i++)
+        {
+		    m_data[i] = that_.m_data[i];
+        }
+
+		m_size = that_.m_size;
+		m_capacity = that_.m_capacity;
+		m_ncolumns = that_.m_ncolumns;
+		m_nlines = that_.m_nlines;
+		m_order = that_.m_order;
 	}
 
 
 	template <typename T>
-	Matrix<T>::Matrix(Matrix&& that_)
+	Matrix<T>::Matrix(Matrix&& that_) noexcept
 		: m_data    (nullptr)
 		, m_capacity(that_.m_capacity)
 		, m_size    (that_.m_size)
@@ -198,11 +207,11 @@ namespace matrix
 		, m_order   (that_.m_order)
 	{
 		std::swap(m_data, that_.m_data);
+
 	}
 
 	template <typename T>
-	Matrix<T>& Matrix<T>::operator= (Matrix&& that_)
-	{
+	Matrix<T>& Matrix<T>::operator= (Matrix&& that_) noexcept 	{
 		if (this == &that_)
 			return *this;
 

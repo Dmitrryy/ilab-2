@@ -16,9 +16,7 @@ int main()
 			std::cin >> m.at(i, l);
 		}
 	}
-	std::cout << m.determinante() << std::endl;
-
-	//RunTest(1000, 5);
+	std::cout << static_cast<long long int>(m.determinante()) << std::endl;
 
 	return 0;
 }
