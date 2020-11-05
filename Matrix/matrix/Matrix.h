@@ -21,14 +21,14 @@ namespace matrix
 	template <typename T = double>
 	class Matrix
 	{
-		T*     m_data;
+		T*     m_data     = nullptr;
 
-		size_t m_capacity;
-		size_t m_size;
-		size_t m_ncolumns;
-		size_t m_nlines;
+		size_t m_capacity = 0;
+		size_t m_size     = 0;
+		size_t m_ncolumns = 0;
+		size_t m_nlines   = 0;
 
-		Order  m_order;
+		Order  m_order    = Order::Row;
 
 	public:
 
@@ -69,6 +69,8 @@ namespace matrix
 		Matrix& sub(const Matrix& rhs_)&;
 		Matrix& mul(const T& num_)&;
 
+		Matrix& multiplication(const Matrix& that_)&;
+
 		Matrix& transpose()&;
 		Matrix& negate   ()&;
 
@@ -82,8 +84,12 @@ namespace matrix
 		T determinanteSloww () const;
 
 		//if T is equal to integral type, then Ret = long long int
-		template <typename Ret = std::conditional_t< !std::is_integral_v<T>, T, double > >
+		template <typename Ret = std::conditional_t< !std::is_integral<T>::value, T, double > >
 		Ret determinante () const;
+
+	public:
+
+	    static Matrix identity(size_t size_);
 
 	public:
 
@@ -110,12 +116,6 @@ namespace matrix
 
 	template <typename T>
 	Matrix<T>::Matrix()
-		: m_data    (nullptr)
-		, m_capacity(0)
-		, m_size    (0)
-		, m_ncolumns(0)
-		, m_nlines  (0)
-		, m_order   (Order::Row)
 	{
 		//static_assert(!std::is_integral<T>::value, "trying to create a matrix of integers");
 	}
@@ -173,27 +173,29 @@ namespace matrix
 	Matrix<T>::Matrix(const Matrix& that_) noexcept
 		: Matrix()
 	{
-		*this = that_;
+        m_data = new T[that_.m_size];
+        for (size_t i = 0; i < that_.m_size; i++)
+        {
+            m_data[i] = that_.m_data[i];
+        }
+
+        m_size = that_.m_size;
+        m_capacity = that_.m_capacity;
+        m_ncolumns = that_.m_ncolumns;
+        m_nlines = that_.m_nlines;
+        m_order = that_.m_order;
 	}
 
 	template <typename T>
-	Matrix<T>& Matrix<T>::operator= (const Matrix& that_) noexcept
+	Matrix<T>& Matrix<T>::operator = (const Matrix& that_) noexcept
 	{
 		if (this == &that_)
 			return *this;
 
-		delete [] m_data;
-		m_data = new T[that_.m_size];
-		for (size_t i = 0; i < that_.m_size; i++)
-        {
-		    m_data[i] = that_.m_data[i];
-        }
+		Matrix tmp(that_);
+        *this = std::move(tmp);
 
-		m_size = that_.m_size;
-		m_capacity = that_.m_capacity;
-		m_ncolumns = that_.m_ncolumns;
-		m_nlines = that_.m_nlines;
-		m_order = that_.m_order;
+        return *this;
 	}
 
 
@@ -207,7 +209,9 @@ namespace matrix
 		, m_order   (that_.m_order)
 	{
 		std::swap(m_data, that_.m_data);
-
+        that_.m_size = that_.m_capacity
+                = that_.m_ncolumns
+                = that_.m_nlines = 0;
 	}
 
 	template <typename T>

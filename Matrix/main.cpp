@@ -1,7 +1,6 @@
 #include <iostream>
 
-#include "matrix/Matrix.h"
-#include "tests/gen_test.h"
+#include <Matrix.h>
 
 using matrix::Matrix;
 using matrix::Order;

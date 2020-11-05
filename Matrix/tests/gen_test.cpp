@@ -51,31 +51,34 @@ void RunTest(size_t num_tests, size_t mat_size)
 Matrix<double> genMatrix(size_t size_, MType type_, long long int *det_ /*= nullptr*/)
 {
     Matrix<double> res(size_, size_);
-    Random r(1, 3);
-    if (det_ != nullptr) { *det_ = 1;}
+    Random r(-50, 50);
 
     if (type_ == MType::Diagonal)
     {
-        for (size_t i = 0u; i < size_; ++i)
-        {
-            res(i, i) = r();
-            if (det_ != nullptr)
-            {
-                *det_ *= res(i, i);
+        if (*det_ != 0) {
+            res = Matrix<double>::identity(size_);
+            Random r2(0, size_);
+            size_t pos = r2();
+            res.at(pos, pos) = *det_;
+        }
+        else {
+            *det_ = 1;
+            for (size_t i = 0u; i < size_; ++i) {
+                res(i, i) = r();
+                if (det_ != nullptr) {
+                    *det_ *= res(i, i);
+                }
             }
         }
     }
     else if (type_ == MType::LowTriangle)
     {
+        res = genMatrix(size_, MType::Diagonal, det_);
         for (size_t i = 0u; i < size_; ++i)
         {
-            for (size_t k = 0u; k <= i; ++k)
+            for (size_t k = 0u; k < i; ++k)
             {
                 res(i, k) = r();
-            }
-            if (det_ != nullptr)
-            {
-                *det_ *= res(i, i);
             }
         }
     }
@@ -83,6 +86,19 @@ Matrix<double> genMatrix(size_t size_, MType type_, long long int *det_ /*= null
     {
         res = genMatrix(size_, MType::LowTriangle, det_);
         res.transpose();
+    }
+    else if (type_ == MType::MulUpLowTriangles)
+    {
+        long long det1 = 1;
+        long long det2 = *det_;
+
+        Matrix<double> low = genMatrix(size_, MType::LowTriangle, &det1);
+        std::cout << low << std::endl;
+        Matrix<double> up = genMatrix(size_, MType::UpTriangle, &det2);
+        std::cout << up << std::endl;
+
+        res = low.multiplication(up);
+        *det_ = det1 * det2;
     }
 
     return res;

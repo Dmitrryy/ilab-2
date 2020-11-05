@@ -434,6 +434,32 @@ namespace matrix
 
 
 	template <typename T>
+    Matrix<T>& Matrix<T>::multiplication(const Matrix& that_)&
+    {
+	    if (m_ncolumns != that_.getNLines())
+        {
+	        throw std::logic_error("matrix sizes are not valid for their composition");
+        }
+
+	    Matrix<T> result(m_nlines, that_.getNColumns());
+
+	    for (size_t l = 0, ml = m_nlines; l < ml; l++)
+        {
+	        for (size_t c = 0, mc = that_.getNColumns(); c < mc; c++)
+            {
+	            auto& cur_res = result.at(l, c);
+	            for (size_t N = 0; N < m_ncolumns; N++)
+                {
+	                cur_res += at(l, N) * that_.at(N, c);
+                }
+            }
+        }
+
+	    return *this = result;
+    }
+
+
+    template <typename T>
 	std::string Matrix<T>::dumpStr() const
 	{
 		std::ostringstream out;
@@ -581,4 +607,17 @@ namespace matrix
 		res.mul(num_);
 		return res;
 	}
+
+    template <typename T>
+    /*static*/ Matrix<T> Matrix<T>::identity(size_t size_)
+    {
+	    Matrix result(size_, size_);
+
+	    for (size_t k = 0; k < size_; k++)
+        {
+	        result.at(k, k)++;
+        }
+
+	    return result;
+    }
 }//namespace matrix

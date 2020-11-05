@@ -35,6 +35,7 @@ enum class MType
     LowTriangle
     , UpTriangle
     , Diagonal
+    , MulUpLowTriangles
 };
 
 void RunTest(size_t num_tests, size_t mat_size);

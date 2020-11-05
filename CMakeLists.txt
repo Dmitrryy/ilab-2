@@ -26,3 +26,9 @@ add_subdirectory(triangles)
 #
 #LVL1: project's name for build is 'Matrix'
 add_subdirectory(Matrix)
+
+#ParaC
+#status: LVL1 in dev
+#
+#LVL1: project's name for build is 'ParaC'
+add_subdirectory(ParaC)

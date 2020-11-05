@@ -1,10 +1,15 @@
 #pragma once 
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#include "../matrix/Matrix.h"
+#include <Matrix.h>
 
 using namespace matrix;
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
 
 class MatrixTest : public ::testing::Test
 {
@@ -227,4 +232,36 @@ TEST_F(MatrixTest, addSub)
 	};
 	EXPECT_EQ(q0_.add(q1_), q2_);
 	EXPECT_EQ(q0_.sub(q1_), q3_);
+}
+
+TEST_F(MatrixTest, multipl)
+{
+    EXPECT_EQ(q0_.multiplication(q1_), q0_);
+
+    q0_ = {
+            {2, 0},
+            {-1, 3}
+    };
+    q1_ = {
+            {4, 0},
+            {-5, 9}
+    };
+    EXPECT_EQ(q0_.multiplication(q0_), q1_);
+
+    q4_ = Matrix<double>::identity(3);
+    EXPECT_EQ(q4_.multiplication(q4_), q4_);
+
+    q1_ = {
+            {2, 0},
+            {1, 1}
+    };
+    q2_ = {
+            {2, 1},
+            {0, 1}
+    };
+    q3_ = {
+            {4, 2},
+            {2, 2}
+    };
+    EXPECT_EQ(q1_.multiplication(q2_), q3_);
 }
