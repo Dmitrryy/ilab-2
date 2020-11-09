@@ -83,7 +83,7 @@ namespace matrix
 
 		T determinanteSloww () const;
 
-		//if T is equal to integral type, then Ret = long long int
+
 		template <typename Ret = std::conditional_t< !std::is_integral<T>::value, T, double > >
 		Ret determinante () const;
 
@@ -215,7 +215,7 @@ namespace matrix
 	}
 
 	template <typename T>
-	Matrix<T>& Matrix<T>::operator= (Matrix&& that_) noexcept 	{
+	Matrix<T>& Matrix<T>::operator= (Matrix&& that_) noexcept {
 		if (this == &that_)
 			return *this;
 
@@ -226,6 +226,12 @@ namespace matrix
 		m_nlines = that_.m_nlines;
 		m_ncolumns = that_.m_ncolumns;
 		m_capacity = that_.m_capacity;
+
+        that_.m_size = that_.m_capacity
+                = that_.m_ncolumns
+                = that_.m_nlines = 0;
+
+        return *this;
 	}
 
 

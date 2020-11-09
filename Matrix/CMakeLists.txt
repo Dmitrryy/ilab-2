@@ -4,8 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 project(Matrix)
 
 # specify the C++ standard
-set(${PROJECT_NAME} CMAKE_CXX_STANDARD 17)
-set(${PROJECT_NAME} CMAKE_CXX_STANDARD_REQUIRED True)
+set(MAKE_CXX_STANDARD 17)
 
 set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Matrix)
 
@@ -23,8 +22,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE matrix)
 project(MatrixTest)
 
 # specify the C++ standard
-set(${PROJECT_NAME} CMAKE_CXX_STANDARD 17)
-set(${PROJECT_NAME} CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Matrix)
 
@@ -47,7 +45,7 @@ set(${PROJECT_NAME} CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 
-add_executable(${PROJECT_NAME} tests/Matrix_test.cpp matrix/Matrix_other.cpp)
+add_executable(${PROJECT_NAME} tests/Matrix_test.cpp matrix/Matrix_other.cpp tests/gen_test.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
         ../include

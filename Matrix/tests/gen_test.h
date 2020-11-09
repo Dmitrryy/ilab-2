@@ -13,7 +13,7 @@ public:
     Random(unsigned _min = std::mt19937::min(), unsigned _max = std::mt19937::max())
         : m_rd()
         , m_gen(m_rd())
-        , m_dist{ _min, _max }
+        , m_dist{ static_cast<int>(_min), static_cast<int>(_max) }
     {}
 
     int operator()() {

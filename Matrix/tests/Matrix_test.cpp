@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <gtest/gtest.h>
+#include <gen_test.h>
 
 #include <Matrix.h>
 
@@ -30,6 +31,23 @@ protected:
 	Matrix<double> q4_;
 };
 
+TEST_F(MatrixTest, muvConstruct)
+{
+    q0_ = genMatrix(4, MType::MulUpLowTriangles);
+    q1_ = q0_;
+    q2_ = std::move(q0_);
+
+    EXPECT_EQ(q1_, q2_);
+
+    q0_ = q1_;
+    q3_ = std::move(q0_) = std::move(q1_);
+    EXPECT_EQ(q3_, q2_);
+
+    q1_ = genMatrix(4, MType::MulUpLowTriangles);
+    q0_ = q1_;
+    Matrix tmp(std::move(q1_));
+    EXPECT_EQ(q0_, tmp);
+}
 
 TEST_F(MatrixTest, construct)
 {
