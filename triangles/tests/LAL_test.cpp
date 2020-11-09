@@ -1,8 +1,7 @@
 #pragma once 
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#include "../LAL/include/LAL.h"
 #include "../LAL/include/LALmath.h"
 
 #define test_class(name)                    \
@@ -28,6 +27,12 @@ test_class(Line3);
 test_class(Plane);
 test_class(Triangle);
 test_class(Rectangle3);
+
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
 
 
 TEST_F(Vector3fTest, Construct)
