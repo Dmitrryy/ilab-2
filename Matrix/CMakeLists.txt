@@ -24,13 +24,18 @@ project(MatrixTest)
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Matrix)
+#set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/Matrix)
 
 # add the executable
 add_executable(${PROJECT_NAME} tests/gen_test.cpp matrix/Matrix_other.cpp tests/test_main.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE matrix)
 target_include_directories(${PROJECT_NAME} PRIVATE tests)
+
+# copy resource file to build directory
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/tests $<TARGET_FILE_DIR:${PROJECT_NAME}>/tests)
 
 
 #############################################

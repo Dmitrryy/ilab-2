@@ -16,7 +16,7 @@ namespace matrix
 		, Column
 	};
 
-	constexpr double EPSIL = 0.000001;
+	constexpr double EPSIL = 0.000000001;
 
 	template <typename T = double>
 	class Matrix
@@ -42,6 +42,9 @@ namespace matrix
 		Matrix             (const Matrix& that_) noexcept;
 		Matrix& operator=  (const Matrix& that_) noexcept;
 
+		template <typename U>
+		Matrix             (const Matrix<U> &that_) noexcept;
+
 		Matrix             (Matrix&& that_) noexcept;
 		Matrix& operator=  (Matrix&& that_) noexcept;
 
@@ -58,7 +61,9 @@ namespace matrix
 
 		void   resize(size_t y_, size_t x_);
 		void   clear ();
-		bool   equal (const Matrix<T>& that_) const;
+
+		template <typename U>
+		bool   equal (const Matrix<U>& that_) const;
 
 		T&       at  (size_t y_, size_t x_) &;
 		const T& at  (size_t y_, size_t x_) const&;
@@ -83,9 +88,7 @@ namespace matrix
 
 		T determinanteSloww () const;
 
-
-		template <typename Ret = std::conditional_t< !std::is_integral<T>::value, T, double > >
-		Ret determinante () const;
+		double determinante () const;
 
 	public:
 
@@ -100,8 +103,11 @@ namespace matrix
 		Matrix<T>& operator -= (const Matrix& that_)&;
 		Matrix<T>& operator *= (const T& num_)&;
 
-		bool operator == (const Matrix<T>& that_) const;
-		bool operator != (const Matrix<T>& that_) const;
+		template <typename U>
+		bool operator == (const Matrix<U>& that_) const;
+
+		template <typename U>
+		bool operator != (const Matrix<U>& that_) const;
 
 		friend std::ostream& operator << (std::ostream& stream_, const Matrix<T>& mtr_) {
 			return stream_ << mtr_.dumpStr();
@@ -185,6 +191,16 @@ namespace matrix
         m_nlines = that_.m_nlines;
         m_order = that_.m_order;
 	}
+
+
+	template <typename T>
+    template <typename U>
+    Matrix<T>::Matrix(const Matrix<U> &that_) noexcept
+        : Matrix(that_.getNLines(), that_.getNColumns(), that_.getOrder())
+    {
+        copy__(*this, that_, true);
+    }
+
 
 	template <typename T>
 	Matrix<T>& Matrix<T>::operator = (const Matrix& that_) noexcept

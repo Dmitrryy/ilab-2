@@ -37,7 +37,8 @@ namespace matrix
 
 
 	template <typename T>
-	bool Matrix<T>::equal(const Matrix<T>& that_) const
+    template <typename U>
+    bool Matrix<T>::equal(const Matrix<U>& that_) const
 	{
 		bool result = true;
 
@@ -187,19 +188,13 @@ namespace matrix
 
 
 	template <typename T>
-	template <typename Ret /*= std::conditional_t< !std::is_integral_v<T>, T, double >*/ >
-	Ret Matrix<T>::determinante() const
+	double Matrix<T>::determinante() const
 	{
 		if (m_nlines != m_ncolumns) {
 			return {};
 		}
 
-		Ret one{};
-		one++;
-		Ret epsilon = one * 0.000001;
-
-		Matrix<Ret> tr_mtr(m_nlines, m_ncolumns, Order::Row);
-		Matrix<>::copy__<T>(tr_mtr, *this, true);
+		Matrix<double> tr_mtr{*this};
 
 		const size_t N = m_nlines;
 		bool minus = false;
@@ -208,37 +203,31 @@ namespace matrix
 			//find a*0 != 0
 			for (size_t k = cl; k < N; k++)
 			{
-				if (std::abs(tr_mtr.at(k, cl)) > epsilon) {
+				if (std::abs(tr_mtr.at(k, cl)) > EPSIL) {
 					if (k != cl) {
 						tr_mtr.swopLines(cl, k);
 						minus = !minus;
-						//std::cout << tr_mtr.dumpStr() << std::endl;
 					}
 					break;
 				}
 			}
 			//det = 0;
-			//std::cout << tr_mtr.dumpStr() << std::endl;
-			if (std::abs(tr_mtr.at(cl, cl)) < epsilon) {
-				return Ret{};
+			if (std::abs(tr_mtr.at(cl, cl)) < EPSIL) {
+				return 0.0;
 			}
 
-			const Ret& cur_elem = tr_mtr.at(cl, cl);
+			auto& cur_elem = tr_mtr.at(cl, cl);
 			for (size_t ln = cl + 1; ln < N; ln++)
 			{
-				Ret multiplier = tr_mtr.at(ln, cl) / cur_elem;
+				double multiplier = tr_mtr.at(ln, cl) / cur_elem;
 				for (size_t c = 0; c < N; c++)
 				{
 					tr_mtr.at(ln, c) -= tr_mtr.at(cl, c) * multiplier;
-					//std::cout << tr_mtr.dumpStr() << std::endl;
 				}
 			}
 		}
 
-		if (minus) {
-			return -tr_mtr.trace();
-		}
-		return tr_mtr.trace();
+		return tr_mtr.trace() * ((minus) ? -1 : 1);
 	}
 
 
@@ -481,13 +470,15 @@ namespace matrix
 		return out.str();
 	}
 
-	template <typename T>
-	bool Matrix<T>::operator == (const Matrix<T>& that_) const {
+    template <typename T>
+    template <typename U>
+	bool Matrix<T>::operator == (const Matrix<U>& that_) const {
 		return equal(that_);
 	}
 
 	template <typename T>
-	bool Matrix<T>::operator != (const Matrix<T>& that_) const {
+    template <typename U>
+    bool Matrix<T>::operator != (const Matrix<U>& that_) const {
 		return !equal(that_);
 	}
 

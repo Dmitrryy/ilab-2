@@ -4,11 +4,15 @@
 #include <Matrix.h>
 #include <gen_test.h>
 
+#define TEST_IN_STREAM
+//#define GEN_TXT_TEST
+
 using matrix::Matrix;
 using matrix::Order;
 
 int main()
 {
+#ifdef GEN_TXT_TEST
     long long int det = 32;
     size_t mat_size = 100;
     Matrix<double> m = genMatrix(mat_size, MType::MulUpLowTriangles, &det);
@@ -32,7 +36,31 @@ int main()
         out << det;
         out.close();
     }
-    //RunTest(1000, 5);
+#endif //GEN_TXT_TEST
+
+#ifdef TEST_IN_STREAM
+
+    std::ifstream input("tests/1001.txt");
+
+    if (!input.is_open()) {
+        std::cout << "nop" << std::endl;
+        return 1;
+    }
+    size_t N = 0;
+    input >> N;
+
+    Matrix<double> matr(N, N, Order::Row);
+    for (size_t l = 0; l < N; l++)
+    {
+        for (size_t c = 0; c < N; c++)
+        {
+            input >> matr.at(l, c);
+        }
+    }
+
+    std::cout << std::endl << std::round(matr.determinante()) << std::endl;
+
+#endif
 
     return 0;
 }

@@ -65,6 +65,15 @@ TEST_F(MatrixTest, construct)
 
 	q4_.at(9, 9) = 10;
 	EXPECT_TRUE(q3_ == q4_);
+
+
+	q1_ = genMatrix(10, MType::MulUpLowTriangles);
+	q2_ = q1_;
+
+	Matrix<int> tmp(q1_);
+	EXPECT_EQ(tmp, q1_);
+	q1_.at(0, 0)++;
+	EXPECT_TRUE(tmp != q1_);
 }
 
 TEST_F(MatrixTest, setOrder)

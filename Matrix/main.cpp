@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include <Matrix.h>
 
@@ -15,7 +16,7 @@ int main()
 			std::cin >> m.at(i, l);
 		}
 	}
-	std::cout << static_cast<long long int>(m.determinante()) << std::endl;
+	std::cout << std::round(m.determinante()) << std::endl;
 
 	return 0;
 }
