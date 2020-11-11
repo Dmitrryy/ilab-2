@@ -45,6 +45,44 @@ target_include_directories(${PROJECT_NAME} PRIVATE LAL/include)
 target_include_directories(${PROJECT_NAME} PRIVATE Octree)
 
 
+#================================================================
+#
+#Triangles LVL2(app_test)
+#
+#================================================================
+project(AppTest)
+
+find_package(Vulkan REQUIRED)
+find_package(X11 REQUIRED)
+find_package(glfw3 REQUIRED)
+
+add_executable(${PROJECT_NAME} application/app_main.cpp application/Vulkan/vkCore.cpp)
+
+target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
+add_definitions(-DVK_USE_PLATFORM_XLIB_KHR)
+
+# Add vulkan dependencies using enviornment variable from LunarG SDK Setup
+target_include_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/include")
+target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/lib")
+target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/etc/explicit_layer.d")
+
+
+# link other .h in /path
+target_include_directories(${PROJECT_NAME} PRIVATE path)
+
+# Link dependencies
+target_link_libraries(${PROJECT_NAME} glfw)
+target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan)
+
+# copy resource file to build directory
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/resource $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource)
+
+target_include_directories(${PROJECT_NAME} PRIVATE LAL/include)
+target_include_directories(${PROJECT_NAME} PRIVATE Octree)
+target_include_directories(${PROJECT_NAME} PRIVATE application/Vulkan)
+
 
 #================================================================
 #
