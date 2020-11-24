@@ -16,8 +16,6 @@ namespace la
 		Vector3f m_b;
 		Vector3f m_c;
 
-		Rectangle3 m_area;
-
 	public:
 
 		Triangle() = default;
@@ -44,9 +42,24 @@ namespace la
 
 		bool   contein(const Vector3f& _vec) const;
 
-		Rectangle3 getArea() const noexcept { return m_area; }
+		Rectangle3 getArea() const noexcept 
+		{ 
+			using std::min;
+			using std::max;
 
-		bool   equal  (const Triangle& _that) const noexcept;
+			Vector3f a, b;
+			a.x = min(getA().x, min(getB().x, getC().x));
+			a.y = min(getA().y, min(getB().y, getC().y));
+			a.z = min(getA().z, min(getB().z, getC().z));
+			b.x = max(getA().x, max(getB().x, getC().x));
+			b.y = max(getA().y, max(getB().y, getC().y));
+			b.z = max(getA().z, max(getB().z, getC().z));
+
+			return Rectangle3{ a, b };
+		}
+
+		bool   equal(const Triangle& _that) const noexcept;
+		bool   intersec  (const Triangle& _that) const noexcept;
 
 		bool operator == (const Triangle& _that) const noexcept { return equal(_that); }
 
@@ -55,10 +68,6 @@ namespace la
 		friend std::ostream& operator << (std::ostream& _stream, const Triangle& _tar) {
 			return _stream << _tar.dump();
 		}
-
-	private:
-
-		void upArea__();
 	};
    
 }//namespace la

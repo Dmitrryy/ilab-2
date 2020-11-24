@@ -19,6 +19,18 @@
     <Filter Include="Application\Vulkan">
       <UniqueIdentifier>{9aee7f9d-d02a-4b15-921c-46c2349ca2a3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\LAL">
+      <UniqueIdentifier>{7d589b44-406b-4381-89f5-8932a0f0305b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LAL\include">
+      <UniqueIdentifier>{355e9823-3642-49d9-a5f6-cfa3ee2635ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\LAL\tests">
+      <UniqueIdentifier>{5a7239a3-f0eb-4180-94b5-e8ffb131440f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Octree">
+      <UniqueIdentifier>{3c47efbb-e2da-402e-938b-b8118f14cf0b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\application\Vulkan\vkCore.cpp">
@@ -33,6 +45,33 @@
     <ClCompile Include="..\application\Vulkan\App.cpp">
       <Filter>Application\Vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\application\helpa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\Line.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\LineSegment.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\math\LALmath.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\Plane.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\square.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\triangle.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\Vector.cpp">
+      <Filter>Source Files\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tests\test_gen.cpp">
+      <Filter>Source Files\LAL\tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\application\Vulkan\vkCore.h">
@@ -43,6 +82,45 @@
     </ClInclude>
     <ClInclude Include="..\application\Vulkan\App.h">
       <Filter>Application\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\application\helpa.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\application\Vulkan\CameraView.h">
+      <Filter>Application\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\LAL.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\LALmath.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\Line.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\LineSegment.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\Plane.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\square.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\triangle.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LAL\include\Vector.h">
+      <Filter>Source Files\LAL\include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tests\LAL_test.h">
+      <Filter>Source Files\LAL\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tests\test_gen.h">
+      <Filter>Source Files\LAL\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Octree\Octree.h">
+      <Filter>Source Files\Octree</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

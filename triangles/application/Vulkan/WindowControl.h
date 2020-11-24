@@ -11,6 +11,12 @@
 
 namespace vks {
 
+    static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
+    {
+        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, GL_TRUE);
+    }
+
     class WindowControl
     {
         GLFWwindow* m_window = nullptr;
@@ -39,6 +45,11 @@ namespace vks {
             return m_height;
         }
 
+        void getCursorPos(double* x, double* y) { glfwGetCursorPos(m_window, x, y); }
+        void setCursorPos(double x, double y) { glfwSetCursorPos(m_window, x, y); }
+        int getKey(int key) { return glfwGetKey(m_window, key); }
+
+
     public:
 
         bool Init(uint32_t width_, uint32_t height_)
@@ -54,6 +65,8 @@ namespace vks {
             glfwSetWindowUserPointer(m_window, this);
             glfwSetFramebufferSizeCallback(m_window, framebufferResizeCallback);
             glfwSetInputMode (m_window, GLFW_STICKY_KEYS, 1);
+
+            glfwSetKeyCallback(m_window, keyCallback);
 
             return true;
         }

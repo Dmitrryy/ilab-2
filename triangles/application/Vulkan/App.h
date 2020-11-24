@@ -2,6 +2,7 @@
 
 #include "vkCore.h"
 #include "../helpa.h"
+#include "CameraView.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -71,6 +72,10 @@ namespace vks
 		std::vector< VkFramebuffer >   m_fbs;
 		VkPipeline                     m_pipeline       = nullptr;
 
+		VkImage                        m_depthImage = nullptr;
+		VkDeviceMemory                 m_depthImageMemory = nullptr;
+		VkImageView                    m_depthImageView = nullptr;
+
 		VkDescriptorSetLayout          m_descriptorSetLayout = nullptr;
 		VkDescriptorPool               m_descriptorPool = nullptr;
 		std::vector< VkDescriptorSet > m_descriptorSets;
@@ -87,10 +92,13 @@ namespace vks
 		VkBuffer                       m_vertexBuffer = {};
 		VkDeviceMemory                 m_vertexBufferMemory = {};
 
-		std::vector< VkBuffer > m_uniformBuffers;
+		std::vector< VkBuffer >       m_uniformBuffers;
 		std::vector< VkDeviceMemory > m_uniformBuffersMemory;
 
-		const std::vector<Vertex> vertices = {
+		CameraView                     m_cameraView;
+		float                          m_speed = 1.f;
+
+		std::vector<Vertex> vertices = {
 			{{-0.5f, 0.f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{-0.5f, 0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}},
 			{{0.5f, 0.f, 0.5f},  {0.0f, 0.0f, 1.0f}},
@@ -120,7 +128,8 @@ namespace vks
 		VulkanApp(std::string appName_)
 			: m_core(appName_)
 			, m_appName(std::move(appName_))
-		{}
+			, m_cameraView({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
+		{ }
 
 		~VulkanApp()
 		{
@@ -130,9 +139,16 @@ namespace vks
 
 		void Init();
 
+		void setVertexBuffer(const std::vector< Vertex >& new_data) { vertices = new_data;}
+		void setCameraView(const CameraView& camera) { m_cameraView = camera; }
+		void setCameraSpeed(float speed) { m_speed = speed; }
+
 		void Run();
 
 	private:
+
+		void updateCamera(float time);
+
 
 		void createSwapChain_();
 		void recreateSwapChain_();
@@ -147,6 +163,8 @@ namespace vks
 		void updateUniformBuffer_(uint32_t currentImage_);
 
 		void copyBuffer_(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		VkCommandBuffer beginSingleTimeCommands();
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 		void createCommandBuffer_();
 		void recordCommandBuffers_();
@@ -154,6 +172,9 @@ namespace vks
 		void renderScene_();
 
 		void createFramebuffer_();
+
+		void createDepthResources_();
+
 		void createRenderPass_();
 
 		void createDescriptorSetLayput_();
@@ -165,6 +186,10 @@ namespace vks
 		void createSyncObjects_();
 
 		VkShaderModule createShaderModule_(const std::vector< char >& source_);
+
+		bool hasStencilComponent(VkFormat format) {
+			return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D32_SFLOAT_S8_UINT;
+		}
 	};
 
 }//namespace vks

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include <LALmath.h>
+//#include LALmath.h
 
 namespace la
 {
@@ -337,7 +337,7 @@ namespace la
 			for (size_t k = i + 1; k < _vec.size(); k++)
 			{
 				//std::cout << _vec.at(i).id << ' ' << _vec.at(k).id << std::endl;
-				if (intersec(_vec.at(i), _vec.at(k)))
+				if (_vec.at(i).intersec(_vec.at(k)))
 				{
 					res.push_back(std::make_pair(_vec.at(i), _vec.at(k)));
 				}
@@ -372,7 +372,7 @@ namespace la
 		for (size_t i = 0; i < _lhs.size(); i++) {
 			for (size_t k = 0; k < _rhs.size(); k++) {
 				//std::cout << _lhs.at(i).id << ' ' << _rhs.at(k).id << std::endl;
-				if (intersec(_lhs.at(i), _rhs.at(k)))
+				if (_lhs.at(i).intersec(_rhs.at(k)))
 				{
 					res.push_back(std::make_pair(_lhs.at(i), _rhs.at(k)));
 				}

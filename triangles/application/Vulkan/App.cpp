@@ -17,6 +17,7 @@ namespace vks
 		m_pWindowControl->Init(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		m_core.Init(m_pWindowControl);
+		m_cameraView.setAspect(m_pWindowControl->getWidth() / (float)m_pWindowControl->getHeight());
 
 		vkGetDeviceQueue(m_core.getDevice(), m_core.getQueueFamily(), 0, &m_queue);
 
@@ -24,12 +25,13 @@ namespace vks
 
 		createRenderPass_();
 		createDescriptorSetLayput_();
-		createPipeline_();
-
-		createFramebuffer_();
 
 		createCommandBuffer_();
+		createDepthResources_();
+		createFramebuffer_();
 		createVertexBuffer_();
+
+		createPipeline_();
 
 		createUniformBuffers_();
 		createDescriptorPool_();
@@ -65,7 +67,7 @@ namespace vks
 		swapChainCreateInfo.clipped          = VK_TRUE;
 		swapChainCreateInfo.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-		VkResult res;
+		VkResult res = {};
 		if ((res = vkCreateSwapchainKHR(m_core.getDevice(), &swapChainCreateInfo, nullptr, &m_swapChainKHR)) != VK_SUCCESS) {
 			
 			throw std::runtime_error("failed to create swap chain!");
@@ -102,6 +104,7 @@ namespace vks
 
 		createRenderPass_();
 		createPipeline_();
+		createDepthResources_();
 
 		createFramebuffer_();
 
@@ -117,6 +120,11 @@ namespace vks
 	void VulkanApp::cleanupSwapChain()
 	{
 		const auto device_ = m_core.getDevice();
+
+		vkDestroyImageView(device_, m_depthImageView, nullptr);
+		vkDestroyImage(device_, m_depthImage, nullptr);
+		vkFreeMemory(device_, m_depthImageMemory, nullptr);
+
 		for (size_t i = 0, mi = m_fbs.size(); i < mi; i++) {
 			vkDestroyFramebuffer(device_, m_fbs[i], nullptr);
 		}
@@ -199,9 +207,9 @@ namespace vks
 		beginInfo.flags = 0;
 		beginInfo.pInheritanceInfo = nullptr;
 
-		VkClearColorValue clearColor = { 0.f, 0.f, 0.f, 1.f };
-		VkClearValue clearValue = {};
-		clearValue.color = clearColor;
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkImageSubresourceRange imageRange = {};
 		imageRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -224,8 +232,8 @@ namespace vks
 			renderPassInfo.renderArea.offset = { 0, 0 };
 			renderPassInfo.renderArea.extent.height = wHeight;
 			renderPassInfo.renderArea.extent.width = wWidth;
-			renderPassInfo.clearValueCount = 1;
-			renderPassInfo.pClearValues = &clearValue;
+			renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+			renderPassInfo.pClearValues = clearValues.data();
 
 			vkCmdBeginRenderPass(m_cmdBufs[k], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -251,6 +259,27 @@ namespace vks
 				throw std::runtime_error("failed to record command buffer!");
 			}
 		}
+	}
+
+
+	void VulkanApp::createDepthResources_()
+	{
+		VkFormat depthFormat = m_core.findSupportedFormat(
+			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+
+		m_core.createImage(m_pWindowControl->getWidth(), m_pWindowControl->getHeight(),
+			depthFormat, 
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			m_depthImage,
+			m_depthImageMemory
+			);
+
+		m_depthImageView = m_core.createImageView(m_depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 	}
 
 
@@ -282,32 +311,39 @@ namespace vks
 
 	void VulkanApp::copyBuffer_(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{
-		VkCommandBufferAllocateInfo allocInfo = {};
+		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+
+		VkBufferCopy copyRegion{};
+		copyRegion.size = size;
+		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+		endSingleTimeCommands(commandBuffer);
+	}
+
+
+	VkCommandBuffer VulkanApp::beginSingleTimeCommands() {
+		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandPool = m_cmdBufPool;
 		allocInfo.commandBufferCount = 1;
 
-		auto device = m_core.getDevice();
+		VkCommandBuffer commandBuffer;
+		vkAllocateCommandBuffers(m_core.getDevice(), &allocInfo, &commandBuffer);
 
-		VkCommandBuffer commandBuffer = {};
-		vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
-
-		VkCommandBufferBeginInfo beginInfo = {};
+		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 		vkBeginCommandBuffer(commandBuffer, &beginInfo);
 
-		VkBufferCopy copyRegion = {};
-		copyRegion.srcOffset = 0;
-		copyRegion.dstOffset = 0;
-		copyRegion.size = size;
-		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+		return commandBuffer;
+	}
 
+	void VulkanApp::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
 		vkEndCommandBuffer(commandBuffer);
 
-		VkSubmitInfo submitInfo = {};
+		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
@@ -315,7 +351,7 @@ namespace vks
 		vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
 		vkQueueWaitIdle(m_queue);
 
-		vkFreeCommandBuffers(device, m_cmdBufPool, 1, &commandBuffer);
+		vkFreeCommandBuffers(m_core.getDevice(), m_cmdBufPool, 1, &commandBuffer);
 	}
 
 
@@ -343,12 +379,9 @@ namespace vks
 		float time = std::chrono::duration< float, std::chrono::seconds::period >(currentTime - startTime).count();
 	
 		UniformBufferObject ubo = {};
-
-		ubo.model = glm::rotate(glm::mat4(1.f), time * glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-		ubo.view = glm::lookAt(glm::vec3(2.f, 2.f, 2.f), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f));
-		ubo.proj = glm::perspective(glm::radians(45.f), m_pWindowControl->getWidth() / (float)m_pWindowControl->getHeight(), 0.1f, 10.f);
-	
-		ubo.proj[1][1] *= -1;
+		ubo.model = glm::mat4(1.f);
+		ubo.view = m_cameraView.getViewMatrix();
+		ubo.proj = m_cameraView.getProjectionMatrix();
 
 		void* data = nullptr;
 		auto device = m_core.getDevice();
@@ -523,23 +556,45 @@ namespace vks
 		attachRef.attachment = 0;
 		attachRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+		VkAttachmentDescription depthAttachment = {};
+		depthAttachment.format = m_core.findSupportedFormat(
+			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+		VkAttachmentReference depthAttachmentRef = {};
+		depthAttachmentRef.attachment = 1;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+
 		VkSubpassDescription subpassDesc = {};
 		subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpassDesc.colorAttachmentCount = 1;
 		subpassDesc.pColorAttachments = &attachRef;
+		subpassDesc.pDepthStencilAttachment = &depthAttachmentRef;
 
 		VkSubpassDependency dependency = {};
 		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+		std::array< VkAttachmentDescription, 2 > attachments = { colorAttachment, depthAttachment };
 
 		VkRenderPassCreateInfo renderPassInfo = {};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = 1;
-		renderPassInfo.pAttachments = &colorAttachment;
+		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+		renderPassInfo.pAttachments = attachments.data();
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpassDesc;
 		renderPassInfo.dependencyCount = 1;
@@ -560,32 +615,18 @@ namespace vks
 
 		for (uint32_t i = 0, mi = m_images.size(); i < mi; i++)
 		{
-			VkImageViewCreateInfo viewCreateInfo = {};
-			viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			viewCreateInfo.image = m_images[i];
-			viewCreateInfo.format = m_core.getSurfaceFormat().format;
-			viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+			m_views[i] = m_core.createImageView(m_images[i], m_core.getSurfaceFormat().format, VK_IMAGE_ASPECT_COLOR_BIT);
 
-			viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-			viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-			viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			viewCreateInfo.subresourceRange.baseMipLevel = 0;
-			viewCreateInfo.subresourceRange.levelCount = 1;
-			viewCreateInfo.subresourceRange.baseArrayLayer = 0;
-			viewCreateInfo.subresourceRange.layerCount = 1;
-
-			if (VK_SUCCESS != vkCreateImageView(m_core.getDevice(), &viewCreateInfo, NULL, &m_views[i])) {
-				throw std::runtime_error("failed to create image view!");
-			}
+			std::array< VkImageView, 2 > attachments = {
+				m_views[i],
+				m_depthImageView
+			};
 
 			VkFramebufferCreateInfo fbInfo = {};
 			fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			fbInfo.renderPass = m_renderPass;
-			fbInfo.attachmentCount = 1;
-			fbInfo.pAttachments = &(m_views[i]);
+			fbInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+			fbInfo.pAttachments = attachments.data();
 			fbInfo.width = wWidth;
 			fbInfo.height = wHeight;
 			fbInfo.layers = 1;
@@ -693,6 +734,18 @@ namespace vks
 		rasterizer.depthBiasClamp = 0.f;
 		rasterizer.depthBiasSlopeFactor = 0.f;
 
+		VkPipelineDepthStencilStateCreateInfo depthStencil = {};
+		depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencil.depthTestEnable = VK_TRUE;
+		depthStencil.depthWriteEnable = VK_TRUE;
+		depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencil.depthBoundsTestEnable = VK_FALSE;
+		depthStencil.minDepthBounds = 0.0f;
+		depthStencil.maxDepthBounds = 1.0f;
+		depthStencil.stencilTestEnable = VK_FALSE;
+		depthStencil.front = {};
+		depthStencil.back = {};
+
 		VkPipelineMultisampleStateCreateInfo multisampling = {};
 		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
 		multisampling.sampleShadingEnable = VK_FALSE;
@@ -753,7 +806,7 @@ namespace vks
 		pipelineInfo.pViewportState = &viewportState;
 		pipelineInfo.pRasterizationState = &rasterizer;
 		pipelineInfo.pMultisampleState = &multisampling;
-		pipelineInfo.pDepthStencilState = nullptr;
+		pipelineInfo.pDepthStencilState = &depthStencil;
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = nullptr;
 
@@ -801,14 +854,73 @@ namespace vks
 
 	void VulkanApp::Run()
 	{
+		auto startTime = std::chrono::high_resolution_clock::now();
+
+		m_pWindowControl->setCursorPos(m_pWindowControl->getWidth() / 2.0, m_pWindowControl->getHeight() / 2.0);
+
 		while (!m_pWindowControl->shouldClose()) 
 		{
+			auto currentTime = std::chrono::high_resolution_clock::now();
+			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+			startTime = currentTime;
+
 			glfwPollEvents();
+
+			updateCamera(time);
 
 			renderScene_();
 		}
 
 		vkDeviceWaitIdle(m_core.getDevice());
+	}
+
+
+	void VulkanApp::updateCamera(float time)
+	{
+		float wWidth = m_pWindowControl->getWidth();
+		float wHeight = m_pWindowControl->getHeight();
+		{
+			double x = 0, y = 0;
+			m_pWindowControl->getCursorPos(&x, &y);
+			const float dx = wWidth / 2.f - x;
+			const float dy = wHeight / 2.f - y;
+
+			m_cameraView.turnInHorizontalPlane(glm::radians(90.f * dx / wWidth));
+			m_cameraView.turnInVerticalPlane(glm::radians(90.f * dy / wHeight));
+
+			m_pWindowControl->setCursorPos(wWidth / 2.0, wHeight / 2.0);
+		}
+
+		{
+			bool forward = m_pWindowControl->getKey(GLFW_KEY_W) == GLFW_PRESS;
+			bool back = m_pWindowControl->getKey(GLFW_KEY_S) == GLFW_PRESS;
+			if (forward && back) { forward = back = false; }
+
+			bool left = m_pWindowControl->getKey(GLFW_KEY_A) == GLFW_PRESS;
+			bool right = m_pWindowControl->getKey(GLFW_KEY_D) == GLFW_PRESS;
+			if (left && right) { left = right = false; }
+
+
+			if (forward || back)
+			{
+				m_cameraView.moveAlongDirection(time * m_speed * ((forward) ? 1.f : -1.f));
+			}
+			if (left || right)
+			{
+				m_cameraView.movePerpendicularDirection(time * m_speed * ((right) ? 1.f : -1.f));
+			}
+		}
+
+		{
+			bool down = m_pWindowControl->getKey(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+			bool up = m_pWindowControl->getKey(GLFW_KEY_SPACE) == GLFW_PRESS;
+			if (down && up) { down = up = false; }
+
+			if (down || up)
+			{
+				m_cameraView.moveVertical(time * m_speed * ((down) ? -1.f : 1.f));
+			}
+		}
 	}
 
 }//namespace vks

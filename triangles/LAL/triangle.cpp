@@ -27,6 +27,11 @@ namespace la
 		return m_a == _that.getA() && m_b == _that.getB() && m_c == _that.getC();
 	}
 
+	bool Triangle::intersec(const Triangle& _that) const noexcept
+	{
+		return la::intersec(*this, _that);
+	}
+
 	void Triangle::reup(Vector3f _a, Vector3f _b, Vector3f _c)
 	{
 		std::vector<Vector3f> cnt = {_a, _b, _c};
@@ -39,8 +44,6 @@ namespace la
 		m_a = cnt.at(0);
 		m_b = cnt.at(1);
 		m_c = cnt.at(2);
-
-		upArea__();
 	}
 
 	bool Triangle::contein(const Vector3f& _vec) const
@@ -76,20 +79,20 @@ namespace la
 		return out.str();
 	}
 
-	void Triangle::upArea__()
-	{
-		using std::min;
-		using std::max;
+	//void Triangle::upArea__()
+	//{
+	//	using std::min;
+	//	using std::max;
 
-		Vector3f a, b;
-		a.x = min(getA().x, min(getB().x, getC().x));
-		a.y = min(getA().y, min(getB().y, getC().y));
-		a.z = min(getA().z, min(getB().z, getC().z));
-		b.x = max(getA().x, max(getB().x, getC().x));
-		b.y = max(getA().y, max(getB().y, getC().y));
-		b.z = max(getA().z, max(getB().z, getC().z));
+	//	Vector3f a, b;
+	//	a.x = min(getA().x, min(getB().x, getC().x));
+	//	a.y = min(getA().y, min(getB().y, getC().y));
+	//	a.z = min(getA().z, min(getB().z, getC().z));
+	//	b.x = max(getA().x, max(getB().x, getC().x));
+	//	b.y = max(getA().y, max(getB().y, getC().y));
+	//	b.z = max(getA().z, max(getB().z, getC().z));
 
-		m_area.reup(a, b);
-	}
+	//	m_area.reup(a, b);
+	//}
 
 } // namespace la
