@@ -46,6 +46,7 @@
     <None Include="matrix\Matrix.inl">
       <Filter>Source Files\Matrix</Filter>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CmakeLists.txt" />

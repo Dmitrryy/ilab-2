@@ -42,7 +42,8 @@ I catch an error with JSON but it seems to work.
 Bump into a [book](https://www.litres.ru/grehem-sellers/vulkan-rukovodstvo-razrabotchika-oficialnoe-rukovo-27071853/).
 
 * Day 5 \
-Still reading a book.
+Still reading a book. \
+      + http://www.ogldev.org/www/tutorial50/tutorial50.html
 
 * Day 6 \
 Updating my IDE vs2019. That was a bad idea ... Now intellisence is sooooo slow and impossible to work.
@@ -56,8 +57,8 @@ Another hour to install the components.
 3rd hour of the night. \
 The project is finally ready.
 
-* Day 7 \
-soon.
+* 5 years later: \
+sent for verification LVL2
 
 ## License
 GNU General Public License v3.0

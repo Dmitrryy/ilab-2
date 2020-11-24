@@ -154,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="matrix\Matrix.inl" />
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CmakeLists.txt" />
