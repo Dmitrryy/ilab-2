@@ -857,6 +857,7 @@ namespace vks
 		auto startTime = std::chrono::high_resolution_clock::now();
 
 		m_pWindowControl->setCursorPos(m_pWindowControl->getWidth() / 2.0, m_pWindowControl->getHeight() / 2.0);
+		m_pWindowControl->setInputMode(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 		while (!m_pWindowControl->shouldClose()) 
 		{

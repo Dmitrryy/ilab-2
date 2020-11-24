@@ -58,6 +58,11 @@ namespace vks
 		}
 		void turnInVerticalPlane(float angle)
 		{
+			if (angle > 0 && m_direction.z >= 0.998f ||
+				angle < 0 && m_direction.z <= -0.998f)
+			{
+				return;
+			}
 			auto axis = glm::cross(m_direction, m_topDirection);
 			m_direction = glm::rotate(glm::mat4(1.f), angle, axis) * glm::vec4(m_direction, 0.f);
 		}

@@ -25,7 +25,7 @@ struct TRiangleColor
     }
 };
 
-
+//it looks like a Castile....
 struct PointToRef
 {
     PointToRef(TRiangleColor& data)
@@ -37,7 +37,6 @@ struct PointToRef
     la::Rectangle3 getArea() const noexcept { return m_data->getArea(); }
     bool intersec(const PointToRef& lhs) const { return m_data->intersec(*lhs.m_data); }
 };
-//it looks like a Castile....
 
 glm::vec3 toGLM(const la::Vector3f& vec) { return { vec.x, vec.y, vec.z }; }
 std::vector< TRiangleColor > getData(std::istream& _source);
@@ -83,6 +82,7 @@ int main()
         {
             vks::Vertex vert = {};
             vert.color = toGLM(tr.color);
+            vert.normal = glm::normalize(toGLM(tr.triangle.getPlane().getN()));
             vert.pos = toGLM(tr.triangle.getA());
             vkData.push_back(vert);
 

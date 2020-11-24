@@ -49,6 +49,7 @@ namespace vks {
         void setCursorPos(double x, double y) { glfwSetCursorPos(m_window, x, y); }
         int getKey(int key) { return glfwGetKey(m_window, key); }
 
+        void setInputMode(int mode, int value) { glfwSetInputMode(m_window, mode, value); }
 
     public:
 
