@@ -62,9 +62,6 @@
     <ClCompile Include="LAL\math\LALmath.cpp">
       <Filter>LAL</Filter>
     </ClCompile>
-    <ClCompile Include="application\Vulkan\vkShell.cpp">
-      <Filter>Application\Vulkan</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tests\LAL_test.h">
@@ -102,9 +99,6 @@
     </ClInclude>
     <ClInclude Include="LAL\include\config.h">
       <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="application\Vulkan\vkShell.hpp">
-      <Filter>Application\Vulkan</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

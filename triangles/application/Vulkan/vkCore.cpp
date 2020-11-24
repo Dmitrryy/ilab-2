@@ -7,7 +7,6 @@
 #include <cassert>
 #include <cstring>
 
-#define PRINTF_DEVICE_INFO
 
 namespace vks {
 
@@ -26,6 +25,36 @@ namespace vks {
 
         return true;
     }
+
+
+    void Core::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = size;
+        bufferInfo.usage = usage;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+        auto device = getDevice();
+
+        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create buffer!");
+        }
+
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+        VkMemoryAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        allocInfo.allocationSize = memRequirements.size;
+        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
+
+        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate buffer memory!");
+        }
+
+        vkBindBufferMemory(device, buffer, bufferMemory, 0);
+    }
+
 
     void Core::createInstance_()
     {
@@ -69,7 +98,7 @@ namespace vks {
         }
     }
 
-
+#ifdef ENABLE_DEBUG_LAYERS
     bool Core::checkValidationLayerSupport() const
     {
         uint32_t layerCount;
@@ -95,6 +124,7 @@ namespace vks {
 
         return true;
     }
+#endif
 
     void Core::selectPhysicalDevice_()
     {
@@ -126,7 +156,8 @@ namespace vks {
 #ifdef PRINTF_DEVICE_INFO
                     printf("Using GFX device %d and queue family %d\n", m_DeviceIndex, m_QueueFamily);
 #endif
-                    break;
+                    
+                    return;
                 }
 
             }
@@ -159,7 +190,30 @@ namespace vks {
         devInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
         devInfo.ppEnabledLayerNames = m_validationLayers.data();
 #endif
+
+        if (VK_SUCCESS != vkCreateDevice(getPhysDevice(), &devInfo, NULL, &m_device)) {
+            throw std::runtime_error("failed to create logical device!");
+        }
     }
+
+
+    uint32_t Core::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties memProperties;
+        vkGetPhysicalDeviceMemoryProperties(m_physDevices.m_devices[m_DeviceIndex], &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+        {
+            if (typeFilter & (1 << i) &&
+                (memProperties.memoryTypes[i].propertyFlags & properties) == properties) 
+            {
+                return i;
+            }
+        }
+
+        throw std::runtime_error("failed to find suitable memory type!");
+    }
+
 
 
     ////////////////////////////////////////////////////////////////////
@@ -181,12 +235,66 @@ namespace vks {
 
 #ifdef PRINTF_DEVICE_INFO
         printf("Found %d extensions\n", numExt);
-        for (uint i = 0 ; i < numExt ; i++) {
+        for (uint32_t i = 0 ; i < numExt ; i++) {
             printf("Instance extension %d - %s\n", i, result[i].extensionName);
         }
 #endif
 
         return result;
+    }
+
+
+    void VulkanPhysicalDevices::update(const VkSurfaceKHR& surface_)
+    {
+        for (size_t i = 0, mi = m_devices.size(); i < mi; i++)
+        {
+            const VkPhysicalDevice& curDevice = m_devices[i];
+
+            vkGetPhysicalDeviceProperties(curDevice, &m_devProps[i]);
+
+            uint32_t numQFamily = 0;
+            vkGetPhysicalDeviceQueueFamilyProperties(curDevice, &numQFamily, nullptr);
+            m_qFamilyProps[i].resize(numQFamily);
+            m_qSupportPresent[i].resize(numQFamily);
+
+            vkGetPhysicalDeviceQueueFamilyProperties(curDevice, &numQFamily, m_qFamilyProps[i].data());
+
+            for (size_t q = 0; q < numQFamily; q++)
+            {
+                if (vkGetPhysicalDeviceSurfaceSupportKHR(curDevice, q, surface_, &(m_qSupportPresent[i][q])) != VK_SUCCESS)
+                {
+                    assert(0);
+                }
+            }
+
+            uint32_t numFormats = 0;
+            vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, nullptr);
+            assert(numFormats > 0);
+
+            m_surfaceFormats[i].resize(numFormats);
+
+            if (vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, m_surfaceFormats[i].data()) != VK_SUCCESS) {
+                assert(0);
+            }
+
+            if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(curDevice, surface_, &(m_surfaceCaps[i])) != VK_SUCCESS) {
+                assert(0);
+            }
+#ifdef PRINTF_DEVICE_INFO
+            printf("Device name: %s\n", m_devProps[i].deviceName);
+            uint32_t apiVer = m_devProps[i].apiVersion;
+            printf("    API version: %d.%d.%d\n", VK_VERSION_MAJOR(apiVer),
+                VK_VERSION_MINOR(apiVer),
+                VK_VERSION_PATCH(apiVer));
+
+            printf("    Num of family queues: %d\n", numQFamily);
+
+            for (uint32_t j = 0; j < numFormats; j++) {
+                const VkSurfaceFormatKHR& SurfaceFormat = m_surfaceFormats[i][j];
+                printf("    Format %d color space %d\n", SurfaceFormat.format, SurfaceFormat.colorSpace);
+            }
+#endif
+        }
     }
 
 
@@ -211,74 +319,28 @@ namespace vks {
             assert(0);
         }
 
-        for (size_t i = 0; i < numDevices; i++)
-        {
-            const VkPhysicalDevice &curDevice = result.m_devices[i];
-
-            vkGetPhysicalDeviceProperties(curDevice, &result.m_devProps[i]);
-
-            uint32_t numQFamily = 0;
-            vkGetPhysicalDeviceQueueFamilyProperties(curDevice, &numQFamily, nullptr);
-            result.m_qFamilyProps[i].resize(numQFamily);
-            result.m_qSupportPresent[i].resize(numQFamily);
-
-            vkGetPhysicalDeviceQueueFamilyProperties(curDevice, &numQFamily, result.m_qFamilyProps[i].data());
-
-            for (size_t q = 0; q < numQFamily; q++)
-            {
-                if (vkGetPhysicalDeviceSurfaceSupportKHR(curDevice, q, surface_, &(result.m_qSupportPresent[i][q])) != VK_SUCCESS)
-                {
-                    assert(0);
-                }
-            }
-
-            uint32_t numFormats = 0;
-            vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, nullptr);
-            assert(numFormats > 0);
-
-            result.m_surfaceFormats[i].resize(numFormats);
-
-            if (vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, result.m_surfaceFormats[i].data()) != VK_SUCCESS) {
-                assert(0);
-            }
-
-            if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(curDevice, surface_, &(result.m_surfaceCaps[i])) != VK_SUCCESS) {
-                assert(0);
-            }
-#ifdef PRINTF_DEVICE_INFO
-            printf("Device name: %s\n", result.m_devProps[i].deviceName);
-            uint32_t apiVer = result.m_devProps[i].apiVersion;
-            printf("    API version: %d.%d.%d\n", VK_VERSION_MAJOR(apiVer),
-                   VK_VERSION_MINOR(apiVer),
-                   VK_VERSION_PATCH(apiVer));
-
-            printf("    Num of family queues: %d\n", numQFamily);
-
-            for (uint j = 0 ; j < numFormats ; j++) {
-                const VkSurfaceFormatKHR& SurfaceFormat = result.m_surfaceFormats[i][j];
-                printf("    Format %d color space %d\n", SurfaceFormat.format , SurfaceFormat.colorSpace);
-            }
-#endif
-        }
+        result.update(surface_);
 
         return result;
     }
 
 
-    std::vector<const char*> getRequiredExtensions() {
+    std::vector<const char*> getRequiredExtensions() 
+    {
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-        if (enableValidationLayers) {
-            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-        }
+#ifdef ENABLE_DEBUG_LAYERS
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+        //extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
+#endif
 
         return extensions;
     }
-
 
 
 
@@ -286,7 +348,7 @@ namespace vks {
 
     /*static*/ VKAPI_ATTR VkBool32 VKAPI_CALL Core::debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-            VkDebugUtilsMessageTypeFlagsEXT messageType,
+            VkDebugUtilsMessageTypeFlagsEXT messageType,                                                                                                                                                                                                                                                
             const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
             void* pUserData)
     {

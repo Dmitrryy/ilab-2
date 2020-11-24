@@ -8,27 +8,49 @@
 
 #include <iostream>
 
+
 namespace vks {
 
     class WindowControl
     {
-        GLFWwindow* m_window;
-        bool framebufferResized = false;
+        GLFWwindow* m_window = nullptr;
+        bool m_framebufferResized = false;
+
+        int m_height = 0;
+        int m_width  = 0;
 
     public:
 
         WindowControl() {};
         virtual ~WindowControl() = default;
 
+        bool shouldClose() const { return glfwWindowShouldClose(m_window); }
+
+        bool resized() {
+            bool result = m_framebufferResized;
+            m_framebufferResized = false;
+            return result;
+        }
+
+        int getWidth() {
+            return m_width;
+        }
+        int getHeight() {
+            return m_height;
+        }
+
     public:
 
         bool Init(uint32_t width_, uint32_t height_)
         {
+            m_height = height_;
+            m_width = width_;
+
             glfwInit();
 
             glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-            m_window = glfwCreateWindow(width_, height_, "Vulkan", nullptr, nullptr);
+            m_window = glfwCreateWindow(m_width, m_height, "Vulkan", nullptr, nullptr);
             glfwSetWindowUserPointer(m_window, this);
             glfwSetFramebufferSizeCallback(m_window, framebufferResizeCallback);
             glfwSetInputMode (m_window, GLFW_STICKY_KEYS, 1);
@@ -47,9 +69,12 @@ namespace vks {
             return surface;
         }
 
+
         static void framebufferResizeCallback(GLFWwindow* window, int width, int height) {
             auto app = reinterpret_cast<WindowControl*>(glfwGetWindowUserPointer(window));
-            app->framebufferResized = true;
+            app->m_framebufferResized = true;
+            app->m_height = height;
+            app->m_width = width;
         }
     };
 

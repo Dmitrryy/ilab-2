@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Matrix", "Matrix\Matrix.vcxproj", "{53DDFD2E-C37F-48AE-906C-8C18A501FD21}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VulakanApp", "triangles\VulakanApp\VulakanApp.vcxproj", "{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -56,6 +58,14 @@ Global
 		{53DDFD2E-C37F-48AE-906C-8C18A501FD21}.Release|x64.Build.0 = Release|x64
 		{53DDFD2E-C37F-48AE-906C-8C18A501FD21}.Release|x86.ActiveCfg = Release|Win32
 		{53DDFD2E-C37F-48AE-906C-8C18A501FD21}.Release|x86.Build.0 = Release|Win32
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Debug|x64.ActiveCfg = Debug|x64
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Debug|x64.Build.0 = Debug|x64
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Debug|x86.ActiveCfg = Debug|Win32
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Debug|x86.Build.0 = Debug|Win32
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Release|x64.ActiveCfg = Release|x64
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Release|x64.Build.0 = Release|x64
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Release|x86.ActiveCfg = Release|Win32
+		{2E63573A-1D6A-408D-83EC-2FEAC108CB8E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

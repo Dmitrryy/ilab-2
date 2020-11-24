@@ -1,3 +1,6 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -22,8 +25,6 @@
 #include <optional>
 #include <set>
 
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 #define VK_EPSILON 0.000001f
 

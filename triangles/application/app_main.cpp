@@ -1,13 +1,13 @@
-#include <vkCore.h>
+#include <App.h>
 
 
 int main()
 {
-    vks::Core vkCore("test");
+    vks::VulkanApp app("vulkan suka");
 
-    vks::WindowControl window;
-    window.Init(800, 600);
-    vkCore.Init(&window);
+    app.Init();
+
+    app.Run();
 
     return 0;
 }
