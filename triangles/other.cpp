@@ -41,11 +41,9 @@ struct ValId
     Key_ id;
 
     la::Rectangle3 getArea() const noexcept { return val.getArea(); }
+    bool intersec(const ValId<la::Triangle, size_t>& _lhs) const { return val.intersec(_lhs.val); }
 };
-bool intersec(const ValId<la::Triangle, size_t>& _lhs, const ValId<la::Triangle, size_t>& _rhs)
-{
-    return la::intersec(_lhs.val, _rhs.val);
-}
+
 
 
 void intersectionN_N(std::vector< la::Triangle > data)

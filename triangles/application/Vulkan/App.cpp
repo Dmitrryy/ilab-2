@@ -1,7 +1,7 @@
 #include "App.h"
 
 #include <cassert>
-
+#include <cstring>
 #include <chrono>
 
 #define WINDOW_HEIGHT 800

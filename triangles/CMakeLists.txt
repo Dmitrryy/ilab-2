@@ -9,10 +9,10 @@ set(CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/triangles)
 
 #================================================================
 #
-#Triangles LVL2
+#Tutorial Vulkan api
 #
 #================================================================
-project(vkShell)
+project(vkTutorial)
 
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
@@ -50,13 +50,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE Octree)
 #Triangles LVL2(app_test)
 #
 #================================================================
-project(AppTest)
+project(TrianglesLVL2)
 
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
 find_package(glfw3 REQUIRED)
 
-add_executable(${PROJECT_NAME} application/app_main.cpp application/Vulkan/vkCore.cpp)
+add_executable(${PROJECT_NAME} application/app_main.cpp application/Vulkan/vkCore.cpp application/helpa.cpp application/Vulkan/App.cpp
+        LAL/Line.cpp LAL/LineSegment.cpp LAL/Plane.cpp LAL/Vector.cpp LAL/square.cpp LAL/triangle.cpp
+        LAL/math/LALmath.cpp
+        )
 
 target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
 add_definitions(-DVK_USE_PLATFORM_XLIB_KHR)
