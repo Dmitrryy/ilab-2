@@ -7,7 +7,7 @@
 
 //#define DEBUGG
 
-#include "Octree/Octree.h"
+#include "../Octree/Octree.h"
 #include "tests/test_gen.h"
 
 extern size_t COUNT_TT_INTERSEC;

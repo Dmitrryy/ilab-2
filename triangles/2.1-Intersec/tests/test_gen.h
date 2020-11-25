@@ -4,8 +4,8 @@
 #include <random>
 #include <vector>
 
-#include "../LAL/include/triangle.h"
-#include "../LAL/include/square.h"
+#include "../../LAL/include/triangle.h"
+#include "../../LAL/include/square.h"
 
 class Random
 {

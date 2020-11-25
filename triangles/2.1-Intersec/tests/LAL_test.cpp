@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "../LAL/include/LALmath.h"
+#include "../../LAL/include/LALmath.h"
 
 #define test_class(name)                    \
 class name##Test : public ::testing::Test { \
