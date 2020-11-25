@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Исходные файлы">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Файлы ресурсов">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Исходные файлы\Application">
+      <UniqueIdentifier>{3d2c5913-831a-4858-b8bb-03df06be993d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Application\Helpa">
+      <UniqueIdentifier>{5bee0fb4-933c-40a8-844b-95b99c328427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы ресурсов\Shaders">
+      <UniqueIdentifier>{c9f47bb8-6d77-457e-94b6-f6cdbba8bf0a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Внешнее">
+      <UniqueIdentifier>{b7a44666-70c1-45f5-8e1d-d38352e2ced8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Внешнее\LAL">
+      <UniqueIdentifier>{faf4a4c4-7105-4be6-8374-973d711f86a7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="app_main.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\App.cpp">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\vkCore.cpp">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\WindowControl.cpp">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Helpa\helpa.cpp">
+      <Filter>Исходные файлы\Application\Helpa</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\Line.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\LineSegment.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\Plane.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\square.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\triangle.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\Vector.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LAL\math\LALmath.cpp">
+      <Filter>Внешнее\LAL</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application\App.h">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\CameraView.h">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\vkCore.h">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\WindowControl.h">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Helpa\helpa.h">
+      <Filter>Исходные файлы\Application\Helpa</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resource\shaders\shader.vert">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="resource\shaders\shader.frag">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CmakeLists.txt" />
+  </ItemGroup>
+</Project>
