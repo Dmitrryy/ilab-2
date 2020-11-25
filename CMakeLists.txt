@@ -7,10 +7,6 @@ cmake_minimum_required(VERSION 3.10)
 # set the project name
 project(ilab)
 
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 #first homework
 #status: final
 add_subdirectory(cache)
@@ -27,8 +23,9 @@ add_subdirectory(triangles)
 #LVL1: project's name for build is 'Matrix'
 add_subdirectory(Matrix)
 
+#[[
 #ParaC
 #status: LVL1 in dev
 #
 #LVL1: project's name for build is 'ParaC'
-add_subdirectory(ParaC)
+add_subdirectory(ParaC)]]

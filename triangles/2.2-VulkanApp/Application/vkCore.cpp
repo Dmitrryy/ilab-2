@@ -191,6 +191,13 @@ namespace vks {
     {
         for (size_t i = 0, mi = m_physDevices.m_devices.size(); i < mi; i++)
         {
+            const VkSurfaceCapabilitiesKHR& SurfaceCaps = m_physDevices.m_surfaceCaps[i];
+            if (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount)
+            {
+                printf("Chawo?!? (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount)\n");
+                continue;
+            }
+
             for (size_t k = 0, km = m_physDevices.m_qFamilyProps[i].size(); k < km; k++)
             {
                 VkQueueFamilyProperties& QFamilyProp = m_physDevices.m_qFamilyProps[i][k];

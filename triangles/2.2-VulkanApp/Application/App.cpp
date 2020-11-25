@@ -81,7 +81,7 @@ namespace vks
 		const VkSurfaceCapabilitiesKHR& SurfaceCaps = m_core.getSurfaceCaps();
 		assert(SurfaceCaps.currentExtent.width != -1);
 		
-		uint32_t numImages = 2;
+		uint32_t numImages = SurfaceCaps.minImageCount + 1;
 		assert(numImages >= SurfaceCaps.minImageCount);
 		assert(numImages <= SurfaceCaps.maxImageCount);
 
