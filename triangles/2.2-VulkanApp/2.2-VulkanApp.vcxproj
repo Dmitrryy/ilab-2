@@ -153,7 +153,6 @@
     <ClCompile Include="Application\App.cpp" />
     <ClCompile Include="Application\Helpa\helpa.cpp" />
     <ClCompile Include="Application\vkCore.cpp" />
-    <ClCompile Include="Application\WindowControl.cpp" />
     <ClCompile Include="app_main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -161,9 +160,9 @@
     <ClInclude Include="Application\CameraView.h" />
     <ClInclude Include="Application\Helpa\helpa.h" />
     <ClInclude Include="Application\vkCore.h" />
-    <ClInclude Include="Application\WindowControl.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="resource\shaders\shader.frag" />
     <None Include="resource\shaders\shader.vert" />
   </ItemGroup>

@@ -35,9 +35,6 @@
     <ClCompile Include="Application\vkCore.cpp">
       <Filter>Исходные файлы\Application</Filter>
     </ClCompile>
-    <ClCompile Include="Application\WindowControl.cpp">
-      <Filter>Исходные файлы\Application</Filter>
-    </ClCompile>
     <ClCompile Include="Application\Helpa\helpa.cpp">
       <Filter>Исходные файлы\Application\Helpa</Filter>
     </ClCompile>
@@ -73,9 +70,6 @@
     <ClInclude Include="Application\vkCore.h">
       <Filter>Исходные файлы\Application</Filter>
     </ClInclude>
-    <ClInclude Include="Application\WindowControl.h">
-      <Filter>Исходные файлы\Application</Filter>
-    </ClInclude>
     <ClInclude Include="Application\Helpa\helpa.h">
       <Filter>Исходные файлы\Application\Helpa</Filter>
     </ClInclude>
@@ -87,6 +81,7 @@
     <None Include="resource\shaders\shader.frag">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="CmakeLists.txt" />

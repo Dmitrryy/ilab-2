@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FDDE5D4F-FF74-4147-8F6A-D325ED898FDE}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
+		triangles\README.md = triangles\README.md
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Matrix", "Matrix\Matrix.vcxproj", "{53DDFD2E-C37F-48AE-906C-8C18A501FD21}"

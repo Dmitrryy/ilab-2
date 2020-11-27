@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-#first level of triangles
+#second level of triangles
 #see README for details
 project(VulkanApp)
 
