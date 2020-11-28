@@ -40,18 +40,38 @@ add_custom_command(
         ${CMAKE_CURRENT_SOURCE_DIR}/resource $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource
         )
 
-add_custom_command(
-        #TARGET ${PROJECT_NAME} POST_BUILD
+#[[add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
 
-        COMMAND $ENV{VULKAN_SDK}/Bin/glslc.exe shader.vert -o vert.spv
-        COMMENT "shaders compiled!"
+        COMMAND $ENV{VULKAN_SDK}/Bin32/glslc.exe shader.vert -o vert.spv
+        #DEPENDS $ENV{VULKAN_SDK}/Bin32/glslc.exe
+        COMMENT "vertex shader compiled!"
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
+        USES_TERMINAL
+        )
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+
+        COMMAND $ENV{VULKAN_SDK}/Bin32/glslc.exe shader.frag -o frag.spv
+        #DEPENDS $ENV{VULKAN_SDK}/Bin32/glslc.exe
+        COMMENT "vertex shader compiled!"
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
+        USES_TERMINAL
+        )]]
+
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+
+        COMMAND $ENV{VULKAN_SDK}/bin/glslc shader.vert -o vert.spv
+        DEPENDS $ENV{VULKAN_SDK}/bin/glslc
+        COMMENT "vertex shader compiled!"
         WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
         )
-
 add_custom_command(
-        #TARGET ${PROJECT_NAME} POST_BUILD
+        TARGET ${PROJECT_NAME} POST_BUILD
 
-        COMMAND $ENV{VULKAN_SDK}/Bin/glslc shader.vert -o vert.spv
-        COMMENT "shaders compiled!"
+        COMMAND $ENV{VULKAN_SDK}/bin/glslc shader.frag -o frag.spv
+        DEPENDS $ENV{VULKAN_SDK}/bin/glslc
+        COMMENT "fragment shader compiled!"
         WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
         )

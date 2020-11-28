@@ -202,6 +202,7 @@ namespace vks {
                 VkQueueFamilyProperties& QFamilyProp = m_physDevices.m_qFamilyProps[i][k];
 
                 VkQueueFlags flags = QFamilyProp.queueFlags;
+
 #ifdef PRINTF_DEVICE_INFO
                 printf("    GFX %s, Compute %s, Transfer %s, Sparse binding %s\n",
                        (flags & VK_QUEUE_GRAPHICS_BIT) ? "Yes" : "No",
