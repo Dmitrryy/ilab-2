@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME} app_main.cpp Application/App.cpp Application/vkCo
 if(NOT LAL_FOUND)
     add_subdirectory(../LAL ../LAL/build)
 endif()
+
 add_definitions(-DVK_USE_PLATFORM_XLIB_KHR)
 
 
@@ -32,6 +33,25 @@ target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan)
 target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
 
 # copy resource file to build directory
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+add_custom_command(
+        TARGET ${PROJECT_NAME} POST_BUILD
+
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/resource $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource)
+        ${CMAKE_CURRENT_SOURCE_DIR}/resource $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource
+        )
+
+add_custom_command(
+        #TARGET ${PROJECT_NAME} POST_BUILD
+
+        COMMAND $ENV{VULKAN_SDK}/Bin/glslc.exe shader.vert -o vert.spv
+        COMMENT "shaders compiled!"
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
+        )
+
+add_custom_command(
+        #TARGET ${PROJECT_NAME} POST_BUILD
+
+        COMMAND $ENV{VULKAN_SDK}/Bin/glslc shader.vert -o vert.spv
+        COMMENT "shaders compiled!"
+        WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
+        )

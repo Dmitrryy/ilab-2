@@ -19,7 +19,6 @@ namespace vks {
         if (glfwCreateWindowSurface(m_inst, pWindow, nullptr, &m_surface) != VK_SUCCESS) {
             throw std::runtime_error("failed to create window surface!");
         }
-        assert(m_surface);
 
         m_physDevices = VulkanGetPhysicalDevices(m_inst, m_surface);
         selectPhysicalDevice_();

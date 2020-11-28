@@ -165,6 +165,7 @@
     <ClCompile Include="tests\test_gen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\LAL\CMakeLists.txt" />
     <Text Include="CmakeLists.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

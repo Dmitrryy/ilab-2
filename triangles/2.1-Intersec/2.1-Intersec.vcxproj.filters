@@ -93,5 +93,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="CmakeLists.txt" />
+    <Text Include="..\LAL\CMakeLists.txt">
+      <Filter>Исходные файлы\LAL</Filter>
+    </Text>
   </ItemGroup>
 </Project>

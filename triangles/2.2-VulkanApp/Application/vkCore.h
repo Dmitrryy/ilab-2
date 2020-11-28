@@ -94,7 +94,10 @@ namespace vks
         Core(const std::string& appName_)
             : m_appName(appName_)
         {}
-        ~Core() = default;
+        ~Core()
+        {
+            cleanup();
+        }
 
         bool Init(GLFWwindow* pWindowControl);
 
@@ -127,7 +130,23 @@ namespace vks
 
         VkFormat findSupportedFormat(const std::vector< VkFormat >& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
-        void cleanup() {}
+        void cleanup() 
+        {
+            if (m_inst != nullptr) 
+            {
+                vkDestroyDevice(m_device, nullptr);
+                m_device = nullptr;
+
+                vkDestroySurfaceKHR(m_inst, m_surface, nullptr);
+                m_surface = nullptr;
+
+                vkDestroyInstance(m_inst, nullptr);
+                m_inst = nullptr;
+
+                m_DeviceIndex = m_QueueFamily = -1;
+                m_physDevices.resize(0);
+            }
+        }
 
     private:
 

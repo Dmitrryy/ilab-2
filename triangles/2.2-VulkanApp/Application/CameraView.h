@@ -9,7 +9,7 @@
 namespace vks
 {
 
-	class CameraView
+	struct CameraView
 	{
 		glm::vec3 m_position;
 		glm::vec3 m_direction;
@@ -19,6 +19,8 @@ namespace vks
 		float m_aspect = 19.f / 8.f;
 		float m_near = 0.1f;
 		float m_far = 1000.f;
+
+		float m_max_z_direction_component = 0.998f;
 
 	public:
 
@@ -33,6 +35,7 @@ namespace vks
 		glm::vec3 getTopDirection() const { return m_topDirection; }
 		float getViewingAngle    () const { return m_viewingAngle; }
 		float getAspect          () const { return m_aspect; }
+		float getMaxZComponentDirection() const { return m_max_z_direction_component; }
 		//
 		glm::mat4 getViewMatrix() const { return glm::lookAt(m_position, m_position + m_direction, m_topDirection); }
 		glm::mat4 getProjectionMatrix() const 
@@ -50,6 +53,7 @@ namespace vks
 		void setTopDirection (const glm::vec3& topDir) { m_topDirection = glm::normalize(topDir); }
 		void setViewingAngle (float angle) { m_viewingAngle = angle; }
 		void setAspect       (float aspect) { m_aspect = aspect; }
+		void setMaxZcomponentDirection(float max_z) { if (std::abs(max_z) <= 1.f) { m_max_z_direction_component = max_z; } }
 		////////////////////////////////////////////////////////
 
 		void turnInHorizontalPlane(float angle)
@@ -58,8 +62,8 @@ namespace vks
 		}
 		void turnInVerticalPlane(float angle)
 		{
-			if (angle > 0 && m_direction.z >= 0.998f ||
-				angle < 0 && m_direction.z <= -0.998f)
+			if (angle > 0 && m_direction.z >= m_max_z_direction_component ||
+				angle < 0 && m_direction.z <= -m_max_z_direction_component)
 			{
 				return;
 			}

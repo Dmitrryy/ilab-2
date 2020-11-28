@@ -5,3 +5,5 @@ add_library(LAL STATIC Line.cpp LineSegment.cpp Plane.cpp
         Vector.cpp square.cpp triangle.cpp
         math/LALmath.cpp
         )
+
+set(LAL_FOUND TRUE)

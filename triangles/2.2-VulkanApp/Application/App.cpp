@@ -11,7 +11,7 @@ namespace vks
 {
 	/*static*/ void VulkanApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 	{
-		auto app = reinterpret_cast<VulkanApp*>(glfwGetWindowUserPointer(window));
+		auto app = static_cast<VulkanApp*>(glfwGetWindowUserPointer(window));
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, GL_TRUE);
@@ -30,49 +30,62 @@ namespace vks
 	}
 
 	/*static*/ void VulkanApp::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-		auto app = reinterpret_cast<VulkanApp*>(glfwGetWindowUserPointer(window));
+		auto app = static_cast<VulkanApp*>(glfwGetWindowUserPointer(window));
 		app->m_framebufferResized = true;
 		app->m_cameraView.setAspect(width /(float) height);
 	}
 
 	void VulkanApp::Init()
 	{
-		glfwInit();
+		try
+		{
+			int res = glfwInit();
+			if (res != GLFW_TRUE) {
+				throw std::runtime_error("failed glfwInit!");
+			}
 
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-		m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
-		glfwSetWindowUserPointer(m_pWindow, this);
-		glfwSetFramebufferSizeCallback(m_pWindow, framebufferResizeCallback);
-		glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
+			m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
+			glfwSetWindowUserPointer(m_pWindow, this);
+			glfwSetFramebufferSizeCallback(m_pWindow, framebufferResizeCallback);
+			glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
 
-		glfwSetKeyCallback(m_pWindow, keyCallback);
+			glfwSetKeyCallback(m_pWindow, keyCallback);
 
 
-		m_core.Init(m_pWindow);
-		m_cameraView.setAspect(WINDOW_WIDTH / WINDOW_HEIGHT);
+			m_core.Init(m_pWindow);
+			m_cameraView.setAspect(WINDOW_WIDTH / WINDOW_HEIGHT);
 
-		vkGetDeviceQueue(m_core.getDevice(), m_core.getQueueFamily(), 0, &m_queue);
+			vkGetDeviceQueue(m_core.getDevice(), m_core.getQueueFamily(), 0, &m_queue);
 
-		createSwapChain_();
+			createSwapChain_();
 
-		createRenderPass_();
-		createDescriptorSetLayput_();
+			createRenderPass_();
+			createDescriptorSetLayput_();
 
-		createCommandBuffer_();
-		createDepthResources_();
-		createFramebuffer_();
-		createVertexBuffer_();
+			createCommandBuffer_();
+			createDepthResources_();
+			createFramebuffer_();
+			createVertexBuffer_();
 
-		createPipeline_();
+			createPipeline_();
 
-		createUniformBuffers_();
-		createDescriptorPool_();
-		createDescriptorSets_();
+			createUniformBuffers_();
+			createDescriptorPool_();
+			createDescriptorSets_();
 
-		recordCommandBuffers_();
+			recordCommandBuffers_();
 
-		createSyncObjects_();
+			createSyncObjects_();
+		}
+		catch (std::exception& exc_)
+		{
+			std::cerr << "Fatal error in VulkanApp::Init():\n";
+			std::cerr << "What(): " << exc_.what() << std::endl;
+			std::cerr << "Called VulkanApp::cleanup()" << std::endl;
+			cleanup();
+		}
 	}
 
 
@@ -161,6 +174,7 @@ namespace vks
 	void VulkanApp::cleanupSwapChain()
 	{
 		const auto device_ = m_core.getDevice();
+		if (device_ == nullptr) { return; }
 
 		vkDestroyImageView(device_, m_depthImageView, nullptr);
 		vkDestroyImage(device_, m_depthImage, nullptr);
@@ -169,6 +183,7 @@ namespace vks
 		for (size_t i = 0, mi = m_fbs.size(); i < mi; i++) {
 			vkDestroyFramebuffer(device_, m_fbs[i], nullptr);
 		}
+		m_fbs.clear();
 
 		vkFreeCommandBuffers(device_, m_cmdBufPool, static_cast<uint32_t>(m_cmdBufs.size()), m_cmdBufs.data());
 
@@ -179,14 +194,18 @@ namespace vks
 		for (size_t i = 0, mi = m_views.size(); i < mi; i++) {
 			vkDestroyImageView(device_, m_views[i], nullptr);
 		}
+		m_views.clear();
 
 		vkDestroySwapchainKHR(device_, m_swapChainKHR, nullptr);
 
-		for (size_t i = 0, mi = m_images.size(); i < mi; i++)
+		for (size_t i = 0, mi = m_uniformBuffers.size(); i < mi; i++)
 		{
 			vkDestroyBuffer(device_, m_uniformBuffers[i], nullptr);
 			vkFreeMemory(device_, m_uniformBuffersMemory[i], nullptr);
 		}
+		m_uniformBuffers.clear();
+		m_uniformBuffersMemory.clear();
+		m_images.clear();
 
 		vkDestroyDescriptorPool(device_, m_descriptorPool, nullptr);
 	}
@@ -197,22 +216,31 @@ namespace vks
 		cleanupSwapChain();
 
 		const auto device_ = m_core.getDevice();
+		if (device_ == nullptr) { return; }
 
 		vkDestroyDescriptorSetLayout(device_, m_descriptorSetLayout, nullptr);
+		m_descriptorSetLayout = nullptr;
 
 		vkDestroyBuffer(device_, m_vertexBuffer, nullptr);
+		m_vertexBuffer = nullptr;
 		vkFreeMemory(device_, m_vertexBufferMemory, nullptr);
+		m_vertexBufferMemory = nullptr;
 
-		for (size_t i = 0; i < m_maxFramesInFlight; i++)
+		for (size_t i = 0, mi = std::min(m_renderFinishedSem.size(), m_maxFramesInFlight); i < mi; i++)
 		{
 			vkDestroySemaphore(device_, m_renderFinishedSem[i], nullptr);
 			vkDestroySemaphore(device_, m_imageAvailableSem[i], nullptr);
 			vkDestroyFence(device_, m_inFlightFences[i], nullptr);
 		}
+		m_renderFinishedSem.clear();
+		m_imageAvailableSem.clear();
+		m_inFlightFences.clear();
 
 		vkDestroyCommandPool(device_, m_cmdBufPool, nullptr);
+		m_cmdBufPool = nullptr;
 
-		vkDestroyDevice(device_, nullptr);
+		glfwDestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
 
 		m_core.cleanup();
 	}
@@ -701,8 +729,8 @@ namespace vks
 
 	void VulkanApp::createPipeline_()
 	{
-		auto vsCode = readFile("resource/shaders/vert.spv");
-		auto fsCode = readFile("resource/shaders/frag.spv");
+		auto vsCode = readFile(vert_shader_fname);
+		auto fsCode = readFile(frag_shader_fname);
 
 		VkShaderModule vertShader = createShaderModule_(vsCode);
 		VkShaderModule fragShader = createShaderModule_(fsCode);
@@ -899,6 +927,10 @@ namespace vks
 
 	void VulkanApp::Run()
 	{
+		if (!isInit()) {
+			std::cerr << "function VulkanApp::Run() call of uninitialized object!";
+			return;
+		}
 		auto startTime = std::chrono::high_resolution_clock::now();
 		int wHeight = 0, wWidth = 0;
 		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
@@ -906,17 +938,26 @@ namespace vks
 		glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
 		glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-		while (!glfwWindowShouldClose(m_pWindow))
+		try {
+
+			while (!glfwWindowShouldClose(m_pWindow))
+			{
+				auto currentTime = std::chrono::high_resolution_clock::now();
+				float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+				startTime = currentTime;
+
+				glfwPollEvents();
+
+				updateCamera(time);
+
+				renderScene_();
+			}
+
+		}
+		catch (std::exception& exc_)
 		{
-			auto currentTime = std::chrono::high_resolution_clock::now();
-			float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-			startTime = currentTime;
-
-			glfwPollEvents();
-
-			updateCamera(time);
-
-			renderScene_();
+			std::cerr << "Fatal error in VulkanApp::Run():\n";
+			std::cerr << "What(): " << exc_.what() << std::endl;
 		}
 
 		vkDeviceWaitIdle(m_core.getDevice());

@@ -18,8 +18,11 @@
 
 namespace vks
 {
+	const std::string vert_shader_fname = "resource/shaders/vert.spv";
+	const std::string frag_shader_fname = "resource/shaders/frag.spv";
 
-	struct Vertex {
+	struct Vertex 
+	{
 		glm::vec3 pos;
 		glm::vec3 color;
 		glm::vec3 normal;
@@ -99,39 +102,16 @@ namespace vks
 
 		size_t                         m_maxFramesInFlight = 2;
 
-		VkBuffer                       m_vertexBuffer = {};
-		VkDeviceMemory                 m_vertexBufferMemory = {};
+		VkBuffer                       m_vertexBuffer = nullptr;;
+		VkDeviceMemory                 m_vertexBufferMemory = nullptr;
 
-		std::vector< VkBuffer >       m_uniformBuffers;
-		std::vector< VkDeviceMemory > m_uniformBuffersMemory;
+		std::vector< VkBuffer >        m_uniformBuffers;
+		std::vector< VkDeviceMemory >  m_uniformBuffersMemory;
 
 		CameraView                     m_cameraView;
 		float                          m_speed = 1.f;
 
-		std::vector<Vertex> vertices = {
-			{{-0.5f, 0.f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{-0.5f, 0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.f, 0.5f},  {0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.0f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.f, 0.5f},  {0.0f, 0.0f, 1.0f}},
-
-			{{-0.5f, 0.f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{-0.5f, 0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.f, 1.f, 0.f}, {1.0f, 0.0f, 0.0f}},
-
-			{{-0.5f, 0.0f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.f, 0.5f},  {0.0f, 0.0f, 1.0f}},
-			{{0.f, 1.f, 0.f}, {1.0f, 0.0f, 0.0f}},
-
-			{{-0.5f, 0.f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.0f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.f, 1.f, 0.f}, {1.0f, 0.0f, 0.0f}},
-
-			{{0.5f, 0.0f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.f, 0.5f},  {0.0f, 0.0f, 1.0f}},
-			{{0.f, 1.f, 0.f}, {1.0f, 0.0f, 0.0f}},
-		};
+		std::vector<Vertex> vertices;
 
 	public:
 
@@ -144,10 +124,11 @@ namespace vks
 		~VulkanApp()
 		{
 			cleanup();
-			delete m_pWindow;
 		}
 
 		void Init();
+		void cleanup();
+		bool isInit() { return m_pWindow != nullptr; }
 
 		void setVertexBuffer(const std::vector< Vertex >& new_data) { vertices = new_data;}
 		void setCameraView(const CameraView& camera) { m_cameraView = camera; }
@@ -164,7 +145,6 @@ namespace vks
 		void recreateSwapChain_();
 
 		void cleanupSwapChain();
-		void cleanup();
 
 
 		void createVertexBuffer_();
@@ -198,7 +178,7 @@ namespace vks
 		VkShaderModule createShaderModule_(const std::vector< char >& source_);
 
 		bool hasStencilComponent(VkFormat format) {
-			return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D32_SFLOAT_S8_UINT;
+			return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT;
 		}
 
 		static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
