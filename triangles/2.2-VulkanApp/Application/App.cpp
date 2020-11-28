@@ -958,6 +958,8 @@ namespace vks
 		{
 			std::cerr << "Fatal error in VulkanApp::Run():\n";
 			std::cerr << "What(): " << exc_.what() << std::endl;
+            std::cerr << "Called VulkanApp::cleanup()" << std::endl;
+            cleanup();
 		}
 
 		vkDeviceWaitIdle(m_core.getDevice());
