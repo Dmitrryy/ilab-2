@@ -44,7 +44,7 @@ namespace vks
 		{
 			int res = glfwInit();
 			if (res != GLFW_TRUE) {
-				throw std::runtime_error("failed glfwInit!");
+				throw std::runtime_error(DEBUG_MSG("failed glfwInit!"));
 			}
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -116,12 +116,12 @@ namespace vks
 		swapChainCreateInfo.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
 		if (vkCreateSwapchainKHR(m_core.getDevice(), &swapChainCreateInfo, nullptr, &m_swapChainKHR) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create swap chain!");
+			throw std::runtime_error(DEBUG_MSG("failed to create swap chain!"));
 		}
 
 		uint32_t numSwapChainImages = 0;
 		if (VK_SUCCESS != vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, nullptr)) {
-            throw std::runtime_error("failed to get swap chain ImageKHR!");
+            throw std::runtime_error(DEBUG_MSG("failed to get swap chain ImageKHR!"));
         }
 
 		m_images.resize(numSwapChainImages);
@@ -129,7 +129,7 @@ namespace vks
 		m_views.resize(numSwapChainImages);
 
         if (VK_SUCCESS != vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, m_images.data())) {
-            throw std::runtime_error("failed to get swap chain ImageKHR!");
+            throw std::runtime_error(DEBUG_MSG("failed to get swap chain ImageKHR!"));
         }
 	}
 
@@ -167,7 +167,7 @@ namespace vks
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
 		if (vkAllocateCommandBuffers(m_core.getDevice(), &allocInfo, m_cmdBufs.data()) != VK_SUCCESS) {
-			throw std::runtime_error("failed to allocate command buffers!");
+			throw std::runtime_error(DEBUG_MSG("failed to allocate command buffers!"));
 		}
 		recordCommandBuffers_();
 	}
@@ -255,7 +255,7 @@ namespace vks
 		cmdPoolCreateInfo.queueFamilyIndex = m_core.getQueueFamily();
 
 		if (vkCreateCommandPool(m_core.getDevice(), &cmdPoolCreateInfo, nullptr, &m_cmdBufPool) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create graphics command pool!");
+			throw std::runtime_error(DEBUG_MSG("failed to create graphics command pool!"));
 		}
 
 		VkCommandBufferAllocateInfo allocInfo = {};
@@ -265,7 +265,7 @@ namespace vks
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
 		if (vkAllocateCommandBuffers(m_core.getDevice(), &allocInfo, m_cmdBufs.data()) != VK_SUCCESS) {
-			throw std::runtime_error("failed to allocate command buffers!");
+			throw std::runtime_error(DEBUG_MSG("failed to allocate command buffers!"));
 		}
 	}
 
@@ -293,7 +293,7 @@ namespace vks
 		for (size_t k = 0, mk = m_cmdBufs.size(); k < mk; k++)
 		{
 			if (vkBeginCommandBuffer(m_cmdBufs[k], &beginInfo) != VK_SUCCESS) {
-				throw std::runtime_error("failed to begin recording command buffer!");
+				throw std::runtime_error(DEBUG_MSG("failed to begin recording command buffer!"));
 			}
 
 			VkRenderPassBeginInfo renderPassInfo = {};
@@ -327,7 +327,7 @@ namespace vks
 			//vkCmdClearColorImage(m_cmdBufs[k], m_images[k], VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &imageRange);
 
 			if (vkEndCommandBuffer(m_cmdBufs[k]) != VK_SUCCESS) {
-				throw std::runtime_error("failed to record command buffer!");
+				throw std::runtime_error(DEBUG_MSG("failed to record command buffer!"));
 			}
 		}
 	}
@@ -479,7 +479,7 @@ namespace vks
 		layoutInfo.pBindings = &uboLayputBinding;
 
 		if (vkCreateDescriptorSetLayout(m_core.getDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create descriptor set layput!");
+			throw std::runtime_error(DEBUG_MSG("failed to create descriptor set layput!"));
 		}
 	}
 
@@ -497,7 +497,7 @@ namespace vks
 		poolInfo.maxSets = static_cast<uint32_t> (m_images.size());
 
 		if (vkCreateDescriptorPool(m_core.getDevice(), &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create descriptor pool!");
+			throw std::runtime_error(DEBUG_MSG("failed to create descriptor pool!"));
 		}
 	}
 
@@ -516,7 +516,7 @@ namespace vks
 
 		m_descriptorSets.resize(m_images.size());
 		if (vkAllocateDescriptorSets(device_, &allocInfo, m_descriptorSets.data()) != VK_SUCCESS) {
-			throw std::runtime_error("failed to allocate descriptor sets!");
+			throw std::runtime_error(DEBUG_MSG("failed to allocate descriptor sets!"));
 		}
 
 		for (size_t i = 0, mi = m_images.size(); i < mi; i++)
@@ -554,7 +554,7 @@ namespace vks
 			return;
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-			throw std::runtime_error("failed to acquire swap chain image!");
+			throw std::runtime_error(DEBUG_MSG("failed to acquire swap chain image!"));
 		}
 		
 
@@ -585,7 +585,7 @@ namespace vks
 		vkResetFences(m_core.getDevice(), 1, &m_inFlightFences[m_currentFrame]);
 
 		if (VK_SUCCESS != vkQueueSubmit(m_queue, 1, &submitInfo, m_inFlightFences[m_currentFrame])) {
-			throw std::runtime_error("failed to submit draw command buffer!");
+			throw std::runtime_error(DEBUG_MSG("failed to submit draw command buffer!"));
 		}
 
 		VkPresentInfoKHR presentInfo = {};
@@ -606,7 +606,7 @@ namespace vks
 			recreateSwapChain_();
 		} 
 		else if (result != VK_SUCCESS) {
-			throw std::runtime_error("failed to present swap chain image!");
+			throw std::runtime_error(DEBUG_MSG("failed to present swap chain image!"));
 		}
 
 		//vkQueueWaitIdle(m_queue);
@@ -676,7 +676,7 @@ namespace vks
 		renderPassInfo.pDependencies = &dependency;
 
 		if (vkCreateRenderPass(m_core.getDevice(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create render pass!");
+			throw std::runtime_error(DEBUG_MSG("failed to create render pass!"));
 		}
 	}
 
@@ -707,7 +707,7 @@ namespace vks
 			fbInfo.layers = 1;
 
 			if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_fbs[i])) {
-				throw std::runtime_error("failed to create frame buffer");
+				throw std::runtime_error(DEBUG_MSG("failed to create frame buffer"));
 			}
 		}
 	}
@@ -722,7 +722,7 @@ namespace vks
 
 		VkShaderModule sModule = nullptr;
 		if (vkCreateShaderModule(m_core.getDevice(), &createInfo, nullptr, &sModule) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create shader module!");
+			throw std::runtime_error(DEBUG_MSG("failed to create shader module!"));
 		}
 
 		return sModule;
@@ -868,7 +868,7 @@ namespace vks
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
 		if (vkCreatePipelineLayout(m_core.getDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create pipeline layout!");
+			throw std::runtime_error(DEBUG_MSG("failed to create pipeline layout!"));
 		}
 
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
@@ -894,7 +894,7 @@ namespace vks
 		pipelineInfo.basePipelineIndex = -1;
 
 		if (vkCreateGraphicsPipelines(m_core.getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create graphics pipeline!");
+			throw std::runtime_error(DEBUG_MSG("failed to create graphics pipeline!"));
 		}
 
 		vkDestroyShaderModule(m_core.getDevice(), fragShader, nullptr);
@@ -921,7 +921,7 @@ namespace vks
 				vkCreateSemaphore(m_core.getDevice(), &createInfo, nullptr, &m_renderFinishedSem[i]) != VK_SUCCESS ||
 				vkCreateFence(m_core.getDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS) {
 
-				throw std::runtime_error("failed to create semaphores!");
+				throw std::runtime_error(DEBUG_MSG("failed to create semaphores!"));
 			}
 		}
 	}
