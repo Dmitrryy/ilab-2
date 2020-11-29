@@ -59,6 +59,7 @@ add_custom_command(
         USES_TERMINAL
         )]]
 
+#[[
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
 
@@ -74,4 +75,4 @@ add_custom_command(
         DEPENDS $ENV{VULKAN_SDK}/bin/glslc
         COMMENT "fragment shader compiled!"
         WORKING_DIRECTORY $<TARGET_FILE_DIR:${PROJECT_NAME}>/resource/shaders
-        )
+        )]]

@@ -7,6 +7,8 @@
 #include <cassert>
 #include <cstring>
 
+#include "Helpa/helpa.h"
+
 
 namespace vks {
 
@@ -17,7 +19,7 @@ namespace vks {
         createInstance_();
 
         if (glfwCreateWindowSurface(m_inst, pWindow, nullptr, &m_surface) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create window surface!");
+            throw std::runtime_error(DEBUG_MSG("failed to create window surface!"));
         }
 
         m_physDevices = VulkanGetPhysicalDevices(m_inst, m_surface);
@@ -38,7 +40,7 @@ namespace vks {
         auto device = getDevice();
 
         if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create buffer!");
+            throw std::runtime_error(DEBUG_MSG("failed to create buffer!"));
         }
 
         VkMemoryRequirements memRequirements;
@@ -50,7 +52,7 @@ namespace vks {
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
         if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate buffer memory!");
+            throw std::runtime_error(DEBUG_MSG("failed to allocate buffer memory!"));
         }
 
         vkBindBufferMemory(device, buffer, bufferMemory, 0);
@@ -76,7 +78,7 @@ namespace vks {
         auto device = getDevice();
 
         if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create image!");
+            throw std::runtime_error(DEBUG_MSG("failed to create image!"));
         }
 
         VkMemoryRequirements memRequirements;
@@ -88,7 +90,7 @@ namespace vks {
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
         if (vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate image memory!");
+            throw std::runtime_error(DEBUG_MSG(DEBUG_MSG("failed to allocate image memory!")));
         }
 
         vkBindImageMemory(device, image, imageMemory, 0);
@@ -109,7 +111,7 @@ namespace vks {
 
         VkImageView imageView;
         if (vkCreateImageView(getDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create texture image view!");
+            throw std::runtime_error(DEBUG_MSG("failed to create texture image view!"));
         }
 
         return imageView;
@@ -137,7 +139,7 @@ namespace vks {
 #ifdef ENABLE_DEBUG_LAYERS
 
         if (!checkValidationLayerSupport()) {
-            throw std::runtime_error("validation layers requested, but not available!");
+            throw std::runtime_error(DEBUG_MSG("validation layers requested, but not available!"));
         }
 
         instInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
@@ -154,7 +156,7 @@ namespace vks {
 #endif
 
         if (vkCreateInstance(&instInfo, nullptr, &m_inst) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create instance!");
+            throw std::runtime_error(DEBUG_MSG("failed to create instance!"));
         }
     }
 
@@ -222,7 +224,7 @@ namespace vks {
                     m_DeviceIndex = i;
                     m_QueueFamily = k;
 #ifdef PRINTF_DEVICE_INFO
-                    printf("Using GFX device %d and queue family %d\n", m_DeviceIndex, m_QueueFamily);
+                    printf("Using GFX device %lu and queue family %lu\n", m_DeviceIndex, m_QueueFamily);
 #endif
                     
                     return;
@@ -232,8 +234,7 @@ namespace vks {
         }
 
         if (m_DeviceIndex < 0) {
-            std::cerr << "No GFX device found!\n";
-            assert(0);
+            throw std::runtime_error(DEBUG_MSG("fatal error in Core::selectPhysicalDevice(): No GFX device found!"));
         }
     }
 
@@ -260,7 +261,7 @@ namespace vks {
 #endif
 
         if (VK_SUCCESS != vkCreateDevice(getPhysDevice(), &devInfo, NULL, &m_device)) {
-            throw std::runtime_error("failed to create logical device!");
+            throw std::runtime_error(DEBUG_MSG("failed to create logical device!"));
         }
     }
 
@@ -279,7 +280,7 @@ namespace vks {
             }
         }
 
-        throw std::runtime_error("failed to find suitable memory type!");
+        throw std::runtime_error(DEBUG_MSG("failed to find suitable memory type!"));
     }
 
 
@@ -300,7 +301,7 @@ namespace vks {
             }
         }
 
-        throw std::runtime_error("failed to find supported format!");
+        throw std::runtime_error(DEBUG_MSG("failed to find supported format!"));
     }
 
 
@@ -312,14 +313,14 @@ namespace vks {
     std::vector<VkExtensionProperties> VulkanEnumExtProps()
     {
         uint32_t numExt = 0;
-        if (vkEnumerateInstanceExtensionProperties(NULL, &numExt, NULL) != VK_SUCCESS){
-            assert(0);
+        if (vkEnumerateInstanceExtensionProperties(NULL, &numExt, NULL) != VK_SUCCESS) {
+            throw std::runtime_error(DEBUG_MSG("failed to enumerate instance extension properties!"));
         }
 
         std::vector<VkExtensionProperties> result(numExt);
 
         if (vkEnumerateInstanceExtensionProperties(NULL, &numExt, &result[0]) != VK_SUCCESS) {
-            assert(0);
+            throw std::runtime_error(DEBUG_MSG("failed to enumerate instance extension properties!"));
         }
 
 #ifdef PRINTF_DEVICE_INFO
@@ -352,22 +353,24 @@ namespace vks {
             {
                 if (vkGetPhysicalDeviceSurfaceSupportKHR(curDevice, q, surface_, &(m_qSupportPresent[i][q])) != VK_SUCCESS)
                 {
-                    assert(0);
+                    throw std::runtime_error(DEBUG_MSG("failed to get physical Device surface support!"));
                 }
             }
 
             uint32_t numFormats = 0;
-            vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, nullptr);
+            if (vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, nullptr) != VK_SUCCESS) {
+                throw std::runtime_error(DEBUG_MSG("failed to get physical Device surface formats!"));
+            }
             assert(numFormats > 0);
 
             m_surfaceFormats[i].resize(numFormats);
 
             if (vkGetPhysicalDeviceSurfaceFormatsKHR(curDevice, surface_, &numFormats, m_surfaceFormats[i].data()) != VK_SUCCESS) {
-                assert(0);
+                throw std::runtime_error(DEBUG_MSG("failed to get physical Device surface formats!"));
             }
 
             if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(curDevice, surface_, &(m_surfaceCaps[i])) != VK_SUCCESS) {
-                assert(0);
+                throw std::runtime_error(DEBUG_MSG("failed to get physical Device surface Capabilities!"));
             }
 #ifdef PRINTF_DEVICE_INFO
             printf("Device name: %s\n", m_devProps[i].deviceName);
@@ -396,7 +399,7 @@ namespace vks {
         uint32_t numDevices = 0;
 
         if (vkEnumeratePhysicalDevices(inst_, &numDevices, nullptr) != VK_SUCCESS){
-            assert(0);
+            throw std::runtime_error(DEBUG_MSG("failed to enumerate physical devices!"));
         }
 #ifdef PRINTF_DEVICE_INFO
         printf("Num physical devices %d\n", numDevices);
@@ -405,7 +408,7 @@ namespace vks {
         result.resize(numDevices);
 
         if (vkEnumeratePhysicalDevices(inst_, &numDevices, result.m_devices.data()) != VK_SUCCESS){
-            assert(0);
+            throw std::runtime_error(DEBUG_MSG("failed to enumerate physical devices!"));
         }
 
         result.update(surface_);

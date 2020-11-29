@@ -18,8 +18,6 @@
 
 namespace vks
 {
-	const std::string vert_shader_fname = "resource/shaders/vert.spv";
-	const std::string frag_shader_fname = "resource/shaders/frag.spv";
 
 	struct Vertex 
 	{

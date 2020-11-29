@@ -7,6 +7,9 @@
 #define WINDOW_HEIGHT 800
 #define WINDOW_WIDTH  1000
 
+const std::string vert_shader_fname = "resource/shaders/vert.spv";
+const std::string frag_shader_fname = "resource/shaders/frag.spv";
+
 namespace vks
 {
 	/*static*/ void VulkanApp::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -95,7 +98,6 @@ namespace vks
 		assert(SurfaceCaps.currentExtent.width != -1);
 		
 		uint32_t numImages = SurfaceCaps.minImageCount + 1;
-		assert(numImages >= SurfaceCaps.minImageCount);
 		assert(numImages <= SurfaceCaps.maxImageCount);
 
 		VkSwapchainCreateInfoKHR swapChainCreateInfo = {};
@@ -113,22 +115,22 @@ namespace vks
 		swapChainCreateInfo.clipped          = VK_TRUE;
 		swapChainCreateInfo.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-		VkResult res = {};
-		if ((res = vkCreateSwapchainKHR(m_core.getDevice(), &swapChainCreateInfo, nullptr, &m_swapChainKHR)) != VK_SUCCESS) {
-			
+		if (vkCreateSwapchainKHR(m_core.getDevice(), &swapChainCreateInfo, nullptr, &m_swapChainKHR) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create swap chain!");
 		}
 
 		uint32_t numSwapChainImages = 0;
 		if (VK_SUCCESS != vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, nullptr)) {
-			assert(0);
-		}
+            throw std::runtime_error("failed to get swap chain ImageKHR!");
+        }
 
 		m_images.resize(numSwapChainImages);
 		m_cmdBufs.resize(numSwapChainImages);
 		m_views.resize(numSwapChainImages);
 
-		vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, m_images.data());
+        if (VK_SUCCESS != vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, m_images.data())) {
+            throw std::runtime_error("failed to get swap chain ImageKHR!");
+        }
 	}
 
 

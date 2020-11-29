@@ -12,8 +12,12 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#ifndef NDEBUG
+
 #define ENABLE_DEBUG_LAYERS
 #define PRINTF_DEVICE_INFO
+
+#endif
 
 namespace vks
 {
