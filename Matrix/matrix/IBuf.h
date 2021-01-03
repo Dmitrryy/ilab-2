@@ -60,11 +60,6 @@ namespace matrix
 			std::swap(m_size, that.m_size);
 			std::swap(m_used, that.m_used);
 		}
-
-		void clear()
-		{
-			*this = IBuff_t();
-		}
 	};
 
 

@@ -41,7 +41,7 @@ namespace matrix
 	template< typename T >
 	template< typename U >
 	MatrixBuffer_t<T>::MatrixBuffer_t(const MatrixBuffer_t< U >& that)
-		: IBuff_t(that.m_size)
+		: IBuff_t<T>(that.m_size)
 		, m_order(that.m_order)
 		, m_lines(that.m_lines)
 		, m_columns(that.m_columns)
@@ -105,7 +105,7 @@ namespace matrix
 
 
 	template< typename T >
-	void MatrixBuffer_t<T>::forAll(std::function< bool(T&, size_t, size_t) >& func)
+	void MatrixBuffer_t<T>::forAll(const std::function< bool(const T&, size_t, size_t) const >& func) const
 	{
 		if (m_order == Order::Row)
 		{
@@ -144,7 +144,7 @@ namespace matrix
 
 	template< typename T >
 	template< typename U >
-	static void MatrixBuffer_t<T>::copy(MatrixBuffer_t< T >& dest, const MatrixBuffer_t< U >& src)
+	/*static*/ void MatrixBuffer_t<T>::copy(MatrixBuffer_t< T >& dest, const MatrixBuffer_t< U >& src)
 	{
 		const size_t min_y = std::min(dest.m_lines, src.m_lines);
 		const size_t min_x = std::min(dest.m_columns, src.m_columns);

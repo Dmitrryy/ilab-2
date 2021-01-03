@@ -42,9 +42,12 @@ namespace matrix
 		Order  getOrder()   const noexcept { return m_buff.getOrder(); }
 		size_t getLines()   const noexcept { return m_buff.getLines(); }
 		size_t getColumns() const noexcept { return m_buff.getColumns(); }
+		//
+		const MatrixBuffer_t<T>& getBuffer() const noexcept { return m_buff; }
 		///////////////////////////////////////////////////
 
-		void forAll(std::function< bool(T&, size_t, size_t) >& func) { m_buff.forAll(func);  }
+        void forAll(const std::function< bool(T&, size_t, size_t) >& func) { m_buff.forAll(func);  }
+        void forAll(const std::function< bool(const T&, size_t, size_t) const >& func) const { static_cast< const MatrixBuffer_t< T >& >(m_buff).forAll(func);  }
 
 		T      trace() const noexcept;
 
@@ -57,7 +60,7 @@ namespace matrix
 		T& at(size_t y_, size_t x_)& { return const_cast<T&>(static_cast<const Matrix<T>*>(this)->at(y_, x_)); }
 		const T& at(size_t y_, size_t x_) const& { return m_buff.at(y_, x_); }
 
-		void setOrder(Order order_) { m_buff.setOrder(); }
+		void setOrder(Order order_) { m_buff.setOrder(order_); }
 
 		Matrix& add(const Matrix& rhs_)&;
 		Matrix& sub(const Matrix& rhs_)&;
@@ -144,7 +147,7 @@ namespace matrix
     Matrix<T>::Matrix(const Matrix<U> &that_) noexcept
         : Matrix(that_.getLines(), that_.getColumns(), that_.getOrder())
     {
-		MatrixBuffer_t< T >::copy(*this, that_);
+		MatrixBuffer_t< T >::copy(m_buff, that_.getBuffer());
     }
 
 }//namespace matrix

@@ -18,7 +18,7 @@ namespace matrix
 			return false;
 		}
 
-		m_buff.forAll([&that_, &result](T& elem, size_t ln, size_t clm)
+		forAll([&that_, &result](T& elem, size_t ln, size_t clm)
 			{
 				result = (elem == that_.at(ln, clm));
 				return result;
@@ -180,7 +180,7 @@ namespace matrix
 	template <typename T>
 	Matrix<T>& Matrix<T>::negate()&
 	{
-		m_buff.forAll([](T& elem, size_t, size_t)
+		m_buff.forAll([](T& elem, size_t l, size_t c)
 			{
 				elem = (-elem);
 				return true;

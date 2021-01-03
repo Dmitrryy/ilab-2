@@ -61,7 +61,8 @@ namespace matrix
 
 		void clear();
 
-		void forAll(std::function< bool(T&, size_t, size_t) >& func);
+        void forAll(const std::function< bool(T&, size_t, size_t) >& func) { static_cast<const MatrixBuffer_t< T >* >(this)->forAll(func); }
+        void forAll(const std::function< bool(const T&, size_t, size_t) const >& func) const;
 
 		template< typename U >
 		static void copy(MatrixBuffer_t< T >& dest, const MatrixBuffer_t< U >& src);
