@@ -119,6 +119,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab-2\Matrix\matrix;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,12 +149,15 @@
     <ClCompile Include="tests\gen_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="matrix\IBuf.h" />
     <ClInclude Include="matrix\Matrix.h" />
+    <ClInclude Include="matrix\MatrixBuff.h" />
     <ClInclude Include="tests\gen_test.h" />
     <ClInclude Include="tests\Matrix_test.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="matrix\Matrix.inl" />
+    <None Include="matrix\MatrixBuffer.inl" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>

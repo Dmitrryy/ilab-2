@@ -41,12 +41,21 @@
     <ClInclude Include="tests\gen_test.h">
       <Filter>Header Files\tests</Filter>
     </ClInclude>
+    <ClInclude Include="matrix\IBuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="matrix\MatrixBuff.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="matrix\Matrix.inl">
       <Filter>Source Files\Matrix</Filter>
     </None>
     <None Include="README.md" />
+    <None Include="matrix\MatrixBuffer.inl">
+      <Filter>Source Files\Matrix</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CmakeLists.txt" />

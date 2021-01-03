@@ -6,6 +6,7 @@
 using matrix::Matrix;
 using matrix::Order;
 
+
 int main()
 {
 	size_t mat_size = 0;
@@ -16,6 +17,7 @@ int main()
 			std::cin >> m.at(i, l);
 		}
 	}
+	
 	std::cout << std::round(m.determinante()) << std::endl;
 
 	return 0;
