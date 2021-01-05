@@ -74,6 +74,21 @@ TEST_F(MatrixTest, construct)
 	EXPECT_EQ(tmp, q1_);
 	q1_.at(0, 0)++;
 	EXPECT_TRUE(tmp != q1_);
+
+	q0_.setOrder(Order::Row);
+	q0_ = {
+            {1, 2, 3},
+            {5, 4, 33}
+	};
+	q1_.setOrder(Order::Column);
+    q1_ = {
+            {1, 2, 3},
+            {5, 4, 33}
+    };
+    EXPECT_EQ(q0_, q1_);
+
+	EXPECT_EQ(q0_.getLines(), 2);
+	EXPECT_EQ(q0_.getColumns(), 3);
 }
 
 TEST_F(MatrixTest, setOrder)
@@ -185,7 +200,7 @@ TEST_F(MatrixTest, swap)
 	};
 	q1_ = {
 	{2, 3, 4},
-		{0, 0, 7},
+	{0, 0, 7},
 	{0, 4, 5}
 	};
 	q0_.swopLines(1, 2);
@@ -214,18 +229,14 @@ TEST_F(MatrixTest, transpose)
 		{3, 4, 0},
 		{4, 5, 7}
 	};
-	EXPECT_EQ(q0_, q1_.transpose());
+    EXPECT_EQ(q0_.transpose(), q1_);
 
 	q0_ = {
 		{2, 3, 4},
 		{0, 4, 5},
 		{0, 0, 7}
 	};
-	q1_ = {
-		{2, 3, 4},
-		{0, 4, 5},
-		{0, 0, 7}
-	};
+	q1_ = q0_;
 	EXPECT_EQ(q0_, q1_.transpose().transpose());
 }
 
@@ -259,6 +270,27 @@ TEST_F(MatrixTest, addSub)
 	};
 	EXPECT_EQ(q0_.add(q1_), q2_);
 	EXPECT_EQ(q0_.sub(q1_), q3_);
+}
+
+TEST_F(MatrixTest, FOREACHLOOP)
+{
+    q0_ = {
+            {1, 2, 3},
+            {4, 5, 6}
+    };
+
+    double i = 1;
+    for (auto elem : q0_)
+    {
+        EXPECT_EQ(i, elem.val);
+        if (i == 6)
+        {
+            EXPECT_EQ(1, elem.line);
+            EXPECT_EQ(2, elem.column);
+        }
+
+        i++;
+    }
 }
 
 TEST_F(MatrixTest, multipl)

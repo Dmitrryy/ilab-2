@@ -3,11 +3,15 @@
 #include <cassert>
 #include <functional>
 #include <sstream>
+#include <cmath>
 
 #include "IBuf.h"
+#include <iterator>
 
 namespace matrix
 {
+    template <typename Pointer, typename Conteiner>
+    class normal_iterator_t;
 
 	enum class Order
 	{
@@ -26,6 +30,18 @@ namespace matrix
 		using IBuff_t<T>::m_data;
 
 	public:
+
+	    using value = T;
+	    using const_value = const T;
+	    using point = T*;
+	    using const_point = const T*;
+
+	    using conteiner = MatrixBuffer_t< T >;
+	    using const_conteiner = MatrixBuffer_t< const T >;
+
+	    using iterator = normal_iterator_t< value, MatrixBuffer_t< T > >;
+	    using const_iterator = normal_iterator_t< const_value, const MatrixBuffer_t< T > >;
+
 
 		MatrixBuffer_t() = default;
 		MatrixBuffer_t(size_t lines, size_t columns, Order order = Order::Row);
@@ -50,6 +66,18 @@ namespace matrix
 		size_t getColumns() const noexcept { return m_columns; }
 		///////////////////////////////////////////////////
 
+        template <typename U>
+        bool   equal(const MatrixBuffer_t<U>& that_) const;
+
+        template <typename U>
+        bool operator == (const MatrixBuffer_t<U>& that_) const { return equal(that_); }
+
+		iterator begin() noexcept { return iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
+		iterator end() noexcept { return iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
+
+		const_iterator cbegin() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
+		const_iterator cend() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
+
 		void setOrder(Order nOrder);
 
 		MatrixBuffer_t& transpose()&;
@@ -61,19 +89,158 @@ namespace matrix
 
 		void clear();
 
-        void forAll(const std::function< bool(T&, size_t, size_t) >& func) { static_cast<const MatrixBuffer_t< T >* >(this)->forAll(func); }
-        void forAll(const std::function< bool(const T&, size_t, size_t) const >& func) const;
-
 		template< typename U >
 		static void copy(MatrixBuffer_t< T >& dest, const MatrixBuffer_t< U >& src);
 
 		void resize(size_t lines, size_t columns);
 
-	private:
+	//private:
 
 		std::string dumpStr() const;
+
+        friend std::ostream& operator << (std::ostream& stream_, const MatrixBuffer_t<T>& mtr_) {
+            return stream_ << mtr_.dumpStr();
+        }
 		
 	};
+
+
+	template<typename T>
+	struct Range
+    {
+	    T left, right;
+
+	    Range(const T& nLeft, const T& nRight)
+	        : left(nLeft)
+	        , right(nRight)
+        { }
+
+	    bool contain(const T& that) const
+        {
+	        return that >= left && that <= right;
+        }
+    };
+
+
+	template <typename T>
+	class Elem
+    {
+    public:
+	    T& val;
+
+	    Elem(T& elem, size_t l, size_t c)
+	        : val(elem)
+	        , line(l)
+	        , column(c)
+        {}
+
+        operator T&() { return val; }
+
+        template <typename U>
+        Elem& operator = (const U& that) {
+	        val = that;
+	        return *this;
+	    }
+
+    public:
+
+        size_t line = 0;
+        size_t column = 0;
+    };
+
+
+
+	template< typename Val, typename Conteiner >
+    class normal_iterator_t : public std::iterator< std::forward_iterator_tag, typename Conteiner::value >
+    {
+        Val* m_value                  = nullptr;
+        Range< Val* > m_range;
+
+        Conteiner* m_general;
+        size_t cur_line = 0, cur_column = 0;
+
+        Val m_negateVal = Val();
+
+    public:
+
+        using elem_t = Elem< Val >;
+
+        normal_iterator_t() = default;
+        normal_iterator_t(Conteiner* gen, Val* left, Val* right, Val* val, size_t cLine, size_t cColumn)
+            : m_range(left, right)
+            , m_general(gen)
+            , m_value(val)
+            , cur_column(cColumn)
+            , cur_line(cLine)
+        {}
+
+        Elem< Val > operator *  () const noexcept {
+            if (m_range.contain(m_value))
+                return Elem(*m_value, cur_line, cur_column);
+            else
+                return Elem((Val&)(m_negateVal), 0, 0);
+        }
+        Val* operator -> () const noexcept { return m_value; }
+
+
+        normal_iterator_t& operator++() noexcept {
+            m_value++;
+            upPosition_(1);
+            return *this;
+        }
+        const normal_iterator_t operator++(int) noexcept {
+            normal_iterator_t tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        normal_iterator_t& operator--() noexcept {
+            m_value--;
+            upPosition_(-1);
+            return *this;
+        }
+
+        const normal_iterator_t operator--(int) noexcept {
+            normal_iterator_t tmp(*this);
+            --*this;
+            return tmp;
+        }
+
+
+        bool operator == (const normal_iterator_t& that) const noexcept {
+            return m_value == that.m_value;
+        }
+        bool operator != (const normal_iterator_t& that) const noexcept {
+            return !(*this == that);
+        }
+
+    private:
+
+        void upPosition_(size_t step)
+        {
+            switch(m_general->getOrder())
+            {
+                case Order::Row:
+                    cur_column = (cur_column + step) % m_general->getColumns();
+                    if (cur_column == 0) {
+                        cur_line = (cur_line + step) % m_general->getLines();
+                    }
+                    break;
+
+                case Order::Column:
+                    cur_line = (cur_line + step) % m_general->getLines();
+                    if (cur_line == 0) {
+                        cur_column = (cur_column + step) % m_general->getColumns();
+                    }
+                    break;
+
+                default:
+                    assert(0);
+            }
+        }
+
+    };//class Iterator_t
+
 
 	std::string toString(Order order_);
 	std::ostream& operator << (std::ostream& stream_, matrix::Order order_);

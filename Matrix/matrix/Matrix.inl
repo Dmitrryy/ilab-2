@@ -1,32 +1,8 @@
+#include <algorithm>
+
 
 namespace matrix
 {
-	template <typename T>
-	void Matrix<T>::clear()
-	{
-		*this = std::move(Matrix<T>());
-	}
-
-
-	template <typename T>
-    template <typename U>
-    bool Matrix<T>::equal(const Matrix<U>& that_) const
-	{
-		bool result = true;
-
-		if (getColumns() != that_.getColumns() || getLines() != that_.getLines()) {
-			return false;
-		}
-
-		forAll([&that_, &result](T& elem, size_t ln, size_t clm)
-			{
-				result = (elem == that_.at(ln, clm));
-				return result;
-			});
-
-		return result;
-	}
-
 
 	template <typename T>
 	T Matrix<T>::trace() const noexcept
@@ -119,9 +95,9 @@ namespace matrix
 			}
 		}
 
-		T result = at(0, 0);
+		T result = tr_mtr.at(0, 0);
 		for (size_t i = 1; i < N; i++) {
-			result += at(i, i);
+			result *= tr_mtr.at(i, i);
 		}
 		return result * ((minus) ? -1 : 1);
 	}
@@ -180,11 +156,11 @@ namespace matrix
 	template <typename T>
 	Matrix<T>& Matrix<T>::negate()&
 	{
-		m_buff.forAll([](T& elem, size_t l, size_t c)
-			{
-				elem = (-elem);
-				return true;
-			});
+	    std::for_each(begin(), end(), [](T& elem)
+        {
+            elem = (-elem);
+            return true;
+        });
 
 		return *this;
 	}
@@ -195,10 +171,9 @@ namespace matrix
 	{
 		Matrix<T> tmp(getLines(), getColumns(), getOrder());
 
-		tmp.forAll([&rhs_, &lhs = *this](T& elem, size_t ln, size_t clm)
+		std::for_each(tmp.begin(), tmp.end(), [&rhs_, &lhs = *this](Elem<T> elem)
 			{
-				elem = rhs_.at(ln, clm) + lhs.at(ln, clm);
-				return true;
+				elem.val = rhs_.at(elem.line, elem.column) + lhs.at(elem.line, elem.line);
 			});
 
 		///
@@ -212,10 +187,9 @@ namespace matrix
 	{
 		Matrix<T> tmp(getLines(), getColumns(), getOrder());
 
-		tmp.forAll([&rhs_, &lhs = *this](T& elem, size_t ln, size_t clm)
+		std::for_each(tmp.begin(), tmp.end(), [&rhs_, &lhs = *this](Elem<T> elem)
 		{
-			elem = rhs_.at(ln, clm) - lhs.at(ln, clm);
-			return true;
+			elem.val = lhs.at(elem.line, elem.column) - rhs_.at(elem.line, elem.column);
 		});
 
 		///
@@ -229,9 +203,9 @@ namespace matrix
 	{
 		Matrix<T> tmp(getLines(), getColumns(), getOrder());
 
-		tmp.forAll([&num_, &lhs = *this](T& elem, size_t ln, size_t clm)
+		std::for_each(begin(), end(), [&num_, &lhs = *this](Elem<T> elem)
 		{
-			elem = lhs.at(ln, clm) * num_;
+			elem.val = lhs.at(elem.line, elem.column) * num_;
 			return true;
 		});
 
@@ -270,13 +244,6 @@ namespace matrix
 
 	    return *this = std::move(result);
     }
-
-
-    template <typename T>
-    template <typename U>
-	bool Matrix<T>::operator == (const Matrix<U>& that_) const {
-		return equal(that_);
-	}
 
 	template <typename T>
     template <typename U>

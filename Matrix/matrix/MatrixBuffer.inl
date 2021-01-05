@@ -2,11 +2,30 @@
 
 namespace matrix
 {
+    template <typename T>
+    template <typename U>
+    bool MatrixBuffer_t<T>::equal(const MatrixBuffer_t<U>& that_) const
+    {
+        bool result = true;
+
+        if (getColumns() != that_.getColumns() || getLines() != that_.getLines()) {
+            return false;
+        }
+
+        std::for_each(cbegin(), cend(), [&that_, &result](Elem<const T> elem)
+        {
+            result = result && (elem.val == that_.at(elem.line, elem.column));
+        });
+
+        return result;
+    }
+
 	template< typename T >
 	MatrixBuffer_t<T>::MatrixBuffer_t(size_t lines, size_t columns, Order order/* = Order::Row*/)
 		: IBuff_t<T>(lines* columns)
 		, m_lines((columns != 0) ? lines : 0)
 		, m_columns((lines != 0) ? columns : 0)
+		, m_order(order)
 	{
 		while (m_used < m_size)
 		{
@@ -95,6 +114,7 @@ namespace matrix
 		IBuff_t<T>::swap(that);
 		std::swap(m_lines, that.m_lines);
 		std::swap(m_columns, that.m_columns);
+		std::swap(m_order, that.m_order);
 	}
 
 	template< typename T >
@@ -103,32 +123,6 @@ namespace matrix
 		*this = MatrixBuffer_t();
 	}
 
-
-	template< typename T >
-	void MatrixBuffer_t<T>::forAll(const std::function< bool(const T&, size_t, size_t) const >& func) const
-	{
-		if (m_order == Order::Row)
-		{
-			for (size_t l = 0; l < m_lines; l++) {
-				for (size_t c = 0; c < m_columns; c++)
-				{
-					if (!func(at(l, c), l, c))
-						return;
-				}
-			}
-		}
-		else if (m_order == Order::Column)
-		{
-			for (size_t c = 0; c < m_columns; c++) {
-				for (size_t l = 0; l < m_lines; l++)
-				{
-					if (func(at(l, c), l, c))
-						return;
-				}
-			}
-		}
-		else { assert(0); }
-	}
 
 	template< typename T >
 	void MatrixBuffer_t<T>::setOrder(Order nOrder)
@@ -146,18 +140,17 @@ namespace matrix
 	template< typename U >
 	/*static*/ void MatrixBuffer_t<T>::copy(MatrixBuffer_t< T >& dest, const MatrixBuffer_t< U >& src)
 	{
-		const size_t min_y = std::min(dest.m_lines, src.m_lines);
-		const size_t min_x = std::min(dest.m_columns, src.m_columns);
+		const size_t min_y = std::min(dest.m_lines, src.getLines());
+		const size_t min_x = std::min(dest.m_columns, src.getColumns());
 
 		MatrixBuffer_t< T > tmp(dest);
 
-		tmp.forAll([&src, &min_y, &min_x](T& elem, size_t ln, size_t clm)
+		std::for_each(tmp.begin(), tmp.end(), [&src, &min_y, &min_x](Elem<T> elem)
 			{
-				if (ln < min_y && clm < min_x)
+				if (elem.line < min_y && elem.column < min_x)
 				{
-					elem = src.at(ln, clm);
+					elem = src.at(elem.line, elem.column);
 				}
-				return true;
 			});
 
 		///
