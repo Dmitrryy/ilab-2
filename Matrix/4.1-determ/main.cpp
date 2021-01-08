@@ -7,10 +7,6 @@
 using matrix::Matrix;
 using matrix::Order;
 
-void foo(int t)
-{
-    std::cout << t << std::endl;
-}
 
 int main()
 {

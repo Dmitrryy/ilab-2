@@ -7,14 +7,12 @@
 
 using namespace matrix;
 
-#ifdef GTEST
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
 
-#endif
 
 class MatrixTest : public ::testing::Test
 {

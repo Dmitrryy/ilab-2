@@ -12,7 +12,10 @@ namespace matrix
 	* templates: 
 	*	T - type of data
 	* 
-	* 
+	* Allocates raw memory for subsequent object construction.
+	*
+	* Note: For proper operation, it is necessary to construct the objects in order (compact).
+	* For each constructed object m_used++.
 	*/
 	template< typename T >
 	class IBuff_t
@@ -26,7 +29,10 @@ namespace matrix
 
 		T*     m_data = nullptr;
 
+		//array size (raw memory)
 		size_t m_size = 0;
+
+		//number of constructed objects
 		size_t m_used = 0;
 
 	protected:
@@ -59,7 +65,6 @@ namespace matrix
 			IBuff_t tmp(std::move(that));
 			swap(tmp);
 		}
-
 		
 		size_t size() const noexcept { return m_size; }
 

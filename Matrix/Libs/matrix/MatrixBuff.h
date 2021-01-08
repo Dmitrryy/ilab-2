@@ -69,11 +69,11 @@ namespace matrix
         template <typename U>
         bool operator == (const MatrixBuffer_t<U>& that_) const { return equal(that_); }
 
-		iterator begin() noexcept { return iterator(m_data, m_data + m_used, m_data, 0, 0); }
-		iterator end() noexcept { return iterator(m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
+		iterator begin() noexcept { return iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
+		iterator end() noexcept { return iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
 
-		const_iterator cbegin() const noexcept { return const_iterator(m_data, m_data + m_used, m_data, 0, 0); }
-		const_iterator cend() const noexcept { return const_iterator(m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
+		const_iterator cbegin() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
+		const_iterator cend() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
 
 		void setOrder(Order nOrder);
 
@@ -93,7 +93,7 @@ namespace matrix
 
 	//private:
 
-		std::string dumpStr() const;
+		[[nodiscard]] std::string dumpStr() const;
 
         friend std::ostream& operator << (std::ostream& stream_, const MatrixBuffer_t<T>& mtr_) {
             return stream_ << mtr_.dumpStr();
@@ -119,65 +119,70 @@ namespace matrix
     };//struct Range
 
 
-	template <typename T>
-	struct Elem
+    //class for storing, in addition to the reference to the value, its coordinates in the matrix
+    template <typename T>
+    struct Elem
     {
-	    T& val;
+        T& val;
 
-		size_t line = 0;
-		size_t column = 0;
+        size_t line = 0;
+        size_t column = 0;
 
-
-	    Elem(T& elem, size_t l, size_t c)
-	        : val(elem)
-	        , line(l)
-	        , column(c)
+        Elem(T& elem, size_t l, size_t c)
+                : val(elem)
+                , line(l)
+                , column(c)
         {}
 
         operator T&() { return val; }
 
         template <typename U>
         Elem& operator = (const U& that) {
-	        val = that;
-	        return *this;
-	    }
-    };//struct Elem
+            val = that;
+            return *this;
+        }
+    };
 
 
 
-	template< typename Val, typename Conteiner >
-    class normal_iterator_t : public std::iterator< std::forward_iterator_tag, typename Conteiner::value >
+    template< typename Val, typename Conteiner >
+    class normal_iterator_t : public std::iterator< std::forward_iterator_tag, Val >
     {
-        Val* m_value                  = nullptr;
+        Val* m_value = nullptr;
         Range< Val* > m_range;
 
+        Conteiner* m_general;
         size_t cur_line = 0, cur_column = 0;
 
         Val m_negateVal = Val();
 
     public:
 
+        using std::iterator< std::forward_iterator_tag, Val >::reference;
+
         using elem_t = Elem< Val >;
 
         normal_iterator_t() = default;
-        normal_iterator_t(Val* left, Val* right, Val* val, size_t cLine, size_t cColumn)
-            : m_range(left, right)
-            , m_value(val)
-            , cur_column(cColumn)
-            , cur_line(cLine)
+        normal_iterator_t(Conteiner* gen, Val* left, Val* right, Val* val, size_t cLine, size_t cColumn)
+                : m_range(left, right)
+                , m_general(gen)
+                , m_value(val)
+                , cur_column(cColumn)
+                , cur_line(cLine)
         {}
 
         Elem< Val > operator *  () const noexcept {
             if (m_range.contain(m_value))
-                return Elem< Val >(*m_value, cur_line, cur_column);
+                return Elem(*m_value, cur_line, cur_column);
             else
-                return Elem< Val >((Val&)(m_negateVal), 0, 0);
+                return Elem((Val&)(m_negateVal), 0, 0);
         }
         Val* operator -> () const noexcept { return m_value; }
 
 
         normal_iterator_t& operator++() noexcept {
             m_value++;
+            upPosition_(1);
             return *this;
         }
         const normal_iterator_t operator++(int) noexcept {
@@ -188,6 +193,7 @@ namespace matrix
 
         normal_iterator_t& operator--() noexcept {
             m_value--;
+            upPosition_(-1);
             return *this;
         }
 
@@ -205,7 +211,32 @@ namespace matrix
             return !(*this == that);
         }
 
-    };//class normal_iterator_t
+    private:
+
+        void upPosition_(size_t step)
+        {
+            switch(m_general->getOrder())
+            {
+                case Order::Row:
+                    cur_column = (cur_column + step) % m_general->getColumns();
+                    if (cur_column == 0) {
+                        cur_line = (cur_line + step) % m_general->getLines();
+                    }
+                    break;
+
+                case Order::Column:
+                    cur_line = (cur_line + step) % m_general->getLines();
+                    if (cur_line == 0) {
+                        cur_column = (cur_column + step) % m_general->getColumns();
+                    }
+                    break;
+
+                default:
+                    assert(0);
+            }
+        }
+
+    };//class Iterator_t
 
 
 	std::string toString(Order order_);
