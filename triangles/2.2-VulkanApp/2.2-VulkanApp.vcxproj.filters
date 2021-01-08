@@ -24,13 +24,13 @@
     <Filter Include="Внешнее\LAL">
       <UniqueIdentifier>{faf4a4c4-7105-4be6-8374-973d711f86a7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Внешнее\Octree">
+      <UniqueIdentifier>{3aa72d53-0119-4133-a3e9-628268cfa8ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="app_main.cpp">
       <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\App.cpp">
-      <Filter>Исходные файлы\Application</Filter>
     </ClCompile>
     <ClCompile Include="Application\vkCore.cpp">
       <Filter>Исходные файлы\Application</Filter>
@@ -59,11 +59,14 @@
     <ClCompile Include="..\LAL\math\LALmath.cpp">
       <Filter>Внешнее\LAL</Filter>
     </ClCompile>
+    <ClCompile Include="Application\VulkanDriver.cpp">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\App.cpp">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Application\App.h">
-      <Filter>Исходные файлы\Application</Filter>
-    </ClInclude>
     <ClInclude Include="Application\CameraView.h">
       <Filter>Исходные файлы\Application</Filter>
     </ClInclude>
@@ -72,6 +75,13 @@
     </ClInclude>
     <ClInclude Include="Application\Helpa\helpa.h">
       <Filter>Исходные файлы\Application\Helpa</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\VulkanDriver.h">
+      <Filter>Исходные файлы\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="Application\App.h">
+      <Filter>Исходные файлы\Application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

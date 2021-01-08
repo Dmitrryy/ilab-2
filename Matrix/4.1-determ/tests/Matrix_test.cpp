@@ -1,16 +1,20 @@
 #pragma once 
 
 #include <gtest/gtest.h>
-#include <gen_test.h>
+#include "gen_test.h"
 
-#include <Matrix.h>
+#include <matrix/Matrix.h>
 
 using namespace matrix;
+
+#ifdef GTEST
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+#endif
 
 class MatrixTest : public ::testing::Test
 {
@@ -45,7 +49,7 @@ TEST_F(MatrixTest, muvConstruct)
 
     q1_ = genMatrix(4, MType::MulUpLowTriangles);
     q0_ = q1_;
-    Matrix tmp(std::move(q1_));
+    Matrix<double> tmp(std::move(q1_));
     EXPECT_EQ(q0_, tmp);
 }
 

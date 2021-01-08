@@ -50,8 +50,9 @@ namespace la
 		}
 
 		size_t split  ();
-		//size_t split  (size_t _deep);
 		size_t msplit ();
+
+		void update();
 
 		size_t size() const;
 		size_t deep() const noexcept;
@@ -79,7 +80,7 @@ namespace la
 		IntersecC _intersecNv_(const std::vector< std::vector< T > >& _lhs, const std::vector< T >& _rhs)const ;
 
 		IntersecC _getIntersecWith_(std::vector< std::vector< T > > _vec) const;
-
+		void _update_();
 	};
 
 
@@ -281,6 +282,31 @@ namespace la
 			res += res2;
 		}
 		return res;
+	}
+
+
+	template <typename T>
+	void Octree<T>::update()
+	{
+		_update_();
+
+		if (haveChildren())
+		{
+			for (const Octree<T>* ch : m_children)
+			{
+				ch->update();
+			}
+		}
+	}
+
+
+	template< typename T >
+	void Octree<T>::_update_()
+	{
+		for (auto& elem : m_data)
+		{
+			elem.update();
+		}
 	}
 
 

@@ -1,14 +1,16 @@
 #include <iostream>
 #include <fstream>
 
-#include <Matrix.h>
-#include <gen_test.h>
+#include <matrix/Matrix.h>
+#include "gen_test.h"
 
 #define TEST_IN_STREAM
 //#define GEN_TXT_TEST
 
 using matrix::Matrix;
 using matrix::Order;
+
+#ifdef GEN_TESTS_MAIN
 
 int main()
 {
@@ -64,3 +66,5 @@ int main()
 
     return 0;
 }
+
+#endif

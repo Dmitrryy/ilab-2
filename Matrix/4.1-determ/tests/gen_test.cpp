@@ -1,5 +1,5 @@
 #include "gen_test.h"
-#include "../matrix/Matrix.h"
+#include <matrix/Matrix.h>
 
 #include <fstream>
 

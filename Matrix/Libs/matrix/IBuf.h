@@ -6,7 +6,14 @@
 
 namespace matrix
 {
-
+	/*
+	* class IBuff_t< T >
+	* 
+	* templates: 
+	*	T - type of data
+	* 
+	* 
+	*/
 	template< typename T >
 	class IBuff_t
 	{
@@ -17,15 +24,17 @@ namespace matrix
 
 	protected:
 
-		T* m_data = nullptr;
-		size_t m_size = 0, m_used = 0;
+		T*     m_data = nullptr;
+
+		size_t m_size = 0;
+		size_t m_used = 0;
 
 	protected:
 
 		IBuff_t() = default;
 		
 		explicit IBuff_t(size_t size)
-			: m_data((size == 0) ? nullptr : static_cast<T*>(::operator new(sizeof(T) * size)))
+			: m_data((size == 0) ? nullptr : static_cast< T* >(::operator new(sizeof(T) * size)))
 			, m_size(size)
 			, m_used(0)
 		{}
@@ -52,7 +61,7 @@ namespace matrix
 		}
 
 		
-		size_t size() const { return m_size; }
+		size_t size() const noexcept { return m_size; }
 
 		void swap(IBuff_t& that) noexcept
 		{

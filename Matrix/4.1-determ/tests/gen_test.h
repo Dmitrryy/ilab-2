@@ -3,7 +3,7 @@
 #include <functional>
 #include <random>
 #include <vector>
-#include <Matrix.h>
+#include <matrix/Matrix.h>
 
 
 class Random

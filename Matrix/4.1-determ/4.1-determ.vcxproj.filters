@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Libs">
+      <UniqueIdentifier>{06891e12-eb00-4ec5-9e26-9e8ea55974eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source">
+      <UniqueIdentifier>{4dd69e82-834f-47f2-b2f9-79159ff479c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tests">
+      <UniqueIdentifier>{8a0d1069-91ac-4912-a10d-745407ab3fdb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Libs\matrix">
+      <UniqueIdentifier>{161bb153-5f67-421f-be72-29c5996b308c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\gen_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\test_main.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Libs\matrix\Matrix_other.cpp">
+      <Filter>Libs\matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Matrix_test.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tests\gen_test.h">
+      <Filter>tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libs\matrix\IBuf.h">
+      <Filter>Libs\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libs\matrix\Matrix.h">
+      <Filter>Libs\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Libs\matrix\MatrixBuff.h">
+      <Filter>Libs\matrix</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="tests\0001.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0001tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0002.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0002tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0003.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0003tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0004.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0004tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0005.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0005tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0006.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0006tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0007.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0007tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0008.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\0008tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\1001.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\1001tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\1002.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\1002tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\1003.txt">
+      <Filter>tests</Filter>
+    </Text>
+    <Text Include="tests\1003tr.txt">
+      <Filter>tests</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Libs\matrix\Matrix.inl">
+      <Filter>Libs\matrix</Filter>
+    </None>
+    <None Include="..\Libs\matrix\MatrixBuffer.inl">
+      <Filter>Libs\matrix</Filter>
+    </None>
+  </ItemGroup>
+</Project>

@@ -1,10 +1,12 @@
 
-#include "Application/App.h"
+#include "Application/VulkanDriver.h"
 
 #include <cmath>
 
 #include "../LAL/include/LALmath.h"
 #include "../Octree/Octree.h"
+
+#define IN_FROM_TESTS1 "../2.1-Intersec/tests/010rr.txt"
 
 struct TRiangleColor
 {
@@ -41,12 +43,27 @@ struct PointToRef
 };
 
 glm::vec3 toGLM(const la::Vector3f& vec) { return { vec.x, vec.y, vec.z }; }
-std::vector< TRiangleColor > getData(std::istream& _source);
+template <typename T>
+std::vector< TRiangleColor > getData(T& _source);
 
 int main()
 {
+#ifdef IN_FROM_TESTS1
+
+    std::ifstream fin(IN_FROM_TESTS1);
+    if (!fin.is_open()) {
+        std::cerr << "cant opent test file: " << IN_FROM_TESTS1 << std::endl;
+        exit(1);
+    }
+    auto triangles = getData(fin);
+
+#else
+
     auto triangles = getData(std::cin);
 
+#endif // IN_FROM_TESTS
+
+    
     using std::min;
     using std::max;
 
@@ -95,14 +112,16 @@ int main()
             vkData.push_back(vert);
         }
 
-        vks::VulkanApp app("vulkan");
+        vks::VulkanDriver app("vulkan");
 
-        app.setVertexBuffer(vkData);
         app.setCameraView(vks::CameraView(toGLM(b) * 1.3f, toGLM((a + b) / 2.f) - toGLM(b) * 1.3f));
         float speed = (a - b).modul() / 8.f;
         app.setCameraSpeed((speed > 1.f) ? speed : 1.f);
 
         app.Init();
+
+        app.updataVertexBuf(vkData);
+
 
         app.Run();
     }
@@ -111,8 +130,8 @@ int main()
 }
 
 
-
-std::vector< TRiangleColor > getData(std::istream& _source)
+template <typename T>
+std::vector< TRiangleColor > getData(T& _source)
 {
     int n = 0;
     _source >> n;

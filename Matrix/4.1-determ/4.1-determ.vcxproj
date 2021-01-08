@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{97001f25-21bc-4590-b060-e2cc02452304}</ProjectGuid>
-    <RootNamespace>My22VulkanApp</RootNamespace>
+    <ProjectGuid>{9d917816-5837-4894-9e32-1a14dd06ed28}</ProjectGuid>
+    <RootNamespace>My41determ</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -112,18 +112,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>EnableAllWarnings</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Libs\glfw-3.3.2.bin.WIN64\include;C:\Libs\glm;C:\VulkanSDK\1.2.154.1\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab-2\Matrix\Libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Libs\glfw-3.3.2.bin.WIN64\lib-vc2019;C:\VulkanSDK\1.2.154.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -134,6 +131,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\dadro\source\repos\ilab-2\Matrix\Libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -143,34 +141,45 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\LAL\Line.cpp" />
-    <ClCompile Include="..\LAL\LineSegment.cpp" />
-    <ClCompile Include="..\LAL\math\LALmath.cpp" />
-    <ClCompile Include="..\LAL\Plane.cpp" />
-    <ClCompile Include="..\LAL\square.cpp" />
-    <ClCompile Include="..\LAL\triangle.cpp" />
-    <ClCompile Include="..\LAL\Vector.cpp" />
-    <ClCompile Include="Application\App.cpp" />
-    <ClCompile Include="Application\VulkanDriver.cpp" />
-    <ClCompile Include="Application\Helpa\helpa.cpp" />
-    <ClCompile Include="Application\vkCore.cpp" />
-    <ClCompile Include="app_main.cpp" />
+    <ClCompile Include="..\Libs\matrix\Matrix_other.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="tests\gen_test.cpp" />
+    <ClCompile Include="tests\Matrix_test.cpp" />
+    <ClCompile Include="tests\test_main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
-    <ClInclude Include="Application\App.h" />
-    <ClInclude Include="Application\VulkanDriver.h" />
-    <ClInclude Include="Application\CameraView.h" />
-    <ClInclude Include="Application\Helpa\helpa.h" />
-    <ClInclude Include="Application\vkCore.h" />
+    <ClInclude Include="..\Libs\matrix\IBuf.h" />
+    <ClInclude Include="..\Libs\matrix\Matrix.h" />
+    <ClInclude Include="..\Libs\matrix\MatrixBuff.h" />
+    <ClInclude Include="tests\gen_test.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="README.md" />
-    <None Include="resource\shaders\shader.frag" />
-    <None Include="resource\shaders\shader.vert" />
+    <Text Include="tests\0001.txt" />
+    <Text Include="tests\0001tr.txt" />
+    <Text Include="tests\0002.txt" />
+    <Text Include="tests\0002tr.txt" />
+    <Text Include="tests\0003.txt" />
+    <Text Include="tests\0003tr.txt" />
+    <Text Include="tests\0004.txt" />
+    <Text Include="tests\0004tr.txt" />
+    <Text Include="tests\0005.txt" />
+    <Text Include="tests\0005tr.txt" />
+    <Text Include="tests\0006.txt" />
+    <Text Include="tests\0006tr.txt" />
+    <Text Include="tests\0007.txt" />
+    <Text Include="tests\0007tr.txt" />
+    <Text Include="tests\0008.txt" />
+    <Text Include="tests\0008tr.txt" />
+    <Text Include="tests\1001.txt" />
+    <Text Include="tests\1001tr.txt" />
+    <Text Include="tests\1002.txt" />
+    <Text Include="tests\1002tr.txt" />
+    <Text Include="tests\1003.txt" />
+    <Text Include="tests\1003tr.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="CmakeLists.txt" />
+    <None Include="..\Libs\matrix\Matrix.inl" />
+    <None Include="..\Libs\matrix\MatrixBuffer.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
