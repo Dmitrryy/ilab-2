@@ -173,9 +173,9 @@ namespace matrix
 
         Elem< Val > operator *  () const noexcept {
             if (m_range.contain(m_value))
-                return Elem(*m_value, cur_line, cur_column);
+                return Elem< Val >(*m_value, cur_line, cur_column);
             else
-                return Elem((Val&)(m_negateVal), 0, 0);
+                return Elem< Val >((Val&)(m_negateVal), 0, 0);
         }
         Val* operator -> () const noexcept { return m_value; }
 

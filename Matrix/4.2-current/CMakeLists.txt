@@ -7,7 +7,7 @@ project(Current)
 set(MAKE_CXX_STANDARD 17)
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp)
+add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp lex.yy.cc parser.tab.cc)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
 
