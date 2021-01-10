@@ -14,7 +14,7 @@ namespace matrix
 
         std::for_each(cbegin(), cend(), [&that_, &result](Elem<const T> elem)
         {
-            result = result && (elem.val == that_.at(elem.line, elem.column));
+            result = result && (elem.val == that_.at_(elem.line, elem.column));
         });
 
         return result;

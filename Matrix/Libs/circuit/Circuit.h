@@ -39,6 +39,7 @@ namespace ezg
             m_data.emplace_back(edge);
         }
 
+        std::vector< Edge > getData() { return m_data; }
 
         std::vector< std::vector< Edge > > findCycles() const
         {
@@ -57,7 +58,7 @@ namespace ezg
 
             const size_t num_cycles = cycles.size();
             matrix::Matrix< double > LSystem(num_cycles + mGlines, m_data.size());
-            std::vector< double > freeMembers(num_cycles);
+            std::vector< double > freeMembers(num_cycles + mGlines);
             for (size_t c = 0; c < num_cycles; c++)
             {
                 double eds = 0;
@@ -82,11 +83,14 @@ namespace ezg
                     }
                 }
             }
-
             std::cout << LSystem << std::endl;
-            std::cout << LSystem.homogeneousSolve() << std::endl;
+            auto solv = LSystem.solve(freeMembers);
+            //std::cout << solv.first << solv.second;
+            assert(solv.second.isZero());
 
-
+            for (size_t c = 0; c < mGcolumns; c++) {
+                m_data[c].current = solv.first.at(c, 0);
+            }
         }
 
 

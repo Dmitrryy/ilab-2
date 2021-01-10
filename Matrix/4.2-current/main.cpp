@@ -15,14 +15,6 @@ int yyFlexLexer::yywrap() {
 
 int main()
 {
-    matrix::Matrix< double > t = {
-            {1, 2, -1, 1},
-            {2, -1, 2, 2}
-    };
-    auto solv = t.solve({0.6, 4});
-    std::cout << solv.first << solv.second << std::endl;
-
-    return 0;
     //we shoot a cannon at sparrows
     freopen("test.txt", "r", stdin);
     FlexLexer* lexer = new yyFlexLexer;
@@ -30,10 +22,14 @@ int main()
     driver.parse();
 
     auto circuit  = driver.getData();
+
+#ifdef DEBUG
     std::cout << circuit.dumpStr() << std::endl;
+#endif
 
     auto cycles = circuit.findCycles();
 
+#ifdef DEBUG
     for (const auto& c : cycles) {
         int i = 0;
         std::cout << '[' << i << "] ";
@@ -43,21 +39,15 @@ int main()
         std::cout << std::endl;
 
     }
+#endif
 
     circuit.calculateCurrent();
 
-/*    matrix::Matrix< double > LSystem(cycles.size(), graph.getColumns());
-    const size_t num_cycles = cycles.size();
-    for (size_t c = 0; c < num_cycles; c++)
+    auto edges = circuit.getData();
+
+    for (const auto& cur : edges)
     {
-        double eds = 0;
-        const size_t num_vertex = cycles[c].size();
-        for (size_t k = 1; k < num_vertex; k++)
-        {
-            const auto& cur = data.at(cycles[c][k - 1], cycles[c][k]);
-            eds += cur.voltage;
-            LSystem
-        }
-    }*/
+        std:: cout << cur.v1 << " -- " << cur.v2 << ", " << ((cur.current.value() == 0) ? 0 : cur.current.value()) << " A" << std::endl;
+    }
 }
 

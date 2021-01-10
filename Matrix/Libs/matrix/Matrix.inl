@@ -125,10 +125,11 @@ namespace matrix
     {
         gaussian_from_(0);
         const size_t nClm = getColumns();
+        std::cout << *this << std::endl;
 
         size_t c = 0;
         bool found = false;
-        for (size_t l = getLines(); l != 0; l++) {
+        for (size_t l = getLines(); l != 0; l--) {
             for (c = 0; c < nClm; c++) {
                 if (at(l - 1, c) != T{}) {
                     found = true;
@@ -173,7 +174,7 @@ namespace matrix
         const size_t dim_solution = getColumns() - rang;
         const size_t nClm = getColumns();
 
-        std:: cout << tmp << std::endl;
+        //std:: cout << tmp << std::endl;
 
         if (rang == 0) {
             return identity(getColumns());
@@ -244,20 +245,23 @@ namespace matrix
         }
 
         tmp.doubleGaussian_();
+        std::cout << tmp << std::endl;
         if (rang == 0 || tmp.rang() != rang) {
             return {};
         }
 
         const size_t dim_solution = getColumns() - rang;
 
-        std:: cout << tmp << std::endl;
+        //std:: cout << tmp << std::endl;
 
         std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
 
-        Matrix< T > generalSolution(nClm, dim_solution);
-        Matrix< T > particularSolution(nClm, dim_solution);
+        bool haveGeneralSolve = dim_solution > 0;
+        size_t num_iterations = (dim_solution == 0) ? 1 : dim_solution;
 
-        for (size_t c = 0; c < dim_solution; c++)
+        Matrix< T > generalSolution(nClm, num_iterations);
+        Matrix< T > particularSolution(nClm, num_iterations);
+        for (size_t c = 0; c < num_iterations; c++)
         {
             size_t nonbasic_clm = 0;
             bool haveNonBasic = false;
@@ -270,7 +274,7 @@ namespace matrix
                     num++;
                 }
             }
-            assert(dim_solution > 1 && haveNonBasic || dim_solution == 1);
+            //assert(dim_solution > 1 && haveNonBasic || dim_solution == 1);
 
             for (size_t l = 0; l < nClm; l++)
             {
@@ -278,11 +282,13 @@ namespace matrix
                 {
                     if (haveNonBasic) {
                         generalSolution.at(l, c) = -tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
+                        particularSolution.at(l, c) = (tmp.at(is_basicClm[l], nClm) - tmp.at(is_basicClm[l], nonbasic_clm)) / tmp.at(is_basicClm[l], l);
                     }
                     else {
-                        generalSolution.at(l, c) = 0;
+                        if (haveGeneralSolve)
+                            generalSolution.at(l, c) = 0;
+                        particularSolution.at(l, c) = tmp.at(is_basicClm[l], nClm) / tmp.at(is_basicClm[l], l);
                     }
-                    particularSolution.at(l, c) = -(tmp.at(is_basicClm[l], nonbasic_clm) - tmp.at(is_basicClm[l], nClm)) / tmp.at(is_basicClm[l], l);
                 }
                 else
                 {

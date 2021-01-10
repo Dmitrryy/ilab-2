@@ -67,6 +67,8 @@ namespace matrix
 
 		T      trace() const noexcept;
 
+        bool isZero() const { return *this == Matrix< T >(getLines(), getColumns());}
+
         const T& at(size_t line, size_t column) const& { return at_(line, column); }
         T& at(size_t lines, size_t column)& { m_actualRang = false; /**/ return const_cast< T& >(static_cast< const Matrix< T >* >(this)->at(lines, column)); }
 
@@ -155,7 +157,6 @@ namespace matrix
 				at(cur_y, cur_x) = elem;
 				cur_x++;
 			}
-			//std::cout << std::endl << *this << std::endl;
 			cur_x = 0;
 			cur_y++;
 		}
