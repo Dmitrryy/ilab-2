@@ -15,6 +15,13 @@ int yyFlexLexer::yywrap() {
 
 int main()
 {
+    matrix::Matrix< double > t = {
+            {1, 2, -1},
+            {2, -1, 2}
+    };
+    std::cout << t.homogeneousSolve() << std::endl;
+
+    return 0;
     //we shoot a cannon at sparrows
     freopen("test.txt", "r", stdin);
     FlexLexer* lexer = new yyFlexLexer;

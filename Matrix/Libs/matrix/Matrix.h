@@ -90,10 +90,11 @@ namespace matrix
 
 		Matrix<T> submatrix(size_t deleted_line, size_t deleted_column) const;
 
-		Matrix& gaussian()&;
-		Matrix& reversGaussian()&;
+		Matrix& gaussian(size_t bc = 0)&;
+		Matrix& reversGaussian(size_t bc = 0)&;
 
 		Matrix homogeneousSolve() const;
+		Matrix solve(const std::vector< T >& freeMembers) const;
 
 		T determinanteSloww() const;
 

@@ -149,7 +149,7 @@ namespace matrix
 			{
 				if (elem.line < min_y && elem.column < min_x)
 				{
-					elem = src.at(elem.line, elem.column);
+					elem = src.at_(elem.line, elem.column);
 				}
 			});
 
@@ -192,7 +192,7 @@ namespace matrix
 			for (size_t l = lines; l < m_lines; l++) {
 				for (size_t c = 0; c < m_columns; c++)
 				{
-					at(l, c).~T();
+					at_(l, c).~T();
 					m_used--;
 				}
 			}
@@ -203,7 +203,7 @@ namespace matrix
 			for (size_t l = m_lines; l < lines; l++) {
 				for (size_t c = 0; c < m_columns; c++)
 				{
-					new(&at(l, c)) T();
+					new(&at_(l, c)) T();
 					m_used++;
 				}
 			}
@@ -214,7 +214,7 @@ namespace matrix
 			for (size_t c = columns; c < m_columns; c++) {
 				for (size_t l = 0; l < m_lines; l++)
 				{
-					at(l, c).~T();
+					at_(l, c).~T();
 					m_used--;
 				}
 			}
@@ -225,7 +225,7 @@ namespace matrix
 			for (size_t i = 0; i < m_lines; i++) {
 				for (size_t k = m_columns; k < columns; k++)
 				{
-					new(&at(i, k)) T();
+					new(&at_(i, k)) T();
 					m_used++;
 				}
 			}
@@ -253,7 +253,7 @@ namespace matrix
 			out << "| ";
 			for (size_t x = 0; x < m_columns; x++)
 			{
-				out << std::setw(6) << at(y, x) << ' ';
+				out << std::setw(6) << at_(y, x) << ' ';
 			}
 			out << "|\n";
 		}

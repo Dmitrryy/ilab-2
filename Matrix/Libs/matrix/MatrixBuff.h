@@ -92,7 +92,7 @@ namespace matrix
     protected:
 
         const T& at_(size_t line, size_t column) const&;
-        T& at_(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t* >(this)->at(lines, column)); }
+        T& at_(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t* >(this)->at_(lines, column)); }
 
 		[[nodiscard]] std::string dumpStr() const;
 

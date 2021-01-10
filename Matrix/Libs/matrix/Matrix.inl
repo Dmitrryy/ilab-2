@@ -1,5 +1,5 @@
 #include <algorithm>
-
+#include <set>
 
 namespace matrix
 {
@@ -39,12 +39,12 @@ namespace matrix
 
 
 	template <typename T>
-    Matrix< T >& Matrix< T >::gaussian()&
+    Matrix< T >& Matrix< T >::gaussian(size_t bc /*= 0*/)&
     {
         const size_t mLines = getLines();
         const size_t mColumns = getColumns();
         size_t rang = 0;
-        for (size_t cl = 0; cl < mColumns; cl++)
+        for (size_t cl = bc; cl < mColumns; cl++)
         {
             //find a*0 != 0
             bool found = false;
@@ -80,12 +80,12 @@ namespace matrix
     }
 
     template <typename T>
-    Matrix< T >& Matrix< T >::reversGaussian()&
+    Matrix< T >& Matrix< T >::reversGaussian(size_t bc /*= 0*/)&
     {
         const size_t mLines = getLines();
         const size_t mColumns = getColumns();
         size_t rang = 0;
-        for (size_t cl = 0; cl < mColumns; cl++)
+        for (size_t cl = bc; cl < mColumns; cl++)
         {
             //find a*0 != 0
             bool found = false;
@@ -102,7 +102,6 @@ namespace matrix
             }
             if (!found)
                 continue;
-
 
             auto& cur_elem = at(mLines - rang, mColumns - 1 - cl);
             for (size_t ln = rang; ln < mLines; ln++)
@@ -126,17 +125,82 @@ namespace matrix
     {
         Matrix< T > tmp(*this);
 
-        tmp.gaussian();
         tmp.reversGaussian();
 
-        size_t rang = tmp.rang();
+        std:: cout << tmp << std::endl;
+
+        const size_t rang = tmp.rang();
+        const size_t dim_solution = getColumns() - rang;
+        const size_t nClm = getColumns();
+
+        size_t i = 0;
+        for (i = 0; i < nClm; i++) {
+            if (tmp.at(0, i) == 0) {
+                break;
+            }
+        }
+        if (i > 0) i--;
+        tmp.gaussian(i);
+
+        std:: cout << tmp << std::endl;
+
         if (rang == 0) {
             return identity(getColumns());
         }
 
-        Matrix< T > res(getColumns(), getLines() - rang + 1);
+        std::vector< size_t > is_basicClm(nClm, -1);
+        for (size_t l = 0, bc = i; l < rang; l++) {
+            for (size_t c = bc; c < nClm; c++) {
+                if (tmp.at(l(i == 0) ? 0 : i - 1, c) != T{})
+                {
+                    is_basicClm[c] = l;
+                    bc = c + 1;
+                    break;
+                }
+            }
+        }
 
+        Matrix< T > res(nClm, dim_solution);
 
+        for (size_t c = 0; c < dim_solution; c++)
+        {
+            size_t nonbasic_clm = 0;
+            bool haveNonBasic = false;
+            for (size_t l = 0, num = 0; l < nClm; l++) { //find nonbasic column with number 'c'
+                if (is_basicClm[l] == -1) {
+                    if (num == c) {
+                        nonbasic_clm = l;
+                        haveNonBasic = true;
+                    }
+                    num++;
+                }
+            }
+            assert(dim_solution > 1 && haveNonBasic || dim_solution == 1);
+
+            for (size_t l = 0; l < nClm; l++)
+            {
+                if (is_basicClm[l] != -1)
+                {
+                    if (haveNonBasic)
+                        res.at(l, c) = tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
+                    else
+                        res.at(l, c) = 0;
+                }
+                else
+                {
+                    if (haveNonBasic && l == nonbasic_clm)
+                    {
+                        res.at(l, c) = 1;
+                    }
+                    else
+                    {
+                        res.at(l, c) = 0;
+                    }
+                }
+            }
+        }
+
+        return res;
     }
 
 
