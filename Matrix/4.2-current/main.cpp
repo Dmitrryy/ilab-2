@@ -16,10 +16,11 @@ int yyFlexLexer::yywrap() {
 int main()
 {
     matrix::Matrix< double > t = {
-            {1, 2, -1},
-            {2, -1, 2}
+            {1, 2, -1, 1},
+            {2, -1, 2, 2}
     };
-    std::cout << t.homogeneousSolve() << std::endl;
+    auto solv = t.solve({0.6, 4});
+    std::cout << solv.first << solv.second << std::endl;
 
     return 0;
     //we shoot a cannon at sparrows

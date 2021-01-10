@@ -39,7 +39,7 @@ namespace matrix
 
 
 	template <typename T>
-    Matrix< T >& Matrix< T >::gaussian(size_t bc /*= 0*/)&
+    Matrix< T >& Matrix< T >::gaussian_from_(size_t bc /*= 0*/)&
     {
         const size_t mLines = getLines();
         const size_t mColumns = getColumns();
@@ -66,7 +66,7 @@ namespace matrix
             for (size_t ln = rang; ln < mLines; ln++)
             {
                 double multiplier = at(ln, cl) / cur_elem;
-                for (size_t c = 0; c < mColumns; c++)
+                for (size_t c = 0; c < mColumns && multiplier != T{}; c++)
                 {
                     at(ln, c) -= at(rang - 1, c) * multiplier;
                 }
@@ -80,7 +80,7 @@ namespace matrix
     }
 
     template <typename T>
-    Matrix< T >& Matrix< T >::reversGaussian(size_t bc /*= 0*/)&
+    Matrix< T >& Matrix< T >::reversGaussian_from_(size_t bc /*= 0*/)&
     {
         const size_t mLines = getLines();
         const size_t mColumns = getColumns();
@@ -107,7 +107,7 @@ namespace matrix
             for (size_t ln = rang; ln < mLines; ln++)
             {
                 double multiplier = at(mLines - 1 - ln, mColumns - 1 - cl) / cur_elem;
-                for (size_t c = 0; c < mColumns; c++)
+                for (size_t c = 0; c < mColumns && multiplier != T{}; c++)
                 {
                     at(mLines - 1 - ln, c) -= at(mLines - rang, c) * multiplier;
                 }
@@ -121,26 +121,57 @@ namespace matrix
     }
 
     template <typename T>
+    Matrix< T >& Matrix< T >::doubleGaussian_()&
+    {
+        gaussian_from_(0);
+        const size_t nClm = getColumns();
+
+        size_t c = 0;
+        bool found = false;
+        for (size_t l = getLines(); l != 0; l++) {
+            for (c = 0; c < nClm; c++) {
+                if (at(l - 1, c) != T{}) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+        return reversGaussian_from_(nClm - c - 1);
+    }
+
+    template <typename T>
+    std::vector< size_t > Matrix<T>::basicLinesAfterDG_() const
+    {
+        const size_t nClm = getColumns();
+        const size_t nLines = getLines();
+
+        std::vector< size_t > res(nClm, -1);
+        for (size_t l = 0, bc = 0; l < nLines; l++) {
+            for (size_t c = bc; c < nClm; c++) {
+                if (at(l, c) != T{})
+                {
+                    res[c] = l;
+                    bc = c + 1;
+                    break;
+                }
+            }
+        }
+
+        return res;
+    }
+
+
+    template <typename T>
     Matrix< T > Matrix< T >::homogeneousSolve() const
     {
         Matrix< T > tmp(*this);
 
-        tmp.reversGaussian();
-
-        std:: cout << tmp << std::endl;
+        tmp.doubleGaussian_();
 
         const size_t rang = tmp.rang();
         const size_t dim_solution = getColumns() - rang;
         const size_t nClm = getColumns();
-
-        size_t i = 0;
-        for (i = 0; i < nClm; i++) {
-            if (tmp.at(0, i) == 0) {
-                break;
-            }
-        }
-        if (i > 0) i--;
-        tmp.gaussian(i);
 
         std:: cout << tmp << std::endl;
 
@@ -148,17 +179,7 @@ namespace matrix
             return identity(getColumns());
         }
 
-        std::vector< size_t > is_basicClm(nClm, -1);
-        for (size_t l = 0, bc = i; l < rang; l++) {
-            for (size_t c = bc; c < nClm; c++) {
-                if (tmp.at(l(i == 0) ? 0 : i - 1, c) != T{})
-                {
-                    is_basicClm[c] = l;
-                    bc = c + 1;
-                    break;
-                }
-            }
-        }
+        std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
 
         Matrix< T > res(nClm, dim_solution);
 
@@ -182,7 +203,7 @@ namespace matrix
                 if (is_basicClm[l] != -1)
                 {
                     if (haveNonBasic)
-                        res.at(l, c) = tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
+                        res.at(l, c) = - tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
                     else
                         res.at(l, c) = 0;
                 }
@@ -203,6 +224,82 @@ namespace matrix
         return res;
     }
 
+
+    template <typename T>
+    std::pair< Matrix< T >, Matrix< T > > Matrix<T>::solve(const std::vector< T >& freeMembers) const
+    {
+        if (getLines() != freeMembers.size()) {
+            throw std::invalid_argument("");
+        }
+
+        Matrix< T > tmp(getLines(), getColumns() + 1);
+        Matrix<T>::copy(tmp, *this);
+
+        const size_t rang = tmp.rang();
+        const size_t mLines = getLines();
+        const size_t nClm = getColumns();
+
+        for(size_t l = 0; l < mLines; l++) {
+            tmp.at(l, nClm) = freeMembers[l];
+        }
+
+        tmp.doubleGaussian_();
+        if (rang == 0 || tmp.rang() != rang) {
+            return {};
+        }
+
+        const size_t dim_solution = getColumns() - rang;
+
+        std:: cout << tmp << std::endl;
+
+        std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
+
+        Matrix< T > generalSolution(nClm, dim_solution);
+        Matrix< T > particularSolution(nClm, dim_solution);
+
+        for (size_t c = 0; c < dim_solution; c++)
+        {
+            size_t nonbasic_clm = 0;
+            bool haveNonBasic = false;
+            for (size_t l = 0, num = 0; l < nClm; l++) { //find nonbasic column with number 'c'
+                if (is_basicClm[l] == -1) {
+                    if (num == c) {
+                        nonbasic_clm = l;
+                        haveNonBasic = true;
+                    }
+                    num++;
+                }
+            }
+            assert(dim_solution > 1 && haveNonBasic || dim_solution == 1);
+
+            for (size_t l = 0; l < nClm; l++)
+            {
+                if (is_basicClm[l] != -1)
+                {
+                    if (haveNonBasic) {
+                        generalSolution.at(l, c) = -tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
+                    }
+                    else {
+                        generalSolution.at(l, c) = 0;
+                    }
+                    particularSolution.at(l, c) = -(tmp.at(is_basicClm[l], nonbasic_clm) - tmp.at(is_basicClm[l], nClm)) / tmp.at(is_basicClm[l], l);
+                }
+                else
+                {
+                    if (haveNonBasic && l == nonbasic_clm)
+                    {
+                        generalSolution.at(l, c) = particularSolution.at(l, c) = 1;
+                    }
+                    else
+                    {
+                        generalSolution.at(l, c) = particularSolution.at(l, c) = 0;
+                    }
+                }
+            }
+        }
+
+        return {particularSolution, generalSolution};
+    }
 
 
     template <typename T >

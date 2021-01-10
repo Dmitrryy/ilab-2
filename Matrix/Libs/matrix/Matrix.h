@@ -90,11 +90,11 @@ namespace matrix
 
 		Matrix<T> submatrix(size_t deleted_line, size_t deleted_column) const;
 
-		Matrix& gaussian(size_t bc = 0)&;
-		Matrix& reversGaussian(size_t bc = 0)&;
+		Matrix& gaussian()& { return gaussian_from_(0); }
+		Matrix& reversGaussian()& { return reversGaussian_from_(0); }
 
 		Matrix homogeneousSolve() const;
-		Matrix solve(const std::vector< T >& freeMembers) const;
+        std::pair< Matrix< T >, Matrix< T > >  solve(const std::vector< T >& freeMembers) const;
 
 		T determinanteSloww() const;
 
@@ -119,6 +119,15 @@ namespace matrix
 		friend std::ostream& operator << (std::ostream& stream_, const Matrix<T>& mtr_) {
 			return stream_ << mtr_.dumpStr();
 		}
+
+	private:
+
+        Matrix& gaussian_from_(size_t bc = 0)&;
+        Matrix& reversGaussian_from_(size_t bc = 0)&;
+        Matrix& doubleGaussian_()&;
+
+        std::vector< size_t > basicLinesAfterDG_() const;
+
 	};//class Matrix
 
 
