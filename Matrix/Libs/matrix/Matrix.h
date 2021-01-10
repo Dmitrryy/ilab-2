@@ -18,7 +18,10 @@ namespace matrix
 	template <typename T = double>
 	class Matrix : public MatrixBuffer_t< T >
 	{
-		//MatrixBuffer_t< T > m_buff;
+		T m_rang = {};
+		bool m_actualRang = false;
+
+        using MatrixBuffer_t<T>::at_;
 
 	public:
 
@@ -33,7 +36,6 @@ namespace matrix
         using MatrixBuffer_t<T>::getColumns;
         using MatrixBuffer_t<T>::getOrder;
         using MatrixBuffer_t<T>::clear;
-        using MatrixBuffer_t<T>::at;
         using MatrixBuffer_t<T>::copy;
         using MatrixBuffer_t<T>::setOrder;
         using MatrixBuffer_t<T>::swap;
@@ -65,6 +67,11 @@ namespace matrix
 
 		T      trace() const noexcept;
 
+        const T& at(size_t line, size_t column) const& { return at_(line, column); }
+        T& at(size_t lines, size_t column)& { m_actualRang = false; /**/ return const_cast< T& >(static_cast< const Matrix< T >* >(this)->at(lines, column)); }
+
+		size_t rang() const;
+
 		Matrix& add(const Matrix& rhs_)&;
 		Matrix& sub(const Matrix& rhs_)&;
 		Matrix& mul(const T& num_)&;
@@ -82,6 +89,11 @@ namespace matrix
 		void swopColumns(size_t cl1_, size_t cl2_);
 
 		Matrix<T> submatrix(size_t deleted_line, size_t deleted_column) const;
+
+		Matrix& gaussian()&;
+		Matrix& reversGaussian()&;
+
+		Matrix homogeneousSolve() const;
 
 		T determinanteSloww() const;
 

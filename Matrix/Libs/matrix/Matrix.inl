@@ -25,7 +25,123 @@ namespace matrix
 	}
 
 
-	template <typename T >
+	template <typename T>
+	size_t Matrix<T>::rang() const
+	{
+	    if (m_actualRang) {
+	        return m_rang;
+	    }
+
+	    Matrix tmp(*this);
+	    tmp.gaussian();
+	    return tmp.rang();
+	}
+
+
+	template <typename T>
+    Matrix< T >& Matrix< T >::gaussian()&
+    {
+        const size_t mLines = getLines();
+        const size_t mColumns = getColumns();
+        size_t rang = 0;
+        for (size_t cl = 0; cl < mColumns; cl++)
+        {
+            //find a*0 != 0
+            bool found = false;
+            for (size_t k = rang; k < mLines; k++)
+            {
+                if (std::abs(at(k, cl)) > EPSIL) {
+                    if (k != rang) {
+                        swopLines(rang, k);
+                    }
+                    found = true;
+                    rang++;
+                    break;
+                }
+            }
+            if (!found)
+                continue;
+
+            auto& cur_elem = at(rang - 1, cl);
+            for (size_t ln = rang; ln < mLines; ln++)
+            {
+                double multiplier = at(ln, cl) / cur_elem;
+                for (size_t c = 0; c < mColumns; c++)
+                {
+                    at(ln, c) -= at(rang - 1, c) * multiplier;
+                }
+            }
+        }
+
+        m_actualRang = true;
+        m_rang = rang;
+
+        return *this;
+    }
+
+    template <typename T>
+    Matrix< T >& Matrix< T >::reversGaussian()&
+    {
+        const size_t mLines = getLines();
+        const size_t mColumns = getColumns();
+        size_t rang = 0;
+        for (size_t cl = 0; cl < mColumns; cl++)
+        {
+            //find a*0 != 0
+            bool found = false;
+            for (size_t k = rang; k < mLines; k++)
+            {
+                if (std::abs(at(mLines - 1 - k, mColumns - 1 - cl)) > EPSIL) {
+                    if (mLines - 1 - k != mLines - 1 - rang) {
+                        swopLines(mLines- 1 - rang, mLines - 1 - k);
+                    }
+                    found = true;
+                    rang++;
+                    break;
+                }
+            }
+            if (!found)
+                continue;
+
+
+            auto& cur_elem = at(mLines - rang, mColumns - 1 - cl);
+            for (size_t ln = rang; ln < mLines; ln++)
+            {
+                double multiplier = at(mLines - 1 - ln, mColumns - 1 - cl) / cur_elem;
+                for (size_t c = 0; c < mColumns; c++)
+                {
+                    at(mLines - 1 - ln, c) -= at(mLines - rang, c) * multiplier;
+                }
+            }
+        }
+
+        m_actualRang = true;
+        m_rang = rang;
+
+        return *this;
+    }
+
+    template <typename T>
+    Matrix< T > Matrix< T >::homogeneousSolve() const
+    {
+        Matrix< T > tmp(*this);
+
+        tmp.gaussian();
+        tmp.reversGaussian();
+
+        size_t rang = tmp.rang();
+        if (rang == 0) {
+            return identity(getColumns());
+        }
+
+        Matrix< T > res(getColumns(), getLines() - rang + 1);
+
+
+    }
+
+
+
+    template <typename T >
 	T Matrix<T>::determinanteSloww() const
 	{
 		T result = T();

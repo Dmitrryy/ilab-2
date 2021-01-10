@@ -79,9 +79,6 @@ namespace matrix
 
 		MatrixBuffer_t& transpose()&;
 
-		const T& at(size_t line, size_t column) const&;
-		T& at(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t* >(this)->at(lines, column)); }
-
 		void swap(MatrixBuffer_t& that) noexcept;
 
 		void clear();
@@ -92,6 +89,10 @@ namespace matrix
 		void resize(size_t lines, size_t columns);
 
 	//private:
+    protected:
+
+        const T& at_(size_t line, size_t column) const&;
+        T& at_(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t* >(this)->at(lines, column)); }
 
 		[[nodiscard]] std::string dumpStr() const;
 

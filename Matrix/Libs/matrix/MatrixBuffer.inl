@@ -90,7 +90,7 @@ namespace matrix
 	//////////////////////////////////////////////////////////////////////
 
 	template< typename T >
-	const T& MatrixBuffer_t<T>::at(size_t line, size_t column) const&
+	const T& MatrixBuffer_t<T>::at_(size_t line, size_t column) const&
 	{
 		if (line >= m_lines || column >= m_columns) {
 			throw std::out_of_range("Out of range valid value.");

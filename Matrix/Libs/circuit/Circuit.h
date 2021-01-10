@@ -84,6 +84,8 @@ namespace ezg
             }
 
             std::cout << LSystem << std::endl;
+            std::cout << LSystem.gaussian() << std::endl;
+            std::cout << LSystem.reversGaussian() << std::endl;
 
         }
 
