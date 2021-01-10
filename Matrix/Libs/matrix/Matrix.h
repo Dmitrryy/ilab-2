@@ -69,6 +69,11 @@ namespace matrix
 		Matrix& sub(const Matrix& rhs_)&;
 		Matrix& mul(const T& num_)&;
 
+        void foldLines(size_t to, size_t what, const T& mult);
+        void foldColumns(size_t to, size_t what, const T& mult);
+        void mulLine(size_t what, const T& mult);
+        void mulColumn(size_t what, const T& mult);
+
 		Matrix& multiplication(const Matrix& that_)&;
 
 		Matrix& negate()&;
