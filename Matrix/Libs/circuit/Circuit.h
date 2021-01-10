@@ -52,6 +52,7 @@ namespace ezg
             const size_t mGlines = m_graph.getLines();
             const size_t mGcolumns = m_graph.getColumns();
 
+            //fixme
             auto cycles = findCycles();
 
             assert(m_data.size() == mGcolumns);
@@ -158,7 +159,24 @@ namespace ezg
                         if (m_graph.at(next_v, c) == 1 && next_v != cur)
                         {
                             auto it = std::find_if(trace.begin(), trace.end(), [next_v](const Edge& e){
-                                return e.v1 == next_v || e.v2 == next_v;
+                                static size_t pre1 = 0, pre2 = 0, store_nv = next_v;
+                                if (store_nv != next_v) {
+                                    pre1 = pre2 = 0;
+                                    store_nv = next_v;
+                                }
+                                bool res = false;
+                                if (e.v1 == pre1 || e.v1 == pre2) {
+                                    res = e.v2 == next_v;
+                                }
+                                else if (e.v2 == pre1 || e.v2 == pre2) {
+                                    res = e.v1 == next_v;
+                                } else  {
+                                    res = e.v1 == next_v || e.v2 == next_v;
+                                }
+                                pre1 = e.v1;
+                                pre2 = e.v2;
+
+                                return res;
                             });
 
                             if (it == trace.end())

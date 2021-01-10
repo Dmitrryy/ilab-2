@@ -25,11 +25,7 @@ int main()
 
 #ifdef DEBUG
     std::cout << circuit.dumpStr() << std::endl;
-#endif
 
-    auto cycles = circuit.findCycles();
-
-#ifdef DEBUG
     for (const auto& c : cycles) {
         int i = 0;
         std::cout << '[' << i << "] ";
