@@ -18,7 +18,7 @@ add_subdirectory(cache)
 add_subdirectory(triangles)
 
 #...one more homework
-#status: LVL1 in dev
+#status: LVL2 in dev
 #
 #LVL1: project's name for build is 'Matrix'
 add_subdirectory(Matrix)

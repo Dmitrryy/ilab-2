@@ -29,13 +29,13 @@ For example:
 We need to find the currents in the edges.
 
 The sign for a current is its direction relative to an edge of the graph. \
-Response format (not guaranteed to be correct):
+Response format:
 
-1 -- 2: -0.442958 A  \
-1 -- 3: -0.631499 A  \
-1 -- 4: -1.07446 A   \
-2 -- 3: -0.0757193 A \
-2 -- 4: 0.367239 A   \
-3 -- 4: -0.707219 A 
+1 -- 2: 0.442958 A  \
+1 -- 3: 0.631499 A  \
+1 -- 4: -1.07446 A  \
+2 -- 3: 0.0757193 A \
+2 -- 4: 0.367239 A  \
+3 -- 4: 0.707219 A 
 
 ##### Algorithm:

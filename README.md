@@ -3,9 +3,12 @@
 ## Homework
 
 ### in developing
-
-* LALib (triangles) - LVL 2
-* Matrix ------------ LVL 1
+|      project      | LVL |
+|:-----------------:|:---:|
+| LALib (triangles) |  3  |
+| Matrix            |  2  |
+| ParaCL            |  1  |
+| OpenCL            |  1  |
   
 ### done
 
