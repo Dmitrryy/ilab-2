@@ -120,6 +120,9 @@ namespace matrix
         return *this;
     }
 
+    /*
+     * Reduces the matrix to a form in which the basis columns have only one non-zero element.
+     */
     template <typename T>
     Matrix< T >& Matrix< T >::doubleGaussian_()&
     {
@@ -166,65 +169,19 @@ namespace matrix
     template <typename T>
     Matrix< T > Matrix< T >::homogeneousSolve() const
     {
-        Matrix< T > tmp(*this);
-
-        tmp.doubleGaussian_();
-
-        const size_t rang = tmp.rang();
-        const size_t dim_solution = getColumns() - rang;
-        const size_t nClm = getColumns();
-
-
-        if (rang == 0) {
-            return identity(getColumns());
-        }
-
-        std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
-
-        Matrix< T > res(nClm, dim_solution);
-
-        for (size_t c = 0; c < dim_solution; c++)
-        {
-            size_t nonbasic_clm = 0;
-            bool haveNonBasic = false;
-            for (size_t l = 0, num = 0; l < nClm; l++) { //find nonbasic column with number 'c'
-                if (is_basicClm[l] == -1) {
-                    if (num == c) {
-                        nonbasic_clm = l;
-                        haveNonBasic = true;
-                    }
-                    num++;
-                }
-            }
-            assert(dim_solution > 1 && haveNonBasic || dim_solution == 1);
-
-            for (size_t l = 0; l < nClm; l++)
-            {
-                if (is_basicClm[l] != -1)
-                {
-                    if (haveNonBasic)
-                        res.at(l, c) = - tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
-                    else
-                        res.at(l, c) = 0;
-                }
-                else
-                {
-                    if (haveNonBasic && l == nonbasic_clm)
-                    {
-                        res.at(l, c) = 1;
-                    }
-                    else
-                    {
-                        res.at(l, c) = 0;
-                    }
-                }
-            }
-        }
-
-        return res;
+        return solve(std::vector(getLines(), T{})).second;
     }
 
 
+    /*
+     * Solves a system of linear equations with free members.
+     *
+     * returns a pair of matrices:
+     *      first is a partial solution.
+     *      second is the fundamental matrix of a homogeneous system.
+     *
+     * fixme: problem with integer types
+     */
     template <typename T>
     std::pair< Matrix< T >, Matrix< T > > Matrix<T>::solve(const std::vector< T >& freeMembers) const
     {
@@ -244,6 +201,7 @@ namespace matrix
         }
 
         tmp.doubleGaussian_();
+
         if (rang == 0 || tmp.rang() != rang) {
             return {};
         }
