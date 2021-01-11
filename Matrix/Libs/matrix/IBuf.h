@@ -40,7 +40,7 @@ namespace matrix
 		IBuff_t() = default;
 		
 		explicit IBuff_t(size_t size)
-			: m_data((size == 0) ? nullptr : static_cast< T* >(::operator new(sizeof(T) * size)))
+			: m_data((size == 0) ? nullptr : static_cast< T* >(::operator new[](sizeof(T) * size)))
 			, m_size(size)
 			, m_used(0)
 		{}
