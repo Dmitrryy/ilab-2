@@ -8,6 +8,7 @@
 
 namespace ezg
 {
+
     struct Edge {
         size_t id = 0;
         size_t v1 = 0, v2 = 0;
@@ -33,20 +34,17 @@ namespace ezg
 
         void connect(size_t id1, size_t id2, Edge edge)
         {
+            //vertex id is index of the line in the graph
             m_graph.resize(std::max(m_graph.getLines(), static_cast<size_t>(std::max(id1, id2)) + 1), m_graph.getColumns() + 1);
             m_graph.at(id1, m_graph.getColumns() - 1) = 1;
             m_graph.at(id2, m_graph.getColumns() - 1) = 1;
 
+            //id is index in the array m_data
             edge.id = m_data.size();
             m_data.emplace_back(edge);
         }
 
         std::vector< Edge > getData() { return m_data; }
-
-        std::vector< std::vector< Edge > > findCycles() const
-        {
-            return findCycles_(1, 1, {});
-        }
 
 
         void calculateCurrent()
@@ -54,7 +52,6 @@ namespace ezg
             const size_t mGlines = m_graph.getLines();
             const size_t mGcolumns = m_graph.getColumns();
 
-            //fixme
             auto cycles = findCycles();
 
 #ifdef DEBUG
@@ -73,11 +70,15 @@ namespace ezg
 #endif
             assert(m_data.size() == mGcolumns);
 
+            /*
+             * We make a system of equations using the first and second Kirchhoff rules.
+             */
+
             const size_t num_cycles = cycles.size();
             matrix::Matrix< double > LSystem(num_cycles + mGlines, m_data.size());
             std::vector< double > freeMembers(num_cycles + mGlines);
             for (size_t c = 0; c < num_cycles; c++)
-            {
+            {//second rule
                 double eds = 0;
                 const size_t num_edges = cycles[c].size();
                 size_t pre1 = 0, pre2 = 0;
@@ -85,6 +86,7 @@ namespace ezg
                 {
                     Edge& cur = cycles[c][k];
 
+                    //is determined by the sign of the bypass circuit
                     bool minus = false;
                     if (k == 0) {
                         pre1 = cycles[c].back().v1;
@@ -103,6 +105,7 @@ namespace ezg
                 freeMembers[c] = eds;
             }
 
+            //first rule
             for (size_t l = 0; l < mGlines; l++)
             {
                 for(size_t c = 0; c < mGcolumns; c++)
@@ -146,9 +149,33 @@ namespace ezg
         }
 
 
+        std::vector< std::vector< Edge > > findCycles() const
+        {
+            if (!m_data.empty())
+                return findCycles_(m_data[0].v1, m_data[0].v1, {});
+            return {};
+        }
+
+
+    private:
+
+
+        /*
+         * searches for cycles in the graph.
+         *
+         * first_vertex - first vertex of the trace
+         * cur - current vertex id
+         * trace - story of the way(edges)
+         */
         std::vector< std::vector< Edge > > findCycles_(size_t first_vert, size_t cur, std::vector< Edge > trace) const
         {
             std::vector< std::vector< Edge > > multi_res;
+
+            /*
+             * algorithm:
+             * Figuratively speaking, it is a snake.
+             * Recursively walk along the edges and if you stumble on your tail, fix the cycle.
+             */
 
             const size_t columns = m_graph.getColumns();
             const size_t lines   = m_graph.getLines();
@@ -218,6 +245,7 @@ namespace ezg
 
             }
 
+            //remove the same cycles
             std::vector< std::vector< Edge > > res;
             {
                 std::set< std::set< Edge > > set;

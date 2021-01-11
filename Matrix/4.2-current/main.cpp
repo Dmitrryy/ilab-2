@@ -17,7 +17,7 @@ int main()
 {
     //we shoot a cannon at sparrows
 #ifdef DEBUG
-    freopen("tests/test5.txt", "r", stdin);
+    freopen("tests/test1.txt", "r", stdin);
 #endif
     FlexLexer* lexer = new yyFlexLexer;
     yy::ParsDriver driver(lexer);
