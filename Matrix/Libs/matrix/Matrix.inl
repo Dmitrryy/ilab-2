@@ -125,7 +125,7 @@ namespace matrix
     {
         gaussian_from_(0);
         const size_t nClm = getColumns();
-        std::cout << *this << std::endl;
+
 
         size_t c = 0;
         bool found = false;
@@ -174,7 +174,6 @@ namespace matrix
         const size_t dim_solution = getColumns() - rang;
         const size_t nClm = getColumns();
 
-        //std:: cout << tmp << std::endl;
 
         if (rang == 0) {
             return identity(getColumns());
@@ -245,14 +244,12 @@ namespace matrix
         }
 
         tmp.doubleGaussian_();
-        std::cout << tmp << std::endl;
         if (rang == 0 || tmp.rang() != rang) {
             return {};
         }
 
         const size_t dim_solution = getColumns() - rang;
 
-        //std:: cout << tmp << std::endl;
 
         std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
 

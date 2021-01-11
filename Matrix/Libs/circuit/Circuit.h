@@ -19,6 +19,8 @@ namespace ezg
         {
             return (v1 == that.v1 && v2 == that.v2) || (v1 == that.v2 && v2 == that.v1);
         }
+        bool operator != (const Edge& that) const { return !(*this == that); }
+        bool operator < (const Edge& that) const { return id < that.id; }
     };
 
 
@@ -43,7 +45,7 @@ namespace ezg
 
         std::vector< std::vector< Edge > > findCycles() const
         {
-            return findCycles_(1, {});
+            return findCycles_(1, 1, {});
         }
 
 
@@ -55,6 +57,20 @@ namespace ezg
             //fixme
             auto cycles = findCycles();
 
+#ifdef DEBUG
+            {
+                int i = 0;
+                for (const auto &c : cycles) {
+                    std::cout << '[' << i << "] ";
+                    for (const auto &elem : c) {
+                        // std::cout << elem.v1 << ' ' << elem.v2 << ' ';
+                        std::cout << elem.id + 1 << ' ';
+                    }
+                    std::cout << std::endl;
+                    i++;
+                }
+            }
+#endif
             assert(m_data.size() == mGcolumns);
 
             const size_t num_cycles = cycles.size();
@@ -64,12 +80,25 @@ namespace ezg
             {
                 double eds = 0;
                 const size_t num_edges = cycles[c].size();
+                size_t pre1 = 0, pre2 = 0;
                 for (size_t k = 0; k < num_edges; k++)
                 {
                     Edge& cur = cycles[c][k];
-                    eds += cur.eds.value_or(0) * ((cur.v1 > cur.v2) ? -1.f : 1.f);
 
-                    LSystem.at(c, cur.id) = cur.resistance.value();
+                    bool minus = false;
+                    if (k == 0) {
+                        pre1 = cycles[c].back().v1;
+                        pre2 = cycles[c].back().v2;
+                    }
+
+                    if (cur.v1 != pre1 && cur.v1 != pre2)
+                        minus = true;
+                    pre1 = cur.v1;
+                    pre2 = cur.v2;
+
+                    eds += cur.eds.value_or(0) * ((minus) ? -1.f : 1.f);
+
+                    LSystem.at(c, cur.id) = cur.resistance.value() * ((minus) ? -1.f : 1.f);
                 }
                 freeMembers[c] = eds;
             }
@@ -84,9 +113,12 @@ namespace ezg
                     }
                 }
             }
+#ifdef DEBUG
+            std::cout << "line system:\n";
             std::cout << LSystem << std::endl;
+#endif
             auto solv = LSystem.solve(freeMembers);
-            //std::cout << solv.first << solv.second;
+
             assert(solv.second.isZero());
 
             for (size_t c = 0; c < mGcolumns; c++) {
@@ -111,111 +143,88 @@ namespace ezg
             return out.str();
         }
 
-    //private:
 
-        /*std::map< Edge, std::vector < Edge > > equalCurrent_() const
-        {
-            const size_t lines = m_graph.getLines();
-            const size_t columns = m_graph.getColumns();
-
-            std::map< Edge, std::vector < Edge > > result;
-
-            for (size_t l = 0; l < lines; l++)
-            {
-                size_t count = 0;
-                size_t el[2] = {};
-                for(size_t c = 0; c < columns; c++)
-                {
-                    if (m_graph.at(l, c) != 1) {
-                        if (count == 2) {
-                            count = 0;
-                            break;
-                        }
-                        el[count] = c;
-                        count++;
-                    }
-                }
-                if (count == 2) {
-                    result[m_data[el[0]]].push_back(m_data[el[1]]);
-                    result[m_data[el[1]]].push_back(m_data[el[0]]);
-                }
-            }
-
-            return result;
-        }*/
-
-        std::vector< std::vector< Edge > > findCycles_(size_t cur, std::vector< Edge > trace) const
+        std::vector< std::vector< Edge > > findCycles_(size_t first_vert, size_t cur, std::vector< Edge > trace) const
         {
             std::vector< std::vector< Edge > > multi_res;
 
             const size_t columns = m_graph.getColumns();
-            const size_t lines = m_graph.getLines();
+            const size_t lines   = m_graph.getLines();
+            const bool first_step = trace.empty();
             for (size_t c = 0; c < columns; c++)
             {
                 if (m_graph.at(cur, c) == 1)
                 {
-                    for (size_t next_v = 0; next_v < lines; next_v++)
+                    const Edge next_edg = m_data[c];
+                    const size_t next_vert = (cur == next_edg.v1) ? next_edg.v2 : next_edg.v1;
+                    if (first_step)
                     {
-                        if (m_graph.at(next_v, c) == 1 && next_v != cur)
+                        auto tmp_trace = trace;
+                        tmp_trace.push_back(next_edg);
+                        auto re_res = findCycles_(first_vert, next_vert, tmp_trace);
+                        multi_res.insert(multi_res.end(), re_res.begin(), re_res.end());
+                    }
+                    else if (trace.back() != next_edg)
+                    {
+                        if (next_vert == first_vert)
                         {
-                            auto it = std::find_if(trace.begin(), trace.end(), [next_v](const Edge& e){
-                                static size_t pre1 = 0, pre2 = 0, store_nv = next_v;
-                                if (store_nv != next_v) {
-                                    pre1 = pre2 = 0;
-                                    store_nv = next_v;
-                                }
-                                bool res = false;
-                                if (e.v1 == pre1 || e.v1 == pre2) {
-                                    res = e.v2 == next_v;
-                                }
-                                else if (e.v2 == pre1 || e.v2 == pre2) {
-                                    res = e.v1 == next_v;
-                                } else  {
-                                    res = e.v1 == next_v || e.v2 == next_v;
-                                }
-                                pre1 = e.v1;
-                                pre2 = e.v2;
+                            auto tmp_trace = trace;
+                            tmp_trace.push_back(next_edg);
+                            multi_res.emplace_back(std::move(tmp_trace));
+                        }
+                        else
+                        {
+                            bool secondly = false;
+                            auto it = std::find_if(trace.begin(), trace.end(), [&secondly, next_vert](const Edge& e) {
+                                bool result = false;
 
-                                return res;
+                                if (e.v1 == next_vert || e.v2 == next_vert)
+                                {
+                                    if (secondly) {
+                                        result = true;
+                                    }
+                                    else {
+                                        secondly = true;
+                                    }
+                                }
+                                else if (secondly) { assert(0);}
+
+                                return result;
                             });
 
                             if (it == trace.end())
                             {
                                 auto tmp_trace = trace;
 
-                                tmp_trace.push_back(m_data[c]);
-                                auto tmp = findCycles_(next_v, std::move(tmp_trace));
+                                tmp_trace.push_back(next_edg);
+                                auto tmp = findCycles_(first_vert, next_vert, std::move(tmp_trace));
                                 multi_res.insert(multi_res.end(), tmp.begin(), tmp.end());
                             }
                             else
                             {
-                                if (trace.back().v1 != next_v && trace.back().v2 != next_v)
-                                {
-                                    multi_res.emplace_back(it, trace.end());
-
-                                    multi_res.back().push_back(m_data[c]);
-                                }
+                                multi_res.emplace_back(it, trace.end());
+                                multi_res.back().push_back(next_edg);
                             }
-                        }
 
+                        }
                     }
+
                 }
 
             }
 
             std::vector< std::vector< Edge > > res;
             {
-                std::set< std::set< int > > set;
+                std::set< std::set< Edge > > set;
 
                 const size_t size = multi_res.size();
                 for (size_t i = 0; i < size; i++)
                 {
                     const size_t old_size = set.size();
-                    std::set< int > ts;
+                    std::set< Edge > ts;
                     for (const auto& ed : multi_res[i])
                     {
-                        ts.insert(ed.v1);
-                        ts.insert(ed.v2);
+                        ts.insert(ed);
                     }
                     set.emplace(std::move(ts));
                     if (old_size < set.size())
