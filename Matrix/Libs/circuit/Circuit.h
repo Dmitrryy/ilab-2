@@ -109,7 +109,9 @@ namespace ezg
                 {
                     if (m_graph.at(l, c) != 0)
                     {
-                        LSystem.at(num_cycles + l, c) = ((m_data[c].v2 == l) ? 1.f : -1.f);
+                        if (m_data[c].v1 != m_data[c].v2) {
+                            LSystem.at(num_cycles + l, c) = ((m_data[c].v2 == l) ? 1.f : -1.f);
+                        }
                     }
                 }
             }
@@ -157,7 +159,10 @@ namespace ezg
                 {
                     const Edge next_edg = m_data[c];
                     const size_t next_vert = (cur == next_edg.v1) ? next_edg.v2 : next_edg.v1;
-                    if (first_step)
+                    if (next_edg.v1 == next_edg.v2) {
+                        multi_res.emplace_back(std::vector{ next_edg });
+                    }
+                    else if (first_step)
                     {
                         auto tmp_trace = trace;
                         tmp_trace.push_back(next_edg);
