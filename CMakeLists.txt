@@ -27,5 +27,5 @@ add_subdirectory(Matrix)
 #ParaC
 #status: LVL1 in dev
 #
-#LVL1: project's name for build is 'ParaC'
-add_subdirectory(ParaC)]]
+#LVL1: project's name for build is 'ParaC']]
+add_subdirectory(ParaC)
