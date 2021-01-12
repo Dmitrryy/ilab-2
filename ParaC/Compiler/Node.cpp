@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 namespace ezg {
+
     std::unordered_map<std::string, size_t> gStrToId;
     size_t gCurFreeId = 1;
 
@@ -29,6 +30,19 @@ namespace ezg {
             return {};
         }
         return it->second;
+    }
+
+    int Scope::execute()
+    {
+        size_t old = gScopeTable.setCurTable(m_idTable);
+
+        for (auto& curNode : m_nodes) {
+            curNode->execute();
+        }
+
+        gScopeTable.setCurTable(old);
+
+        return 0;
     }
 
     ////////////////////////////////////////////////////////////

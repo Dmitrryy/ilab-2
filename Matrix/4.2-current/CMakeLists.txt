@@ -7,7 +7,8 @@ project(Current)
 set(MAKE_CXX_STANDARD 17)
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp ${CMAKE_CURRENT_SOURCE_DIR}/lex.yy.cc ${CMAKE_CURRENT_SOURCE_DIR}/parser.tab.cc)
+add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/lex.yy.cc ${CMAKE_CURRENT_SOURCE_DIR}/parser.tab.cc)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

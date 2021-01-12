@@ -45,12 +45,7 @@ namespace ezg
         std::optional< size_t > declareVar(const std::string& var_name) override;
 
         void addNode(INode* nNode) override { m_nodes.push_back(nNode); }
-        int execute() override
-        {
-            for (auto& curNode : m_nodes) {
-                curNode->execute();
-            }
-        }
+        int execute() override;
 
         std::string dumpStr() const override
         {
@@ -132,6 +127,7 @@ namespace ezg
             {
                 m_scope->execute();
             }
+            return 0;
         }
 
         std::string dumpStr() const override
@@ -146,13 +142,14 @@ namespace ezg
 
     public:
 
-        Print_t(INode* target)
+        explicit Print_t(INode* target)
                 : m_target(target)
         {}
 
         int execute() override
         {
             std::cout << m_target->execute() << std::endl;
+            return 0;
         }
 
         std::string dumpStr() const override

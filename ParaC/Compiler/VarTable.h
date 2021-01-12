@@ -50,6 +50,8 @@ namespace ezg
     public:
 
         void setParent(ScopeNode_t* pNode) { m_parent = pNode; }
+
+        ScopeNode_t* getParent() const { return m_parent; }
         void addChild(ScopeNode_t* pNode) { m_children.push_back(pNode); }
         void addObj(size_t id, INode* data)
         {
@@ -85,12 +87,16 @@ namespace ezg
 
     public:
 
-        void setCurTable(size_t nId)
+        size_t setCurTable(size_t nId)
         {
             assert(nId < m_tables.size());
+            size_t old = m_curTableId;
             m_curTableId = nId;
+            return old;
         }
+
         size_t getCurTableId() const noexcept { return m_curTableId; }
+
         size_t createTable(size_t prevId)
         {
             assert(prevId < m_tables.size());
@@ -103,6 +109,7 @@ namespace ezg
 
             return newId;
         }
+
         size_t createTable()
         {
             size_t newId = m_tables.size();

@@ -26,8 +26,8 @@ namespace ezg
 
 /*        , LPar
         , RPar
-        , LBrake
-        , RBrake
+        , LBrace
+        , RBrace
 
         , SColon*/
     };
