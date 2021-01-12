@@ -24,12 +24,12 @@ namespace ezg
         , Print
         , QMark
 
-        , LPar
+/*        , LPar
         , RPar
         , LBrake
         , RBrake
 
-        , SColon
+        , SColon*/
     };
 
 
@@ -47,8 +47,8 @@ namespace ezg
     public:
 
         static INode* make_op(Operator tOp, INode* left, INode* right);
-        static INode* make_val(double val);
-        static INode* make_var(const std::string& var_name);
+        static INode* make_val(int val);
+        static INode* make_var(size_t id);
         static INode* make_while(INode* condition, INode* scope);
         static INode* make_if(INode* condition, INode* scope);
         static INode* make_print(INode* param);
@@ -66,6 +66,7 @@ namespace ezg
 
     public:
 
+        static IScope* make(size_t prev_scope);
         static IScope* make();
     };
 

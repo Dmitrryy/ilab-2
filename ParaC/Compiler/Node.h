@@ -34,6 +34,7 @@ namespace ezg
     {
         std::vector< INode* > m_nodes;
         size_t m_idTable;
+
     public:
 
         explicit Scope(size_t idTable)
