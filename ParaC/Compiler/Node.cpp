@@ -31,7 +31,10 @@ namespace ezg {
         if (it == gStrToId.end()) {
             return {};
         }
-        return it->second;
+        if (gScopeTable.access(it->second).has_value()) {
+            return it->second;
+        }
+        return {};
     }
 
     int Scope::execute()
@@ -105,7 +108,7 @@ case Operator::name:             \
             OpCase(Add);
             OpCase(Sub);
             OpCase(Mul);
-            OpCase(Dev);
+            OpCase(Div);
 
             default:
                 assert(0);
@@ -117,6 +120,12 @@ case Operator::name:             \
     INode* INode::make_val(int val)
     {
         INode* res = new Value(val);
+        return res;
+    }
+
+    INode* INode::make_assign(INode* var, INode* val)
+    {
+        INode* res = new Assign(dynamic_cast< Variable* >(var), val);
         return res;
     }
 

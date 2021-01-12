@@ -24,6 +24,8 @@ namespace ezg
         , Print
         , QMark
 
+        , Assign
+
 /*        , LPar
         , RPar
         , LBrace
@@ -47,6 +49,7 @@ namespace ezg
     public:
 
         static INode* make_op(Operator tOp, INode* left, INode* right);
+        static INode* make_assign(INode* var, INode* val);
         static INode* make_val(int val);
         static INode* make_var(size_t id);
         static INode* make_while(INode* condition, INode* scope);
@@ -72,7 +75,7 @@ namespace ezg
 
         static IScope* make_separate();
         static IScope* make_inside_current();
-        static IScope* make_first();
+        //static IScope* make_first();
     };
 
 }//namespace ezg

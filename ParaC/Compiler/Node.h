@@ -181,6 +181,29 @@ namespace ezg
     //////////////////////////////////////////////////////////////////
 
 
+    class Assign : public INode
+    {
+        Variable* m_pVariable;
+        INode* m_pValue;
+
+    public:
+
+        Assign(Variable* var, INode* val)
+        : m_pVariable(var)
+        , m_pValue(val)
+        {}
+
+        int execute() override {
+            m_pVariable->setVal(m_pValue->execute());
+            return 0;
+        }
+
+        std::string dumpStr() const override
+        {
+        }
+    };
+
+
     class Op_t : public INode
     {
     protected:
@@ -217,6 +240,6 @@ namespace ezg
     OPERATION_TEMPLATE(Add, +);
     OPERATION_TEMPLATE(Sub, -);
     OPERATION_TEMPLATE(Mul, *);
-    OPERATION_TEMPLATE(Dev, /);
+    OPERATION_TEMPLATE(Div, /);
 
 }//namespace ezg

@@ -32,6 +32,7 @@ namespace yy
                     }
                     else {
                         yylval->as <std::string> () = word;
+                        tokenType = parser::token_type::VARIABLE;
                     }
                     break;
                 }
@@ -64,7 +65,7 @@ namespace yy
                 res = parser::token_type::PRINT;
             }
             else if (str == "int") {
-                res = parser::token_type ::TYPE;
+                res = parser::token_type::TYPE;
             }
 
             return res;
