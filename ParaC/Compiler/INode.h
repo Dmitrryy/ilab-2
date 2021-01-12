@@ -12,7 +12,7 @@ namespace ezg
           Add
         , Sub
         , Mul
-        , Dev
+        , Div
 
         , Greater
         , Less
@@ -61,13 +61,18 @@ namespace ezg
     public:
 
         virtual void addNode(INode* node) = 0;
+        virtual void insertNode(const std::vector< INode* > &vec) = 0;
         virtual std::optional< size_t > visible(const std::string& var_name) = 0;
         virtual std::optional< size_t > declareVar(const std::string& var_name) = 0;
 
+        virtual void entry() = 0;
+        virtual void exit() = 0;
+
     public:
 
-        static IScope* make(size_t prev_scope);
-        static IScope* make();
+        static IScope* make_separate();
+        static IScope* make_inside_current();
+        static IScope* make_first();
     };
 
 }//namespace ezg

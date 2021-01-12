@@ -5,6 +5,7 @@
 #include <vector>
 #include <cassert>
 #include <optional>
+#include <stack>
 
 #include "INode.h"
 
@@ -83,19 +84,22 @@ namespace ezg
     class ScopeTable final
     {
         std::vector< ScopeNode_t* > m_tables;
-        size_t                      m_curTableId = 0;
+        //size_t                      m_curTableId = 0;
+        std::stack< size_t > m_scopeIdStore;
 
     public:
 
-        size_t setCurTable(size_t nId)
+        void entryScope(size_t id)
         {
-            assert(nId < m_tables.size());
-            size_t old = m_curTableId;
-            m_curTableId = nId;
-            return old;
+            assert(id < m_tables.size());
+            m_scopeIdStore.push(id);
+        }
+        void exitCurScope()
+        {
+            m_scopeIdStore.pop();
         }
 
-        size_t getCurTableId() const noexcept { return m_curTableId; }
+        size_t getCurTableId() const noexcept { return m_scopeIdStore.top(); }
 
         size_t createTable(size_t prevId)
         {
@@ -122,7 +126,7 @@ namespace ezg
 
         std::optional< INode* > access(size_t id) const
         {
-            return m_tables[m_curTableId]->access(id);
+            return m_tables[m_scopeIdStore.top()]->access(id);
         }
 
         void addElem(size_t idTable, size_t idElem, INode* data) { m_tables[idTable]->addObj(idElem, data); }

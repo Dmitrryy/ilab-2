@@ -10,7 +10,8 @@ namespace yy
 
     class Driver {
     private:
-        FlexLexer* lexer_;
+        FlexLexer* lexer_ = nullptr;
+        ezg::IScope* m_node = nullptr;
 
     public:
         Driver (FlexLexer* lexer):
@@ -41,6 +42,8 @@ namespace yy
             return tokenType;
         }
 
+        void setNode(ezg::IScope* sc) { m_node = sc; }
+
         bool parse () {
             parser parser (this);
             bool result = parser.parse ();
@@ -59,6 +62,9 @@ namespace yy
             }
             else if (str == "print") {
                 res = parser::token_type::PRINT;
+            }
+            else if (str == "int") {
+                res = parser::token_type ::TYPE;
             }
 
             return res;

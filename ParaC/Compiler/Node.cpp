@@ -2,6 +2,8 @@
 #include "VarTable.h"
 #include <unordered_map>
 
+#include <stack>
+
 namespace ezg {
 
     std::unordered_map<std::string, size_t> gStrToId;
@@ -34,15 +36,25 @@ namespace ezg {
 
     int Scope::execute()
     {
-        size_t old = gScopeTable.setCurTable(m_idTable);
+        gScopeTable.entryScope(m_idTable);
 
         for (auto& curNode : m_nodes) {
             curNode->execute();
         }
-
-        gScopeTable.setCurTable(old);
+        assert(gScopeTable.getCurTableId() == m_idTable);
+        gScopeTable.exitCurScope();
 
         return 0;
+    }
+
+    void Scope::entry()
+    {
+        gScopeTable.entryScope(m_idTable);
+    }
+    void Scope::exit()
+    {
+        assert(gScopeTable.getCurTableId() == m_idTable);
+        gScopeTable.exitCurScope();
     }
 
     ////////////////////////////////////////////////////////////
@@ -58,22 +70,22 @@ namespace ezg {
 
     /////////////////////////////////////////////////////////////
 
-    IScope* IScope::make(size_t prev_scope)
-    {
-        size_t id = gScopeTable.createTable(prev_scope);
-
-        IScope* res = new Scope(id);
-
-        return res;
-    }
-    IScope* IScope::make()
+    IScope* IScope::make_separate()
     {
         size_t id = gScopeTable.createTable();
-
         IScope* res = new Scope(id);
-
         return res;
     }
+
+    IScope* IScope::make_inside_current()
+    {
+        size_t cur_id = gScopeTable.getCurTableId();
+        size_t id = gScopeTable.createTable(cur_id);
+        IScope* res = new Scope(id);
+        return res;
+    }
+
+
 
     ////////////////////////////////////////////////////////////
 

@@ -45,6 +45,11 @@ namespace ezg
         std::optional< size_t > declareVar(const std::string& var_name) override;
 
         void addNode(INode* nNode) override { m_nodes.push_back(nNode); }
+        void insertNode(const std::vector< INode* > &vec) override { m_nodes.insert(m_nodes.end(), vec.begin(), vec.end()); }
+
+        void entry() override;
+        void exit() override;
+
         int execute() override;
 
         std::string dumpStr() const override
