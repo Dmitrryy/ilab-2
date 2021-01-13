@@ -11,7 +11,7 @@ namespace yy
     class Driver {
     private:
         FlexLexer* lexer_ = nullptr;
-        ezg::IScope* m_node = nullptr;
+        void* m_node = nullptr;
 
     public:
         Driver (FlexLexer* lexer):
@@ -24,17 +24,12 @@ namespace yy
                     yylval->as <double> () = std::stod (lexer_->YYText ());
                     break;
                 }
-                case yy::parser::token_type::WORD: {
+
+                case yy::parser::token_type::VARIABLE: {
                     std::string word(lexer_->YYText());
-                    auto tmp_tt = isKeyWord(word);
-                    if (tmp_tt != parser::token_type::ERROR) {
-                        tokenType = tmp_tt;
-                    }
-                    else {
-                        yylval->as <std::string> () = word;
-                        std::cout << std::endl << "[[" << word << "]]" << std::endl;
-                        tokenType = parser::token_type::VARIABLE;
-                    }
+                    parser::semantic_type tmp;
+                    tmp.as<std::string>() = word;
+                    yylval->copy<std::string>(tmp);
                     break;
                 }
                 default: {
@@ -44,33 +39,14 @@ namespace yy
             return tokenType;
         }
 
-        void setNode(ezg::IScope* sc) { m_node = sc; }
-        ezg::IScope* getNode() { return m_node; }
+
+        void setResult(void* sc) { m_node = sc; }
+        void* getNode() { return m_node; }
 
         bool parse () {
             parser parser (this);
             bool result = parser.parse ();
             return !result;
-        }
-
-        parser::token_type isKeyWord(const std::string& str)
-        {
-            parser::token_type res = parser::token_type::ERROR;
-
-            if (str == "while") {
-                res = parser::token_type::WHILE;
-            }
-            else if (str == "if") {
-                res = parser::token_type::IF;
-            }
-            else if (str == "print") {
-                res = parser::token_type::PRINT;
-            }
-            else if (str == "int") {
-                res = parser::token_type::TYPE;
-            }
-
-            return res;
         }
     };
 

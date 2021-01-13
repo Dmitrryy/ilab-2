@@ -1,24 +1,23 @@
 #include <iostream>
-
+#include <fstream>
 #include "parser/driver.h"
 
 extern FILE* yyin;
 
 int main(int argc, char* argv[])
 {
-    freopen("tests/test1.txt", "r", stdin);
-/*    if (fd_in == nullptr) {
+    std::fstream in("tests/test1.txt");
+    if (!in.is_open()) {
         std::cerr << "cant open file: " << argv[1] << std::endl;
         return 1;
     }
-    yyin = fd_in;*/
-
 
     FlexLexer *lexer = new yyFlexLexer;
+    lexer->switch_streams(in, std::cout);
+
     yy::Driver driver { lexer };
     driver.parse ();
-
-    auto n = driver.getNode();
+    auto n = (ezg::IScope*)driver.getNode();
     n->execute();
 
     return 0;

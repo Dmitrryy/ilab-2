@@ -99,7 +99,7 @@
 
 program
 :   open_first inside_scope     {   $1->insertNode($2);
-                                    driver->setNode($1);
+                                    driver->setResult($1);
                                     gScopeStack.pop();
                                 }
 ;
@@ -216,8 +216,8 @@ exprLvl3
 
 
 access_variable
-:	VARIABLE				{   auto is_visible = gScopeStack.top()->visible($1);
-                                                       	if (is_visible.has_value()) {
+:	VARIABLE				{   	auto is_visible = gScopeStack.top()->visible($1);
+                                                   	if (is_visible.has_value()) {
                                                         	$$ = ezg::INode::make_var(is_visible.value());
                                                         }
                                                         else {

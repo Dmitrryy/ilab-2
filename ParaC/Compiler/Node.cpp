@@ -13,14 +13,14 @@ namespace ezg {
     ScopeTable gScopeTable;
     VarTable gVarTable;
 
-    std::optional<size_t> Scope::declareVar(const std::string &var_name)
-    {
+    std::optional<size_t> Scope::declareVar(const std::string &var_name) {
         if (gStrToId.count(var_name) != 0) {
             return {};
         }
         size_t idVar = gCurFreeId++;
         gStrToId[var_name] = idVar;
 
+        gVarTable.loadUp({idVar});
         gScopeTable.addElem(m_idTable, idVar, nullptr);
 
         return {idVar};
@@ -40,13 +40,13 @@ namespace ezg {
 
     int Scope::execute()
     {
-        gScopeTable.entryScope(m_idTable);
+        entry();
 
         for (auto& curNode : m_nodes) {
             curNode->execute();
         }
-        assert(gScopeTable.getCurTableId() == m_idTable);
-        gScopeTable.exitCurScope();
+
+        exit();
 
         return 0;
     }

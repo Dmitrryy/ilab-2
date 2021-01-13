@@ -16,7 +16,7 @@ DOUBLE          {DIGIT}+{DOT}?{DIGIT}*
 INTEGER         {DIGIT_NON_ZERO}{DIGIT}*
 LETTER          [a-zA-Z_]
 LETTER_OR_DIGIT [a-zA-Z0-9_]
-WORD            {LETTER}{LETTER_OR_DIGIT}*
+VARIABLE        {LETTER}{LETTER_OR_DIGIT}*
 
 %%
                             /* Сопоставляем каждой лексеме её константу для парсера */
@@ -40,9 +40,13 @@ WORD            {LETTER}{LETTER_OR_DIGIT}*
 
 "?"                         return yy::parser::token_type::QMARK;
 "="                         return yy::parser::token_type::ASSIGN;
+"while"                     return yy::parser::token_type::WHILE;
+"if"                        return yy::parser::token_type::IF;
+"print"                     return yy::parser::token_type::PRINT;
+"int"                       return yy::parser::token_type::TYPE;
 
 {DOUBLE}                    return yy::parser::token_type::NUMBER;
-{WORD}                      return yy::parser::token_type::WORD;
+{VARIABLE}                  return yy::parser::token_type::VARIABLE;
 .			                return yy::parser::token_type::ERROR;
 
 %%

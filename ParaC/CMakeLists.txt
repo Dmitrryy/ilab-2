@@ -10,7 +10,7 @@ set(${PROJECT_NAME} CMAKE_CXX_STANDARD_REQUIRED True)
 # specify the C++ standard
 set(MAKE_CXX_STANDARD 17)
 
-add_definitions(-DDEBUG)
+#add_definitions(-DDEBUG)
 
 
 # add the executable

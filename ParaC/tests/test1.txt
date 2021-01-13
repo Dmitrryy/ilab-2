@@ -1,1 +1,11 @@
-int lox = 7;
+int xox = 5;
+while(xox < 10) {
+    xox = xox + 1;
+}
+{
+int tmp = 9;
+{
+print xox;
+}
+print tmp;
+}
