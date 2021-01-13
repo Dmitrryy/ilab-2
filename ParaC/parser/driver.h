@@ -32,6 +32,7 @@ namespace yy
                     }
                     else {
                         yylval->as <std::string> () = word;
+                        std::cout << std::endl << "[[" << word << "]]" << std::endl;
                         tokenType = parser::token_type::VARIABLE;
                     }
                     break;
@@ -44,6 +45,7 @@ namespace yy
         }
 
         void setNode(ezg::IScope* sc) { m_node = sc; }
+        ezg::IScope* getNode() { return m_node; }
 
         bool parse () {
             parser parser (this);

@@ -1,6 +1,7 @@
 #include "Node.h"
 #include "VarTable.h"
 #include <unordered_map>
+#include <iostream>
 
 #include <stack>
 
@@ -99,6 +100,10 @@ case Operator::name:             \
 
     INode* INode::make_op(Operator tOp, INode* left, INode* right)
     {
+#ifdef DEBUG
+        std::cout << "operator created: " << (int)tOp << std::endl;
+        std::cout << "left:\n" << left->dumpStr() << "\nright:\n" << right->dumpStr() << std::endl;
+#endif
         INode* res = nullptr;
         switch (tOp) {
             OpCase(Greater);
@@ -119,42 +124,68 @@ case Operator::name:             \
 
     INode* INode::make_val(int val)
     {
+#ifdef DEBUG
+        std::cout << "value created: " << val << std::endl;
+#endif
         INode* res = new Value(val);
         return res;
     }
 
     INode* INode::make_assign(INode* var, INode* val)
     {
+#ifdef DEBUG
+        std::cout << "assign created:" << std::endl;
+        std::cout << "var:\n" << var->dumpStr() << "\nval:\n" << val->dumpStr() << std::endl;
+#endif
         INode* res = new Assign(dynamic_cast< Variable* >(var), val);
         return res;
     }
 
+
     INode* INode::make_var(size_t id)
     {
+#ifdef DEBUG
+        std::cout << "variable created: " << id << '(' << ')' << std::endl;
+#endif
         INode* res = new Variable(id);
         return res;
     }
 
     INode* INode::make_while(INode* condition, INode* scope)
     {
+#ifdef DEBUG
+        std::cout << "while created:" << std::endl;
+        std::cout << "condition:\n" << condition->dumpStr() << "\nscope:\n" << scope->dumpStr() << std::endl;
+#endif
         INode* res = new While_t(condition, scope);
         return res;
     }
 
     INode* INode::make_if(INode* condition, INode* scope)
     {
+#ifdef DEBUG
+        std::cout << "if created:" << std::endl;
+        std::cout << "condition:\n" << condition->dumpStr() << "\nscope:\n" << scope->dumpStr() << std::endl;
+#endif
         INode* res = new If_t(condition, scope);
         return res;
     }
 
     INode* INode::make_print(INode* param)
     {
+#ifdef DEBUG
+        std::cout << "print created:" << std::endl;
+        std::cout << "param:\n" << param->dumpStr() << std::endl;
+#endif
         INode* res = new Print_t(param);
         return res;
     }
 
     INode* INode::make_qmark()
     {
+#ifdef DEBUG
+        std::cout << "qmark created!" << std::endl;
+#endif
         INode* res = new QMark_t();
         return res;
     }

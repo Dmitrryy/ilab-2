@@ -83,6 +83,11 @@ namespace ezg
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: Variable" << std::endl
+                << "id = " << m_id << std::endl;
+
+            return out.str();
         }
     };
 
@@ -106,10 +111,17 @@ namespace ezg
             {
                 m_scope->execute();
             }
+            return 0;
         }
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: While" << std::endl
+                << "condition: \n" << m_condition->dumpStr() << std::endl
+                << "scope: \n" << m_scope->dumpStr() << std::endl;
+
+            return out.str();
         }
     };
 
@@ -137,6 +149,12 @@ namespace ezg
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: If" << std::endl
+                << "condition: \n" << m_condition->dumpStr() << std::endl
+                << "scope: \n" << m_scope->dumpStr() << std::endl;
+
+            return out.str();
         }
     };
 
@@ -159,6 +177,11 @@ namespace ezg
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: Print" << std::endl
+                << "target: \n" << m_target->dumpStr() << std::endl;
+
+            return out.str();
         }
     };
 
@@ -175,6 +198,10 @@ namespace ezg
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: qmark!" << std::endl;
+
+            return out.str();
         }
     };
 
@@ -200,6 +227,12 @@ namespace ezg
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: assign" << std::endl
+                << "var: \n" << m_pVariable->dumpStr() << std::endl
+                << "val: \n" << m_pValue->dumpStr() << std::endl;
+
+            return out.str();
         }
     };
 
@@ -219,6 +252,12 @@ namespace ezg
 
         std::string dumpStr() const override
         {
+            std::ostringstream out;
+            out << "Type: operation" << std::endl
+                << "left: \n" << m_left->dumpStr() << std::endl
+                << "right: \n" << m_right->dumpStr() << std::endl;
+
+            return out.str();
         }
     };
 
