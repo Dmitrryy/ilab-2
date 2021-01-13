@@ -6,25 +6,10 @@
 #include <sstream>
 #include <set>
 
+#include "Edge.h"
+
 namespace ezg
 {
-
-    struct Edge {
-        size_t id = 0;
-        size_t v1 = 0, v2 = 0;
-        std::optional< float > resistance;
-        std::optional< float > current;
-        std::optional< float > eds;
-
-        bool operator == (const Edge& that) const
-        {
-            return (v1 == that.v1 && v2 == that.v2) || (v1 == that.v2 && v2 == that.v1);
-        }
-        bool operator != (const Edge& that) const { return !(*this == that); }
-        bool operator < (const Edge& that) const { return id < that.id; }
-    };
-
-
     class Circuit
     {
         matrix::Matrix< int > m_graph;
@@ -32,19 +17,19 @@ namespace ezg
 
     public:
 
-        void connect(size_t id1, size_t id2, Edge edge)
+        void connect(Edge edge)
         {
             //vertex id is index of the line in the graph
-            m_graph.resize(std::max(m_graph.getLines(), static_cast<size_t>(std::max(id1, id2)) + 1), m_graph.getColumns() + 1);
-            m_graph.at(id1, m_graph.getColumns() - 1) = 1;
-            m_graph.at(id2, m_graph.getColumns() - 1) = 1;
+            m_graph.resize(std::max(m_graph.getLines(), static_cast<size_t>(std::max(edge.v1, edge.v2)) + 1), m_graph.getColumns() + 1);
+            m_graph.at(edge.v1, m_graph.getColumns() - 1) = 1;
+            m_graph.at(edge.v2, m_graph.getColumns() - 1) = 1;
 
             //id is index in the array m_data
             edge.id = m_data.size();
             m_data.emplace_back(edge);
         }
 
-        std::vector< Edge > getData() { return m_data; }
+        std::vector< Edge > getData() const { return m_data; }
 
 
         void calculateCurrent()
@@ -73,36 +58,18 @@ namespace ezg
             /*
              * We make a system of equations using the first and second Kirchhoff rules.
              */
-
             const size_t num_cycles = cycles.size();
             matrix::Matrix< double > LSystem(num_cycles + mGlines, m_data.size());
             std::vector< double > freeMembers(num_cycles + mGlines);
             for (size_t c = 0; c < num_cycles; c++)
             {//second rule
-                double eds = 0;
-                const size_t num_edges = cycles[c].size();
-                size_t pre1 = 0, pre2 = 0;
-                for (size_t k = 0; k < num_edges; k++)
-                {
-                    Edge& cur = cycles[c][k];
+                auto line = secondRuleKirchhoff_(cycles[c]);
+                assert(line.size() - 1 == LSystem.getColumns());
 
-                    //is determined by the sign of the bypass circuit
-                    bool minus = false;
-                    if (k == 0) {
-                        pre1 = cycles[c].back().v1;
-                        pre2 = cycles[c].back().v2;
-                    }
-
-                    if (cur.v1 != pre1 && cur.v1 != pre2)
-                        minus = true;
-                    pre1 = cur.v1;
-                    pre2 = cur.v2;
-
-                    eds += cur.eds.value_or(0) * ((minus) ? -1.f : 1.f);
-
-                    LSystem.at(c, cur.id) = cur.resistance.value() * ((minus) ? -1.f : 1.f);
+                for (size_t clm = 0; clm < mGcolumns; clm++) {
+                    LSystem.at(c, clm) = line[clm];
                 }
-                freeMembers[c] = eds;
+                freeMembers[c] = line.back();
             }
 
             //first rule
@@ -123,13 +90,15 @@ namespace ezg
             std::cout << LSystem << std::endl;
 #endif
             auto solv = LSystem.solve(freeMembers);
-
             assert(solv.second.isZero());
 
             for (size_t c = 0; c < mGcolumns; c++) {
                 m_data[c].current = solv.first.at(c, 0);
             }
         }
+
+
+
 
 
         std::string dumpStr() const
@@ -159,6 +128,36 @@ namespace ezg
 
     private:
 
+        std::vector< float > secondRuleKirchhoff_(const std::vector< Edge >& cycle) const
+        {
+            double eds = 0;
+            const size_t num_edges = cycle.size();
+            std::vector< float > result(m_data.size() + 1);
+            size_t pre1 = 0, pre2 = 0;
+            for (size_t k = 0; k < num_edges; k++)
+            {
+                const Edge& cur = cycle[k];
+
+                //is determined by the sign of the bypass circuit
+                bool minus = false;
+                if (k == 0) {
+                    pre1 = cycle.back().v1;
+                    pre2 = cycle.back().v2;
+                }
+
+                if (cur.v1 != pre1 && cur.v1 != pre2)
+                    minus = true;
+                pre1 = cur.v1;
+                pre2 = cur.v2;
+
+                eds += cur.eds.value_or(0) * ((minus) ? -1.f : 1.f);
+
+                result.at(cur.id) = cur.resistance.value() * ((minus) ? -1.f : 1.f);
+            }
+            result.back() = eds;
+
+            return result;
+        }
 
         /*
          * searches for cycles in the graph.
@@ -246,28 +245,36 @@ namespace ezg
             }
 
             //remove the same cycles
+            removeSameExcludingOrder_< Edge >(multi_res);
+            return multi_res;
+        }
+
+
+        template<typename T>
+        static void removeSameExcludingOrder_(std::vector< std::vector< T > >& multi_vec)
+        {
             std::vector< std::vector< Edge > > res;
             {
                 std::set< std::set< Edge > > set;
 
-                const size_t size = multi_res.size();
+                const size_t size = multi_vec.size();
                 for (size_t i = 0; i < size; i++)
                 {
                     const size_t old_size = set.size();
                     std::set< Edge > ts;
-                    for (const auto& ed : multi_res[i])
+                    for (const auto& ed : multi_vec[i])
                     {
                         ts.insert(ed);
                     }
                     set.emplace(std::move(ts));
                     if (old_size < set.size())
                     {
-                        res.emplace_back(std::move(multi_res[i]));
+                        res.emplace_back(std::move(multi_vec[i]));
                     }
                 }
             }
 
-            return res;
+            multi_vec = std::move(res);
         }
 
     };//class Circuit

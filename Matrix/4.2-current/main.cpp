@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "ParserDriver.h"
-
+#include <circuit/Circuit.h>
 
 #include <set>
 #include <vector>
@@ -13,19 +13,31 @@ int yyFlexLexer::yywrap() {
     return 1;
 }
 
+
 int main()
 {
+
     //we shoot a cannon at sparrows
 #ifdef DEBUG
     freopen("tests/test1.txt", "r", stdin);
 #endif
     FlexLexer* lexer = new yyFlexLexer;
     yy::ParsDriver driver(lexer);
-    driver.parse();
 
-    auto circuit  = driver.getData();
+    auto res_pars = driver.parse();
+    if (!res_pars) {
+        std::cerr << "parsing terminate\n";
+        return 1;
+    }
+
+    auto data = driver.getData();
 
     delete lexer;
+
+    ezg::Circuit circuit;
+    for (const auto& edge : data) {
+        circuit.connect(edge);
+    }
 
 #ifdef DEBUG
     std::cout << circuit.dumpStr() << std::endl;

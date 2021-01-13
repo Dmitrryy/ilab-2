@@ -207,12 +207,9 @@ namespace matrix
         }
 
         const size_t dim_solution = getColumns() - rang;
-
-
-        std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
-
-        bool haveGeneralSolve = dim_solution > 0;
-        size_t num_iterations = (dim_solution == 0) ? 1 : dim_solution;
+        const std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
+        const bool haveGeneralSolve = dim_solution > 0;
+        const size_t num_iterations = (dim_solution == 0) ? 1 : dim_solution;
 
         Matrix< T > generalSolution(nClm, num_iterations);
         Matrix< T > particularSolution(nClm, num_iterations);

@@ -19,6 +19,7 @@ namespace yy { class ParsDriver; }
 %code
 {
 #include "ParserDriver.h"
+#include <optional>
 
 namespace yy {
 
@@ -33,13 +34,15 @@ parser::token_type yylex(parser::semantic_type* yylval,
   EDGE    "--"
   COMMA   ","
   SCOLON  ";"
+  EDSDIM  "V"
   ERR
 ;
 
-%token <float> NUMBER
-%nterm <float> vertex
-%nterm <float> resister
-%nterm <float> voltage
+%token < float > NUMBER
+%nterm < float > vertex
+%nterm < float > resister
+%nterm < float > voltage
+%nterm eds_dimention
 
 %left '+' '-'
 
@@ -48,7 +51,11 @@ parser::token_type yylex(parser::semantic_type* yylval,
 %%
 
 program
-    : vertex EDGE vertex COMMA resister SCOLON voltage program { driver->connect($1, $3, $5, $7); }
+    : vertex EDGE vertex COMMA resister SCOLON voltage program { 	ezg::Edge cur($1, $3);
+    									cur.resistance = $5;
+    									cur.eds = $7;
+    									driver->insert(cur);
+     }
     | {}
 ;
 
@@ -61,10 +68,15 @@ resister
 ;
 
 voltage
-    : NUMBER LBREAK { $$ = $1; }
-    | NUMBER        { $$ = $1; }
-    | LBREAK        { $$ = 0.f; }
-    | /*empty*/     { $$ = 0.f; }
+    : NUMBER eds_dimention LBREAK 	{ $$ = $1; }
+    | NUMBER eds_dimention 		{ $$ = $1; }
+    | LBREAK        			{ $$ = 0.f; }
+    | /*empty*/     			{ $$ = 0.f; }
+;
+
+eds_dimention
+:	EDSDIM {}
+| 	/* empty */ {}
 ;
 
 %%
