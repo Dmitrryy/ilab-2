@@ -55,6 +55,8 @@ namespace matrix
 		MatrixBuffer_t(MatrixBuffer_t&& that) noexcept;
 		MatrixBuffer_t& operator = (MatrixBuffer_t&& that) noexcept;
 
+		virtual ~MatrixBuffer_t() = default;
+
 	public:
 
 		////////////////////get////////////////////////////

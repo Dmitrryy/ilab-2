@@ -96,7 +96,6 @@ program
                                     driver->setNode($1);
                                     gScopeStack.pop();
                                 }
-|   /* empty */
 ;
 
 
@@ -136,7 +135,7 @@ inside_scope
 |   inside_scope scope          {   $$.insert($$.end(), $1.begin(), $1.end());
                                     $$.push_back($2);
                                 }
-|   /* empty */
+|   /* empty */			{}
 ;
 
 
@@ -215,29 +214,6 @@ exprLvl3
                                             		}
                                         	}
 ;
-
-////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-program
-:   program act SCOLON
-|   /* empty */
-;
-
-
-
-
-
-program:
-	program exprLvl1 SCOLON	{ std::cout << "expression found: " << $2 << std::endl; }
-|
-;
-
 
 
 %%

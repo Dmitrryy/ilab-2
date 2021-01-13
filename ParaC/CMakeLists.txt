@@ -29,7 +29,7 @@ add_custom_command(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/parser/gramar.tab.cc
         PRE_BUILD
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/parser
-        COMMAND bison
+        COMMAND bison -Wcex
         gramar.y
 )
 

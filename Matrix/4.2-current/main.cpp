@@ -25,6 +25,8 @@ int main()
 
     auto circuit  = driver.getData();
 
+    delete lexer;
+
 #ifdef DEBUG
     std::cout << circuit.dumpStr() << std::endl;
 #endif
