@@ -12,7 +12,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    FlexLexer *lexer = new yyFlexLexer;
+    auto *lexer = new Scanner;
     lexer->switch_streams(in, std::cout);
 
     yy::Driver driver { lexer };

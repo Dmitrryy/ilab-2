@@ -1,14 +1,22 @@
 %option c++
 /* TODO */
-%option noyywrap
+%option noyywrap nounput noinput batch debug
+%option yylineno
 
 %{
 
 #include "gramar.tab.hh"
+#include "scanner.h"
+#include <iostream>
+
+#define YY_USER_ACTION updateLocation();
 
 %}
 
-WS              [ \t\n\v]+
+%option yyclass="Scanner"
+
+WS              [ \t\v]+
+ENDL            [\n]+
 DOT             [.]
 DIGIT           [0-9]
 DIGIT_NON_ZERO  [1-9]
@@ -21,7 +29,7 @@ VARIABLE        {LETTER}{LETTER_OR_DIGIT}*
 %%
                             /* Сопоставляем каждой лексеме её константу для парсера */
 {WS}                        /* skip blanks and tabs */
-
+{ENDL}
 "+"                         return yy::parser::token_type::ADD;
 "-"                         return yy::parser::token_type::SUB;
 "*"                         return yy::parser::token_type::MUL;

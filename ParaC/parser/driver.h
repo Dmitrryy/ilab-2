@@ -1,23 +1,24 @@
 #pragma once
 
-#include <FlexLexer.h>
-
 #include "../Compiler/INode.h"
+
 #include "gramar.tab.hh"
+#include "scanner.h"
 
 namespace yy
 {
 
     class Driver {
     private:
-        FlexLexer* lexer_ = nullptr;
+        Scanner* lexer_ = nullptr;
         void* m_node = nullptr;
 
     public:
-        Driver (FlexLexer* lexer):
+        explicit Driver (Scanner* lexer):
                 lexer_ (lexer)
         {}
-        parser::token_type yylex (parser::semantic_type* yylval) {
+        parser::token_type yylex (parser::location_type* l, parser::semantic_type* yylval)
+        {
             parser::token_type tokenType = static_cast <parser::token_type> (lexer_->yylex ());
             switch (tokenType) {
                 case yy::parser::token_type::NUMBER: {
@@ -36,6 +37,12 @@ namespace yy
                     break;
                 }
             }
+
+            *l = lexer_->getLocation();
+            //static int i = 0;
+            //i++;
+            //std::cout << '[' << i << "] (" << l->begin.line << " ," << l->begin.column << ") (" <<  l->end.line << " ," << l->end.column << ")\n";
+
             return tokenType;
         }
 

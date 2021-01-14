@@ -3,7 +3,11 @@
 %skeleton "lalr1.cc"
 %defines
 %define api.value.type variant
+
 %param {Driver* driver}
+
+%locations
+
 
 %code requires
 {
@@ -35,7 +39,7 @@
 
 	namespace yy {
 
-		parser::token_type yylex (parser::semantic_type* yylval, Driver* driver);
+		parser::token_type yylex (parser::semantic_type* yylval, parser::location_type* l, Driver* driver);
 
 	}
 
@@ -222,7 +226,7 @@ access_variable
                                                         }
                                                         else {
                                                         	//void parser::error("undefined variable");
-                                                        	std::cout << "undefined variable\n" << std::endl;
+                                                        	std::cout << "undefined variable\n" << $1 << '(' << @1.begin.line << ", " << @1.begin.column << ')' << std::endl;
                                                                 assert(0);
                                                         }
                                                  }
@@ -232,11 +236,11 @@ access_variable
 
 namespace yy {
 
-	parser::token_type yylex (parser::semantic_type* yylval, Driver* driver) {
-		return driver->yylex (yylval);
+	parser::token_type yylex (parser::semantic_type* yylval, parser::location_type* l, Driver* driver) {
+		return driver->yylex (l, yylval);
 	}
 
-	void parser::error (const std::string& msg) {
+	void parser::error (const parser::location_type& l, const std::string& msg) {
 		std::cout << msg << std::endl;
 	}
 
