@@ -6,6 +6,9 @@ namespace ezg
 
     struct Edge
     {
+        Edge() = default;
+
+
         Edge(size_t vLeft, size_t vRight)
             : v1(vLeft)
             , v2(vRight)

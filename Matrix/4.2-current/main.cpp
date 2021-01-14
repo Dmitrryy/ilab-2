@@ -8,25 +8,20 @@
 #include <cassert>
 #include <algorithm>
 
-// here we can return non-zero if lexing is not done inspite of EOF detected
-int yyFlexLexer::yywrap() {
-    return 1;
-}
-
 
 int main()
 {
+    auto* lexer = new Scanner;
+    yy::ParsDriver driver(lexer);
 
-    //we shoot a cannon at sparrows
 #ifdef DEBUG
     freopen("tests/test1.txt", "r", stdin);
+    driver.setFileName("tests/test1.txt");
 #endif
-    FlexLexer* lexer = new yyFlexLexer;
-    yy::ParsDriver driver(lexer);
 
     auto res_pars = driver.parse();
     if (!res_pars) {
-        std::cerr << "parsing terminate\n";
+        std::cerr << "cant pars it =(\n";
         return 1;
     }
 

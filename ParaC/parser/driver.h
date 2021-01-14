@@ -33,6 +33,7 @@ namespace yy
                     yylval->copy<std::string>(tmp);
                     break;
                 }
+
                 default: {
                     break;
                 }

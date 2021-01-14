@@ -2,6 +2,7 @@
 /* TODO */
 %option noyywrap nounput noinput batch debug
 %option yylineno
+%option yyclass="Scanner"
 
 %{
 
@@ -13,7 +14,6 @@
 
 %}
 
-%option yyclass="Scanner"
 
 WS              [ \t\v]+
 ENDL            [\n]+
@@ -30,6 +30,7 @@ VARIABLE        {LETTER}{LETTER_OR_DIGIT}*
                             /* Сопоставляем каждой лексеме её константу для парсера */
 {WS}                        /* skip blanks and tabs */
 {ENDL}
+
 "+"                         return yy::parser::token_type::ADD;
 "-"                         return yy::parser::token_type::SUB;
 "*"                         return yy::parser::token_type::MUL;

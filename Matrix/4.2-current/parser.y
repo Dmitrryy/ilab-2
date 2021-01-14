@@ -3,7 +3,11 @@
 %skeleton "lalr1.cc"
 %defines
 %define api.value.type variant
-%param {yy::ParsDriver* driver}
+%define parse.error custom
+
+%param {ParsDriver* driver}
+
+%locations
 
 %code requires
 {
@@ -12,8 +16,10 @@
 #include <vector>
 #include <map>
 
+#include <circuit/Edge.h>
 // forward decl of argument to parser
 namespace yy { class ParsDriver; }
+
 }
 
 %code
@@ -21,11 +27,11 @@ namespace yy { class ParsDriver; }
 #include "ParserDriver.h"
 #include <optional>
 
-namespace yy {
+	namespace yy {
 
-parser::token_type yylex(parser::semantic_type* yylval,
-                         ParsDriver* driver);
-}
+		parser::token_type yylex (parser::semantic_type* yylval, parser::location_type* l, ParsDriver* driver);
+
+	}
 }
 
 %token
@@ -42,7 +48,10 @@ parser::token_type yylex(parser::semantic_type* yylval,
 %nterm < float > vertex
 %nterm < float > resister
 %nterm < float > voltage
+%nterm < ezg::Edge > expr
+%nterm < ezg::Edge > line
 %nterm eds_dimention
+%nterm end_file
 
 %left '+' '-'
 
@@ -51,13 +60,32 @@ parser::token_type yylex(parser::semantic_type* yylval,
 %%
 
 program
-    : vertex EDGE vertex COMMA resister SCOLON voltage program { 	ezg::Edge cur($1, $3);
-    									cur.resistance = $5;
-    									cur.eds = $7;
-    									driver->insert(cur);
-     }
-    | {}
+: line	program	{ driver->insert($1); }
+| /* empty */ 	{ }
 ;
+
+
+line
+:	expr LBREAK 	{ $$ = $1;	}
+|	expr end_file 	{ $$ = $1;	}
+| 	error LBREAK 	{ }
+| 	error TEOF 	{  }
+;
+
+
+expr
+: vertex EDGE vertex COMMA resister SCOLON voltage 	{	$$ = ezg::Edge($1, $3);
+								$$.resistance = $5;
+								$$.eds = $7;
+}
+;
+
+
+end_file
+:	TEOF end_file {}
+| 	/* empty */ {}
+;
+
 
 vertex
     : NUMBER { $$ = $1; }
@@ -68,9 +96,7 @@ resister
 ;
 
 voltage
-    : NUMBER eds_dimention LBREAK 	{ $$ = $1; }
-    | NUMBER eds_dimention 		{ $$ = $1; }
-    | LBREAK        			{ $$ = 0.f; }
+    : NUMBER eds_dimention		{ $$ = $1; }
     | /*empty*/     			{ $$ = 0.f; }
 ;
 
@@ -83,13 +109,17 @@ eds_dimention
 
 namespace yy {
 
-parser::token_type yylex(parser::semantic_type* yylval,
-                         ParsDriver* driver)
-{
-  return driver->yylex(yylval);
-}
+	parser::token_type yylex (parser::semantic_type* yylval, parser::location_type* l, ParsDriver* driver) {
+		return driver->yylex (l, yylval);
+	}
 
-void parser::error(const std::string& msg){
-    std::cerr << msg << std::endl;
-}
+	void parser::error (const parser::location_type& l, const std::string& msg) {
+		std::cout << msg << " in line: " << l.begin.line << std::endl;
+	}
+
+	void parser::report_syntax_error(parser::context const& ctx) const
+	{
+		driver->error(ctx);
+	}
+
 }

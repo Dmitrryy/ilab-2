@@ -1,9 +1,15 @@
 %option c++
 
+%option noyywrap nounput noinput batch debug
+%option yylineno
+%option yyclass="Scanner"
+
 %{
 
 #include "parser.tab.hh"
+#include "scanner.h"
 
+#define YY_USER_ACTION updateLocation();
 %}
 
 WS      [ \t\v]+
