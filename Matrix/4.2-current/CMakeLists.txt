@@ -13,7 +13,7 @@ add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp
 target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-add_definitions(-DDEBUG)
+#add_definitions(-DDEBUG)
 
 
 add_custom_command(

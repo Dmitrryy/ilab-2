@@ -1,5 +1,5 @@
 int  xy = 5;
 
-  print dfv;
+  print xy;
 
 print xy;
