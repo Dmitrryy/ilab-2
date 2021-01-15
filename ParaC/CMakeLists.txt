@@ -31,6 +31,7 @@ add_custom_command(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/parser/gramar.tab.cc
         PRE_BUILD
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/parser
+
         COMMAND bison -Wcex
         gramar.y
 )
@@ -38,6 +39,7 @@ add_custom_command(
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/parser/lex.yy.cc
         PRE_BUILD
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/parser
+
         COMMAND flex
         lex.l
         )

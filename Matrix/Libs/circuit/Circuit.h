@@ -175,8 +175,6 @@ namespace ezg
              */
 
             const size_t columns = m_graph.getColumns();
-            const size_t lines   = m_graph.getLines();
-            const bool first_step = trace.empty();
             for (size_t c = 0; c < columns; c++)
             {
                 if (m_graph.at(cur, c) == 1)
@@ -267,6 +265,8 @@ namespace ezg
                     }
                 }
             }
+
+            ///
 
             multi_vec = std::move(res);
         }

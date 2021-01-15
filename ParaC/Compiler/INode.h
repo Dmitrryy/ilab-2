@@ -63,6 +63,8 @@ namespace ezg
     {
     public:
 
+        virtual ~IScope() = default;
+
         virtual void addNode(INode* node) = 0;
         virtual void insertNode(const std::vector< INode* > &vec) = 0;
         virtual std::optional< size_t > visible(const std::string& var_name) = 0;

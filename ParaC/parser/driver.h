@@ -11,7 +11,8 @@ namespace yy
     class Driver {
     private:
         Scanner* lexer_ = nullptr;
-        void* m_node = nullptr;
+        //void* m_node = nullptr;
+        std::vector< void* > m_data;
 
     public:
         explicit Driver (Scanner* lexer):
@@ -30,7 +31,7 @@ namespace yy
                     std::string word(lexer_->YYText());
                     parser::semantic_type tmp;
                     tmp.as<std::string>() = word;
-                    yylval->copy<std::string>(tmp);
+                    yylval->swap< std::string >(tmp);
                     break;
                 }
 
@@ -47,9 +48,9 @@ namespace yy
             return tokenType;
         }
 
-
-        void setResult(void* sc) { m_node = sc; }
-        void* getNode() { return m_node; }
+        void insert(void* point) { m_data.push_back(point); }
+        //void setResult(void* sc) { m_node = sc; }
+        std::vector< void* > getData() const { return m_data; }
 
         bool parse () {
             parser parser (this);

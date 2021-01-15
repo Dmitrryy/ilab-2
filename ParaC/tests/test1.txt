@@ -1,5 +1,6 @@
 int  xy = 5;
 
-  print xy;
+if (xy == 7)
+    int tmp = 6;
 
-print xy;
+print tmp;

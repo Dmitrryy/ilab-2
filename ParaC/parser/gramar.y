@@ -103,7 +103,6 @@
 
 program
 :   open_first inside_scope     {   $1->insertNode($2);
-                                    driver->setResult($1);
                                     gScopeStack.pop();
                                 }
 ;
@@ -111,6 +110,7 @@ program
 
 open_first
 :   /* empty */     {   $$ = ezg::IScope::make_separate();
+			driver->insert($$);
                         $$->entry();
                         gScopeStack.push($$);
                     }
@@ -128,9 +128,10 @@ scope
 
 
 open_scope
-:   LBRACE                              {   $$ = ezg::IScope::make_inside_current();
-                                            $$->entry();
-                                            gScopeStack.push($$);
+:   LBRACE                              {   	$$ = ezg::IScope::make_inside_current();
+						driver->insert($$);
+                                            	$$->entry();
+                                            	gScopeStack.push($$);
                                         }
 ;
 
@@ -150,11 +151,11 @@ inside_scope
 
 
 act
-:   declaration_variable ASSIGN exprLvl1	{ $$ = ezg::INode::make_assign($1, $3); }
-|   declaration_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); }
-|   access_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3); }
-|   access_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); }
-|   PRINT exprLvl1				{ $$ = ezg::INode::make_print($2); }
+:   declaration_variable ASSIGN exprLvl1	{ $$ = ezg::INode::make_assign($1, $3);   			driver->insert($$);}
+|   declaration_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); 	driver->insert($$);}
+|   access_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3); 			driver->insert($$);}
+|   access_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); 	driver->insert($$);}
+|   PRINT exprLvl1				{ $$ = ezg::INode::make_print($2); 				driver->insert($$);}
 ;
 
 
@@ -167,6 +168,7 @@ declaration_variable
 					}
 					else {
 						$$ = ezg::INode::make_var(id.value());
+						driver->insert($$);
 					}
 				}
 ;
@@ -179,42 +181,42 @@ nonscolon_act
 
 
 ntif
-:   IF LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_if($3, $5); }
-|   IF LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_if($3, $5); }
+:   IF LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_if($3, $5); 	driver->insert($$);}
+|   IF LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_if($3, $5); 	driver->insert($$);}
 ;
 
 
 ntwhile
-:   WHILE LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_while($3, $5); }
-|   WHILE LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_while($3, $5); }
+:   WHILE LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_while($3, $5); 	driver->insert($$);}
+|   WHILE LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_while($3, $5); 	driver->insert($$);}
 ;
 
 
 condition
-:   exprLvl1 GREATER  exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Greater,  $1, $3);   }
-|   exprLvl1 LESS     exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Less,     $1, $3);   }
-|   exprLvl1 EQUAL    exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Equal,    $1, $3);   }
-|   exprLvl1 NONEQUAL exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::NonEqual, $1, $3);   }
+:   exprLvl1 GREATER  exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Greater,  $1, $3);	 driver->insert($$);}
+|   exprLvl1 LESS     exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Less,     $1, $3);   driver->insert($$);}
+|   exprLvl1 EQUAL    exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Equal,    $1, $3);   driver->insert($$);}
+|   exprLvl1 NONEQUAL exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::NonEqual, $1, $3);   driver->insert($$);}
 ;
 
 
 exprLvl1
-:	exprLvl2 ADD exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::Add, $1, $3);   }
-| 	exprLvl2 SUB exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::Sub, $1, $3);   }
+:	exprLvl2 ADD exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::Add, $1, $3);   driver->insert($$);}
+| 	exprLvl2 SUB exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::Sub, $1, $3);   driver->insert($$);}
 | 	exprLvl2			{   $$ = $1; }
 ;
 
 
 exprLvl2
-:	exprLvl3 MUL exprLvl2           {   $$ = ezg::INode::make_op(ezg::Operator::Mul, $1, $3);   }
-| 	exprLvl3 DIV exprLvl2           {   $$ = ezg::INode::make_op(ezg::Operator::Div, $1, $3);   }
+:	exprLvl3 MUL exprLvl2           {   $$ = ezg::INode::make_op(ezg::Operator::Mul, $1, $3);   driver->insert($$);}
+| 	exprLvl3 DIV exprLvl2           {   $$ = ezg::INode::make_op(ezg::Operator::Div, $1, $3);   driver->insert($$);}
 | 	exprLvl3			{   $$ = $1; }
 ;
 
 
 exprLvl3
 :	LPARENTHESES exprLvl1 RPARENTHESES  	{   $$ = $2;              }
-| 	NUMBER				  	{   $$ = ezg::INode::make_val($1);    }
+| 	NUMBER				  	{   $$ = ezg::INode::make_val($1);    driver->insert($$);}
 |	access_variable				{   $$ = $1; }
 ;
 
@@ -223,6 +225,7 @@ access_variable
 :	VARIABLE				{   	auto is_visible = gScopeStack.top()->visible($1);
                                                    	if (is_visible.has_value()) {
                                                         	$$ = ezg::INode::make_var(is_visible.value());
+                                                        	driver->insert($$);
                                                         }
                                                         else {
                                                         	//void parser::error("undefined variable");
