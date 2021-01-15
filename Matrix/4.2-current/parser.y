@@ -53,22 +53,21 @@ namespace yy { class ParsDriver; }
 %nterm eds_dimention
 %nterm end_file
 
-%left '+' '-'
 
 %start program
 
 %%
 
 program
-: line	program	{ driver->insert($1); }
-| /* empty */ 	{ }
+: line	program	{ driver->insert($1); 	}
+| /* empty */ 	{ 			}
 ;
 
 
 line
 :	expr LBREAK 	{ $$ = $1;	}
 |	expr end_file 	{ $$ = $1;	}
-| 	error LBREAK 	{ }
+| 	error LBREAK 	{  }
 | 	error TEOF 	{  }
 ;
 
@@ -82,8 +81,8 @@ expr
 
 
 end_file
-:	TEOF end_file {}
-| 	/* empty */ {}
+:	TEOF end_file 	{	}
+| 	/* empty */ 	{	}
 ;
 
 
@@ -101,8 +100,8 @@ voltage
 ;
 
 eds_dimention
-:	EDSDIM {}
-| 	/* empty */ {}
+:	EDSDIM 		{	}
+| 	/* empty */ 	{	}
 ;
 
 %%

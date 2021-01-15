@@ -98,9 +98,6 @@ namespace ezg
         }
 
 
-
-
-
         std::string dumpStr() const
         {
             std::ostringstream out;
@@ -121,7 +118,7 @@ namespace ezg
         std::vector< std::vector< Edge > > findCycles() const
         {
             if (!m_data.empty())
-                return findCycles_(m_data[0].v1, m_data[0].v1, {});
+                return findCycles_(m_data[0].v1, {});
             return {};
         }
 
@@ -159,6 +156,7 @@ namespace ezg
             return result;
         }
 
+
         /*
          * searches for cycles in the graph.
          *
@@ -166,7 +164,7 @@ namespace ezg
          * cur - current vertex id
          * trace - story of the way(edges)
          */
-        std::vector< std::vector< Edge > > findCycles_(size_t first_vert, size_t cur, std::vector< Edge > trace) const
+        std::vector< std::vector< Edge > > findCycles_(size_t cur, std::vector< Edge > trace) const
         {
             std::vector< std::vector< Edge > > multi_res;
 
@@ -184,60 +182,21 @@ namespace ezg
                 if (m_graph.at(cur, c) == 1)
                 {
                     const Edge next_edg = m_data[c];
+                    if (!trace.empty() && next_edg == trace.back()) {
+                        continue;
+                    }
+
                     const size_t next_vert = (cur == next_edg.v1) ? next_edg.v2 : next_edg.v1;
-                    if (next_edg.v1 == next_edg.v2) {
-                        multi_res.emplace_back(std::vector{ next_edg });
+                    auto tmp_trace = trace;
+                    tmp_trace.push_back(next_edg);
+                    auto it = checkCircuitCloser_(tmp_trace.cbegin(), tmp_trace.cend());
+
+                    if (it != tmp_trace.cend()) {
+                        multi_res.emplace_back(it, tmp_trace.cend());
                     }
-                    else if (first_step)
-                    {
-                        auto tmp_trace = trace;
-                        tmp_trace.push_back(next_edg);
-                        auto re_res = findCycles_(first_vert, next_vert, tmp_trace);
+                    else {
+                        auto re_res = findCycles_(next_vert, tmp_trace);
                         multi_res.insert(multi_res.end(), re_res.begin(), re_res.end());
-                    }
-                    else if (trace.back() != next_edg)
-                    {
-                        if (next_vert == first_vert)
-                        {
-                            auto tmp_trace = trace;
-                            tmp_trace.push_back(next_edg);
-                            multi_res.emplace_back(std::move(tmp_trace));
-                        }
-                        else
-                        {
-                            bool secondly = false;
-                            auto it = std::find_if(trace.begin(), trace.end(), [&secondly, next_vert](const Edge& e) {
-                                bool result = false;
-
-                                if (e.v1 == next_vert || e.v2 == next_vert)
-                                {
-                                    if (secondly) {
-                                        result = true;
-                                    }
-                                    else {
-                                        secondly = true;
-                                    }
-                                }
-                                else if (secondly) { assert(0);}
-
-                                return result;
-                            });
-
-                            if (it == trace.end())
-                            {
-                                auto tmp_trace = trace;
-
-                                tmp_trace.push_back(next_edg);
-                                auto tmp = findCycles_(first_vert, next_vert, std::move(tmp_trace));
-                                multi_res.insert(multi_res.end(), tmp.begin(), tmp.end());
-                            }
-                            else
-                            {
-                                multi_res.emplace_back(it, trace.end());
-                                multi_res.back().push_back(next_edg);
-                            }
-
-                        }
                     }
 
                 }
@@ -247,6 +206,41 @@ namespace ezg
             //remove the same cycles
             removeSameExcludingOrder_< Edge >(multi_res);
             return multi_res;
+        }
+
+
+
+        static std::vector< Edge >::const_iterator
+        checkCircuitCloser_(std::vector< Edge >::const_iterator begin, std::vector< Edge >::const_iterator end)
+        {
+            if (end - begin == 1 && begin->v1 == begin->v2) {
+                return begin;
+            }
+            else if (end - begin < 2 || (end - 1)->id == (end - 2)->id) {
+                return end;
+            }
+            const Edge& last_edge = *(end - 1);
+            const Edge& prev_last = *(end - 2);
+            if (std::set< size_t >{ last_edge.v1, last_edge.v2 } == std::set< size_t >{ prev_last.v1, prev_last.v2 }) {
+                //loop on two vertices
+                return end - 2;
+            }
+
+            const size_t last_vert = (last_edge.v1 == prev_last.v1 || last_edge.v1 == prev_last.v2) ? last_edge.v2 : last_edge.v1;
+            auto it = std::find_if(begin, end, [last_vert](const Edge& cur) {
+                return cur.v1 == last_vert || cur.v2 == last_vert;
+            });
+            if (end - it > 2)
+            {
+                auto tmp_it = it + 1;
+                if (tmp_it->v1 == last_vert || tmp_it->v2 == last_vert) {
+                    it = tmp_it;
+                }
+            }
+            if (end - it > 2) {
+                return it;
+            }
+            return end;
         }
 
 
