@@ -5,7 +5,7 @@
 #include <CL/cl.h>
 
 const char* saxpy_kernel = {
-        "__kernel                                    \n"
+        "__kernel                                       \n"
         "void saxpy_kernel(float alpha,                 \n"
         "                   __global float *A,          \n"
         "                   __global float *B,          \n"

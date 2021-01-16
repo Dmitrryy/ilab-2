@@ -24,11 +24,11 @@ add_subdirectory(triangles)
 add_subdirectory(Matrix)
 
 #[[
-#ParaC
+#ParaCL
 #status: LVL1 in dev
 #
-#LVL1: project's name for build is 'ParaC']]
-add_subdirectory(ParaC)
+#LVL1: project's name for build is 'ParaCL']]
+add_subdirectory(ParaCL)
 
 
 

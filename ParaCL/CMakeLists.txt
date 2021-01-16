@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name
-project(ParaC)
+project(ParaCL)
 
 # specify the C++ standard
 set(${PROJECT_NAME} CMAKE_CXX_STANDARD 17)
