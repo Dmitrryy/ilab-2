@@ -29,3 +29,7 @@ add_subdirectory(Matrix)
 #
 #LVL1: project's name for build is 'ParaC']]
 add_subdirectory(ParaC)
+
+
+
+add_subdirectory(OpenCL)
