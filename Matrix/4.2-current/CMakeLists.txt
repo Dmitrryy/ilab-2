@@ -21,4 +21,4 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 add_dependencies(${PROJECT_NAME} ${FB_TARGET})
 
-add_definitions(-DDEBUG)
+#add_definitions(-DDEBUG)
