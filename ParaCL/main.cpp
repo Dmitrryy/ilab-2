@@ -5,8 +5,12 @@
 
 int main(int argc, char* argv[])
 {
+#ifdef DEBUG
+    std::ifstream in("tests/test1.txt");
+#else
     std::fstream in(argv[1]);
-    if (!in.is_open()) {
+#endif
+    if (!in) {
         std::cerr << "cant open file: " << argv[1] << std::endl;
         return 1;
     }

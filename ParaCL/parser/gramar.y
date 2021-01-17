@@ -3,6 +3,7 @@
 %skeleton "lalr1.cc"
 %defines
 %define api.value.type variant
+%define parse.error custom
 
 %param {Driver* driver}
 
@@ -244,7 +245,11 @@ namespace yy {
 	}
 
 	void parser::error (const parser::location_type& l, const std::string& msg) {
-		std::cout << msg << std::endl;
+		std::cout << msg << " in line: " << l.begin.line << std::endl;
 	}
 
+	void parser::report_syntax_error(parser::context const& ctx) const
+	{
+		driver->error(ctx);
+	}
 }

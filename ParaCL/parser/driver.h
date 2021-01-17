@@ -11,7 +11,7 @@ namespace yy
     class Driver {
     private:
         Scanner* lexer_ = nullptr;
-        //void* m_node = nullptr;
+        size_t m_numErrors = 0;
         std::vector< void* > m_data;
 
     public:
@@ -56,6 +56,24 @@ namespace yy
             parser parser (this);
             bool result = parser.parse ();
             return !result;
+        }
+
+
+        void error(parser::context const& ctx)
+        {
+            m_numErrors++;
+            std::vector < parser::symbol_kind_type > expected_symbols(10);
+            int size_es = ctx.expected_tokens(expected_symbols.data(), 10);
+
+            std::cerr << *(ctx.location().begin.filename) << ':' << ctx.location().begin.line << ": "
+                      << "Error: expected ";
+            for (int i = 0; i < size_es; i++) {
+                if (i != 0) { std::cerr << " or "; }
+                std::cerr << parser::symbol_name(expected_symbols[i]);
+            }
+            std::cerr << " before " << parser::symbol_name(ctx.token());
+
+            std::cerr << std::endl;
         }
     };
 
