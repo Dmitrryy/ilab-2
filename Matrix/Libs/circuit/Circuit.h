@@ -105,7 +105,7 @@ namespace ezg
 #endif
             auto solv = LSystem.solve(freeMembers);
             //assert(solv.second.isZero());
-            std::cout << solv.first << std::endl;
+            //std::cout << solv.first << std::endl;
             for (size_t c = 0; c < mGcolumns; c++) {
                 m_data[c].current = solv.first.at(c, 0);
             }

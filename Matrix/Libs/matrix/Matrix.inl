@@ -129,8 +129,6 @@ namespace matrix
         gaussian_from_(0);
         const size_t nClm = getColumns();
 
-        std::cout << *this << std::endl;
-
         size_t c = 0;
         bool found = false;
         for (size_t l = getLines(); l != 0; l--) {
@@ -201,11 +199,7 @@ namespace matrix
             tmp.at(l, nClm) = freeMembers[l];
         }
 
-        std::cout << tmp << std::endl;
-
         tmp.doubleGaussian_();
-
-        std::cout << tmp << std::endl;
 
         if (rang == 0 || tmp.rang() != rang) {
             return {};
