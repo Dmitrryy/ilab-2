@@ -6,13 +6,18 @@
 #include "parser.tab.hh"
 #include "scanner.h"
 
-#include <circuit/Edge.h>
-
 namespace yy {
+
+    struct Elem
+    {
+        size_t v1, v2;
+        float res;
+        float eds;
+    };
 
     class ParsDriver {
         Scanner *plex_;
-        std::vector<ezg::Edge> m_data;
+        std::vector< Elem > m_data;
         size_t m_numErrors = 0;
         std::string m_fileName;
 
@@ -31,11 +36,14 @@ namespace yy {
             return tt;
         }
 
-        std::vector<ezg::Edge> getData() const { return m_data; }
+        std::vector< Elem > getData() const { return m_data; }
 
         void setFileName(const std::string& str) { m_fileName = str; }
 
-        void insert(const ezg::Edge &e) { m_data.push_back(e); }
+        void connect(size_t v1, size_t v2, float res, float eds)
+        {
+            m_data.emplace_back(Elem{v1, v2, res, eds});
+        }
 
         bool parse() {
             parser parser(this);
@@ -52,13 +60,14 @@ namespace yy {
             std::vector < parser::symbol_kind_type > expected_symbols(10);
             int size_es = ctx.expected_tokens(expected_symbols.data(), 10);
 
-            std::cerr << *(ctx.location().begin.filename) << ':' << ctx.location().begin.line << ": "
+            std::cerr << ctx.location() << ": "
                       << "Error: expected ";
             for (int i = 0; i < size_es; i++) {
                 if (i != 0) { std::cerr << " or "; }
                 std::cerr << parser::symbol_name(expected_symbols[i]);
             }
-            std::cerr << " before " << parser::symbol_name(ctx.token());
+            if (ctx.token() != parser::YYNTOKENS)
+                std::cerr << " before \'" << ctx.lookahead().name() << '\'';
 
             std::cerr << std::endl;
         }

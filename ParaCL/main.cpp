@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
 #ifdef DEBUG
     std::ifstream in("tests/test1.txt");
 #else
-    std::fstream in(argv[1]);
+    std::ifstream in(argv[1]);
 #endif
     if (!in) {
         std::cerr << "cant open file: " << argv[1] << std::endl;

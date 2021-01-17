@@ -7,6 +7,8 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 
 int main()
@@ -18,6 +20,8 @@ int main()
     freopen("tests/test1.txt", "r", stdin);
     driver.setFileName("tests/test1.txt");
 #endif
+    std::istringstream in("");
+
 
     auto res_pars = driver.parse();
     if (!res_pars) {
@@ -31,7 +35,7 @@ int main()
 
     ezg::Circuit circuit;
     for (const auto& edge : data) {
-        circuit.connect(edge);
+        circuit.connect(edge.v1, edge.v2, edge.res, edge.eds);
     }
 
 #ifdef DEBUG
@@ -40,12 +44,11 @@ int main()
 
     circuit.calculateCurrent();
 
-    auto edges = circuit.getData();
+    auto currents = circuit.getCurrents();
 
-    for (auto it = edges.crbegin(); it != edges.crend(); ++it)
+    for (const auto& cur : data)
     {
-        auto cur = *it;
-        std:: cout << cur.v1 << " -- " << cur.v2 << ": " << ((cur.current.value() == 0) ? 0 : cur.current.value()) << " A" << std::endl;
+        std:: cout << cur.v1 << " -- " << cur.v2 << ": " << ((currents.at(cur.v1, cur.v2) == 0) ? 0 : currents.at(cur.v1, cur.v2)) << " A" << std::endl;
     }
 }
 

@@ -17,20 +17,34 @@ namespace ezg
 
     public:
 
-        void connect(Edge edge)
+        void connect(size_t v1, size_t v2, float resistance, float eds)
         {
             //vertex id is index of the line in the graph
-            m_graph.resize(std::max(m_graph.getLines(), static_cast<size_t>(std::max(edge.v1, edge.v2)) + 1), m_graph.getColumns() + 1);
-            m_graph.at(edge.v1, m_graph.getColumns() - 1) = 1;
-            m_graph.at(edge.v2, m_graph.getColumns() - 1) = 1;
+            m_graph.resize(std::max(m_graph.getLines(), static_cast<size_t>(std::max(v1, v2)) + 1), m_graph.getColumns() + 1);
+            m_graph.at(v1, m_graph.getColumns() - 1) = 1;
+            m_graph.at(v2, m_graph.getColumns() - 1) = 1;
 
             //id is index in the array m_data
+            Edge edge(v1, v2);
             edge.id = m_data.size();
-            m_data.emplace_back(edge);
+            edge.resistance = resistance;
+            edge.eds = eds;
+
+            m_data.push_back(edge);
         }
 
-        std::vector< Edge > getData() const { return m_data; }
+        //std::vector< Edge > getData() const { return m_data; }
+        matrix::Matrix< float > getCurrents() const
+        {
+            matrix::Matrix< float > res(m_graph.getLines(), m_graph.getLines());
 
+            for(const auto& ed : m_data)
+            {
+                res.at(ed.v1, ed.v2) = ed.current.value();
+            }
+
+            return res;
+        }
 
         void calculateCurrent()
         {
@@ -90,8 +104,8 @@ namespace ezg
             std::cout << LSystem << std::endl;
 #endif
             auto solv = LSystem.solve(freeMembers);
-            assert(solv.second.isZero());
-
+            //assert(solv.second.isZero());
+            std::cout << solv.first << std::endl;
             for (size_t c = 0; c < mGcolumns; c++) {
                 m_data[c].current = solv.first.at(c, 0);
             }
@@ -105,7 +119,7 @@ namespace ezg
             {
                 out << cur.v1 << " -- " << cur.v2 << ", " << cur.resistance.value_or(0) << ';';
                 if (cur.eds.has_value()) {
-                    out << ' ' << cur.eds.value();
+                    out << ' ' << cur.eds.value_or(0) << " V; " << cur.current.value_or(0) << " A";
                 }
                 out << std::endl;
             }

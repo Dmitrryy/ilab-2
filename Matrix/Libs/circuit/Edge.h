@@ -21,7 +21,7 @@ namespace ezg
         std::optional< float > eds;
 
         bool operator == (const Edge& that) const {
-            return (v1 == that.v1 && v2 == that.v2);
+            return id == that.id;
         }
         bool operator != (const Edge& that) const { return !(*this == that); }
         bool operator < (const Edge& that) const { return id < that.id; }

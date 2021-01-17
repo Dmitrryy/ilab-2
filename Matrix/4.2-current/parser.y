@@ -16,7 +16,6 @@
 #include <vector>
 #include <map>
 
-#include <circuit/Edge.h>
 // forward decl of argument to parser
 namespace yy { class ParsDriver; }
 
@@ -45,11 +44,11 @@ namespace yy { class ParsDriver; }
 ;
 
 %token < float > NUMBER
-%nterm < float > vertex
+%nterm < size_t > vertex
 %nterm < float > resister
 %nterm < float > voltage
-%nterm < ezg::Edge > expr
-%nterm < ezg::Edge > line
+%nterm expr
+%nterm line
 %nterm eds_dimention
 %nterm end_file
 
@@ -59,24 +58,22 @@ namespace yy { class ParsDriver; }
 %%
 
 program
-: line	program	{ driver->insert($1); 	}
-| /* empty */ 	{ 			}
+: line	program	{	}
+| /* empty */ 	{ 	}
 ;
 
 
 line
-:	expr LBREAK 	{ $$ = $1;	}
-|	expr end_file 	{ $$ = $1;	}
-| 	error LBREAK 	{  }
-| 	error TEOF 	{  }
+:	expr LBREAK 	{	}
+|	expr end_file 	{ 	}
+|	LBREAK		{	}
+| 	error LBREAK 	{  	}
+| 	error TEOF 	{  	}
 ;
 
 
 expr
-: vertex EDGE vertex COMMA resister SCOLON voltage 	{	$$ = ezg::Edge($1, $3);
-								$$.resistance = $5;
-								$$.eds = $7;
-}
+: vertex EDGE vertex COMMA resister SCOLON voltage 	{	driver->connect($1, $3, $5, $7);	}
 ;
 
 
@@ -87,7 +84,7 @@ end_file
 
 
 vertex
-    : NUMBER { $$ = $1; }
+    : NUMBER { $$ = static_cast< size_t >($1); }
 ;
 
 resister

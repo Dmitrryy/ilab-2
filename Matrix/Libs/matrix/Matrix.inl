@@ -129,12 +129,13 @@ namespace matrix
         gaussian_from_(0);
         const size_t nClm = getColumns();
 
+        std::cout << *this << std::endl;
 
         size_t c = 0;
         bool found = false;
         for (size_t l = getLines(); l != 0; l--) {
             for (c = 0; c < nClm; c++) {
-                if (at(l - 1, c) != T{}) {
+                if (std::abs(at(l - 1, c) - T{}) > EPSIL) {
                     found = true;
                     break;
                 }
@@ -153,7 +154,7 @@ namespace matrix
         std::vector< size_t > res(nClm, -1);
         for (size_t l = 0, bc = 0; l < nLines; l++) {
             for (size_t c = bc; c < nClm; c++) {
-                if (at(l, c) != T{})
+                if (std::abs(at(l, c) - T{}) > EPSIL)
                 {
                     res[c] = l;
                     bc = c + 1;
@@ -200,7 +201,11 @@ namespace matrix
             tmp.at(l, nClm) = freeMembers[l];
         }
 
+        std::cout << tmp << std::endl;
+
         tmp.doubleGaussian_();
+
+        std::cout << tmp << std::endl;
 
         if (rang == 0 || tmp.rang() != rang) {
             return {};
