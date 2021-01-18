@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
+
+set(FB_TARGET bs_pre)
+add_custom_target(${FB_TARGET}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cl ${CMAKE_CURRENT_BINARY_DIR}/kernel.cl
+        )
+
+
 # set the project name
 project(BitonicSort)
 
@@ -23,3 +30,5 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCL_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} ${FB_TARGET})

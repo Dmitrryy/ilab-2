@@ -34,7 +34,7 @@ namespace yy { class ParsDriver; }
 }
 
 %token
-  LBREAK  "\n"
+  LBREAK  "\\n"
   TEOF
   EDGE    "--"
   COMMA   ","

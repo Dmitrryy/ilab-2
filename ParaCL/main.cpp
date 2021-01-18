@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    auto *lexer = new Scanner;
+    auto *lexer = new Scanner("tests/test1.txt");
     lexer->switch_streams(in, std::cout);
 
     yy::Driver driver { lexer };

@@ -12,7 +12,7 @@ add_custom_target(${FB_TARGET}
 # set the project name
 project(ParaCL)
 
-#add_definitions(-DDEBUG)
+add_definitions(-DDEBUG)
 
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp Compiler/Node.cpp parser/lex.yy.cc parser/gramar.tab.cc)

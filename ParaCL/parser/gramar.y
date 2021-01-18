@@ -54,19 +54,19 @@
   MUL			"*"
   DIV			"/"
   SCOLON  		";"
-  LPARENTHESES	"("
-  RPARENTHESES	")"
-  LBRACE        "{"
-  RBRACE        "}"
-  GREATER       ">"
-  LESS          "<"
-  EQUAL         "=="
-  NONEQUAL      "!="
-  ASSIGN        "="
-  WHILE
-  IF
-  PRINT
-  QMARK         "?"
+  LPARENTHESES		"("
+  RPARENTHESES		")"
+  LBRACE        	"{"
+  RBRACE        	"}"
+  GREATER       	">"
+  LESS          	"<"
+  EQUAL         	"=="
+  NONEQUAL      	"!="
+  ASSIGN        	"="
+  WHILE			"while"
+  IF			"if"
+  PRINT			"print"
+  QMARK         	"?(scanf)"
   ERROR
 ;
 
@@ -152,9 +152,9 @@ inside_scope
 
 
 act
-:   declaration_variable ASSIGN exprLvl1	{ $$ = ezg::INode::make_assign($1, $3);   			driver->insert($$);}
-|   declaration_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); 	driver->insert($$);}
-|   access_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3); 			driver->insert($$);}
+//:   declaration_variable ASSIGN exprLvl1	{ $$ = ezg::INode::make_assign($1, $3);   			driver->insert($$);}
+//|   declaration_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); 	driver->insert($$);}
+:   access_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3); 			driver->insert($$);}
 |   access_variable ASSIGN QMARK		{ $$ = ezg::INode::make_assign($1, ezg::INode::make_qmark()); 	driver->insert($$);}
 |   PRINT exprLvl1				{ $$ = ezg::INode::make_print($2); 				driver->insert($$);}
 ;
@@ -183,13 +183,13 @@ nonscolon_act
 
 ntif
 :   IF LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_if($3, $5); 	driver->insert($$);}
-|   IF LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_if($3, $5); 	driver->insert($$);}
+//|   IF LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_if($3, $5); 	driver->insert($$);}
 ;
 
 
 ntwhile
 :   WHILE LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_while($3, $5); 	driver->insert($$);}
-|   WHILE LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_while($3, $5); 	driver->insert($$);}
+//|   WHILE LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_while($3, $5); 	driver->insert($$);}
 ;
 
 
@@ -229,9 +229,19 @@ access_variable
                                                         	driver->insert($$);
                                                         }
                                                         else {
+                                                        auto id = gScopeStack.top()->declareVar($1);
+                                                        					if (!id.has_value()) {
+                                                        						//void parser::error("multiple definition of variable\n");
+                                                        						std::cerr << "multiple definition of variable\n" << std::endl;
+                                                        						assert(0);
+                                                        					}
+                                                        					else {
+                                                        						$$ = ezg::INode::make_var(id.value());
+                                                        						driver->insert($$);
+                                                        					}
                                                         	//void parser::error("undefined variable");
-                                                        	std::cout << "undefined variable\n" << $1 << '(' << @1.begin.line << ", " << @1.begin.column << ')' << std::endl;
-                                                                assert(0);
+                                                        	//std::cout << "undefined variable\n" << $1 << '(' << @1.begin.line << ", " << @1.begin.column << ')' << std::endl;
+                                                                //assert(0);
                                                         }
                                                  }
 

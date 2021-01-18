@@ -65,13 +65,13 @@ namespace yy
             std::vector < parser::symbol_kind_type > expected_symbols(10);
             int size_es = ctx.expected_tokens(expected_symbols.data(), 10);
 
-            std::cerr << *(ctx.location().begin.filename) << ':' << ctx.location().begin.line << ": "
+            std::cerr << ctx.location() << ':' << ctx.location().begin.line << ": "
                       << "Error: expected ";
             for (int i = 0; i < size_es; i++) {
                 if (i != 0) { std::cerr << " or "; }
-                std::cerr << parser::symbol_name(expected_symbols[i]);
+                std::cerr << "\'" << parser::symbol_name(expected_symbols[i]) << "\'";
             }
-            std::cerr << " before " << parser::symbol_name(ctx.token());
+            std::cerr << " before \'" << parser::symbol_name(ctx.token()) << "\'";
 
             std::cerr << std::endl;
         }
