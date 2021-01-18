@@ -10,9 +10,9 @@
 
 class Scanner : public yyFlexLexer
 {
-    yy::location m_loc;
-    size_t m_storeLine = 1;
-    std::string m_name;
+    yy::location    m_loc;
+    size_t          m_storeLine = 1;
+    std::string     m_name;
 
 private:
 

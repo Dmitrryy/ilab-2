@@ -7,8 +7,8 @@
 #include <memory>
 #include <cstring>
 
-
 #include <CL/cl.h>
+
 #include <CL/opencl.h>
 
 #define LOG_OCL_COMPILER_ERROR(PROGRAM, DEVICE)\
@@ -155,7 +155,7 @@ int main() {
             // Each thread writes a sorted pair.
             // So, the number of threads (global) should be half the length of the input buffer.
 
-            clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL, &global_size, &local_size, 0, NULL, NULL);
+            clEnqueueNDRangeKernel(commandQueue, kernel, 1, nullptr, &global_size, &local_size, 0, NULL, NULL);
 
             clFinish(commandQueue);
 
