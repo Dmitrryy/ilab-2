@@ -10,6 +10,7 @@
 #include <CL/cl.h>
 
 #include <CL/opencl.h>
+#ifdef DEBUG
 
 #define LOG_OCL_COMPILER_ERROR(PROGRAM, DEVICE)\
 {\
@@ -55,6 +56,11 @@ std::cout << " \n\t\t\tBUILD LOG\n";\
  std::cout << " ************************************************\n";\
  free(buildLog);\
 }
+#else
+
+#define LOG_OCL_COMPILER_ERROR(PROGRAM, DEVICE) {}
+
+#endif
 
 
 #define DATA_TYPE int

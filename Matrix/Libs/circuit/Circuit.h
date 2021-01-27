@@ -33,18 +33,6 @@ namespace ezg
             m_data.push_back(edge);
         }
 
-        //std::vector< Edge > getData() const { return m_data; }
-        matrix::Matrix< float > getCurrents() const
-        {
-            matrix::Matrix< float > res(m_graph.getLines(), m_graph.getLines());
-
-            for(const auto& ed : m_data)
-            {
-                res.at(ed.v1, ed.v2) = ed.current.value();
-            }
-
-            return res;
-        }
 
         void calculateCurrent()
         {
@@ -80,6 +68,10 @@ namespace ezg
                 auto line = secondRuleKirchhoff_(cycles[c]);
                 assert(line.size() - 1 == LSystem.getColumns());
 
+                if (checkInfinityCurrent(line)) {
+                    throw std::runtime_error("infinite current loop detected");
+                }
+
                 for (size_t clm = 0; clm < mGcolumns; clm++) {
                     LSystem.at(c, clm) = line[clm];
                 }
@@ -105,7 +97,7 @@ namespace ezg
 #endif
             auto solv = LSystem.solve(freeMembers);
             //assert(solv.second.isZero());
-            //std::cout << solv.first << std::endl;
+            std::cout << solv.first << std::endl;
             for (size_t c = 0; c < mGcolumns; c++) {
                 m_data[c].current = solv.first.at(c, 0);
             }
@@ -137,6 +129,15 @@ namespace ezg
         }
 
 
+        void printCurrents(std::ostream& out = std::cout) const
+        {
+            for (const auto& edge : m_data) {
+                out << edge.v1 << " -- " << edge.v2 << ": " << ((std::abs(edge.current.value()) < matrix::EPSIL) ? 0.f : edge.current.value())
+                          << " A" << std::endl;
+            }
+        }
+
+
     private:
 
         std::vector< float > secondRuleKirchhoff_(const std::vector< Edge >& cycle) const
@@ -144,26 +145,30 @@ namespace ezg
             double eds = 0;
             const size_t num_edges = cycle.size();
             std::vector< float > result(m_data.size() + 1);
-            size_t pre1 = 0, pre2 = 0;
+            size_t pre = 0;
+
             for (size_t k = 0; k < num_edges; k++)
             {
                 const Edge& cur = cycle[k];
 
                 //is determined by the sign of the bypass circuit
-                bool minus = false;
-                if (k == 0) {
-                    pre1 = cycle.back().v1;
-                    pre2 = cycle.back().v2;
+                float sign = 1;
+                if (k == 0 && num_edges > 1) {
+                    pre = (cycle[0].v1 == cycle[1].v1 || cycle[0].v1 == cycle[1].v2) ? cycle[0].v2 : cycle[0].v1;
                 }
 
-                if (cur.v1 != pre1 && cur.v1 != pre2)
-                    minus = true;
-                pre1 = cur.v1;
-                pre2 = cur.v2;
+                if (cur.v1 != pre) {
+                    pre = cur.v1;
+                    sign = -1;
+                }
+                else {
+                    sign = 1;
+                    pre = cur.v2;
+                }
 
-                eds += cur.eds.value_or(0) * ((minus) ? -1.f : 1.f);
+                eds += cur.eds.value_or(0) * sign;
 
-                result.at(cur.id) = cur.resistance.value() * ((minus) ? -1.f : 1.f);
+                result.at(cur.id) = cur.resistance.value() * sign;
             }
             result.back() = eds;
 
@@ -221,9 +226,8 @@ namespace ezg
         }
 
 
-
-        static std::vector< Edge >::const_iterator
-        checkCircuitCloser_(std::vector< Edge >::const_iterator begin, std::vector< Edge >::const_iterator end)
+        using Edgelt = std::vector< Edge >::const_iterator;
+        Edgelt checkCircuitCloser_(Edgelt begin, Edgelt end) const
         {
             if (end - begin == 1 && begin->v1 == begin->v2) {
                 return begin;
@@ -283,6 +287,27 @@ namespace ezg
             ///
 
             multi_vec = std::move(res);
+        }
+
+
+        bool checkInfinityCurrent(const std::vector< float >& src) const
+        {
+            bool result = true;
+            const size_t size = src.size();
+
+            if (std::abs(src.back()) < matrix::EPSIL) {
+                result = false;
+            }
+            else {
+                for (size_t k = 0; k < size - 1; k++)
+                {
+                    if (std::abs(src[k]) > matrix::EPSIL) {
+                        result = false;
+                    }
+                }
+            }
+
+            return result;
         }
 
     };//class Circuit

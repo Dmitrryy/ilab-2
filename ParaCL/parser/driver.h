@@ -13,7 +13,7 @@ namespace yy
     class Driver {
     private:
         Scanner* m_lexer = nullptr;
-        size_t m_numErrors = 0;
+        mutable size_t m_numErrors = 0;
         std::vector< ezg::INode* > m_data;
 
         std::istringstream m_strInput;
@@ -88,7 +88,7 @@ namespace yy
         }
 
 
-        void error(parser::context const& ctx)
+        void error(parser::context const& ctx) const
         {
             m_numErrors++;
             std::vector < parser::symbol_kind_type > expected_symbols(10);
@@ -108,7 +108,7 @@ namespace yy
             }
 
             for (size_t i = 0; i < loc.end.column; i++) {
-                if (i == ctx.lookahead().location.begin.line - 1) {
+                if (i == ctx.lookahead().location.begin.column - 1) {
                     std::cerr << '^';
                 }
                 else {

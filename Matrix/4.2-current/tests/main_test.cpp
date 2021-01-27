@@ -28,8 +28,8 @@ int main()
     yy::ParsDriver driver(lexer);
 
 
-    freopen("tests/test2.txt", "r", stdin);
-    driver.setFileName("tests/test9.txt");
+    freopen("tests/test1.txt", "r", stdin);
+    driver.setFileName("tests/test3.txt");
 
     std::istringstream in("");
 
@@ -53,13 +53,15 @@ int main()
     std::cout << circuit.dumpStr() << std::endl;
 #endif
 
-    circuit.calculateCurrent();
-
-    auto currents = circuit.getCurrents();
-
-    std::ofstream fout("my_ans.txt");
-    for (const auto& cur : data)
-    {
-        std::cout << cur.v1 << " -- " << cur.v2 << ": " << ((std::abs(currents.at(cur.v1, cur.v2)) < matrix::EPSIL) ? 0 : currents.at(cur.v1, cur.v2)) << " A" << std::endl;
+    try {
+        circuit.calculateCurrent();
     }
+    catch (const std::runtime_error& err) {
+        std::cerr << err.what();
+        return 1;
+    }
+
+    circuit.printCurrents();
+
+    return 0;
 }

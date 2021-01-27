@@ -147,6 +147,7 @@ inside_scope
 |   inside_scope scope          {   $$.insert($$.end(), $1.begin(), $1.end());
                                     $$.push_back($2);
                                 }
+|   error SCOLON		{   }
 |   /* empty */			{}
 ;
 
@@ -232,7 +233,7 @@ access_variable
                                                         auto id = gScopeStack.top()->declareVar($1);
                                                         					if (!id.has_value()) {
                                                         						//void parser::error("multiple definition of variable\n");
-                                                        						std::cerr << "multiple definition of variable\n" << std::endl;
+                                                        						//std::cerr << "multiple definition of variable\n" << std::endl;
                                                         						assert(0);
                                                         					}
                                                         					else {

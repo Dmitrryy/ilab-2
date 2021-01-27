@@ -66,8 +66,7 @@ namespace yy {
                 if (i != 0) { std::cerr << " or "; }
                 std::cerr << parser::symbol_name(expected_symbols[i]);
             }
-            if (ctx.token() != parser::YYNTOKENS)
-                std::cerr << " before \'" << ctx.lookahead().name() << '\'';
+            std::cerr << " before \'" << parser::symbol_name(ctx.token()) << "\'" << std::endl;
 
             std::cerr << std::endl;
         }
