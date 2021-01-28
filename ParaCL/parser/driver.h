@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <iomanip>
 
 #include "../Compiler/INode.h"
 
@@ -56,7 +57,6 @@ namespace yy
             }
 
             *l = m_lexer->getLocation();
-
             return tokenType;
         }
 
@@ -64,13 +64,14 @@ namespace yy
 
         std::vector< ezg::INode* > getData() const { return m_data; }
 
-        bool parse () {
+        size_t parse () {
             parser parser (this);
             bool res = parser.parse ();
             if (res) {
                 std::cerr << "compile terminate!" << std::endl;
+                this->~Driver();
             }
-            return m_numErrors == 0;
+            return m_numErrors;
         }
 
 
@@ -88,24 +89,30 @@ namespace yy
         }
 
 
-        void error(parser::context const& ctx) const
+        void error(parser::context const& ctx, const std::string& msg) const
         {
             m_numErrors++;
             std::vector < parser::symbol_kind_type > expected_symbols(10);
             int size_es = ctx.expected_tokens(expected_symbols.data(), 10);
 
             auto loc = ctx.location();
-            std::cerr << loc << "Error: expected ";
-            for (int i = 0; i < size_es; i++) {
-                if (i != 0) { std::cerr << " or "; }
-                std::cerr << "\'" << parser::symbol_name(expected_symbols[i]) << "\'";
+            std::cerr << loc << ":Error: " << msg << std::endl;
+            if (size_es > 0) {
+                std::cerr << "Expected: ";
+                for (int i = 0; i < size_es; i++) {
+                    if (i != 0) { std::cerr << " or "; }
+                    std::cerr << "\'" << parser::symbol_name(expected_symbols[i]) << "\'";
+                }
+                std::cerr << " before \'" << parser::symbol_name(ctx.token()) << "\'" << std::endl;
             }
-            std::cerr << " before \'" << parser::symbol_name(ctx.token()) << "\'" << std::endl;
 
             std::cerr << "context: " << std::endl;
             for (size_t begl = loc.begin.line; begl <= loc.end.line; begl++) {
-                std::cerr << m_sourceByLine[begl - 1] << std::endl;
+                std::cerr << begl << ' ' << m_sourceByLine[begl - 1] << std::endl;
             }
+
+            const size_t ws = std::to_string(loc.end.line).size() + 1;
+            std::cerr << std::setw(ws) << ' ';
 
             for (size_t i = 0; i < loc.end.column; i++) {
                 if (i == ctx.lookahead().location.begin.column - 1) {

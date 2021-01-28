@@ -6,34 +6,34 @@
 #include <stack>
 
 namespace ezg {
-
-    std::unordered_map<std::string, size_t> gStrToId;
     size_t gCurFreeId = 1;
 
-    ScopeTable gScopeTable;
-    VarTable gVarTable;
+    ScopeTable g_ScopeTable;
+    dst< std::string, size_t > g_StrToId;
+    //VarTable g_VarTable;
 
-    std::optional<size_t> Scope::declareVar(const std::string &var_name) {
-        if (gStrToId.count(var_name) != 0) {
+    std::optional<size_t> Scope::declareVar(const std::string &var_name)
+    {
+        if (g_StrToId.countLeft(var_name) != 0) {
             return {};
         }
         size_t idVar = gCurFreeId++;
-        gStrToId[var_name] = idVar;
+        g_StrToId.add(var_name, idVar);
 
-        gVarTable.loadUp({idVar});
-        gScopeTable.addElem(m_idTable, idVar, nullptr);
+        g_ScopeTable.addElem(m_idTable, idVar, std::make_unique< VarInfo_t >());
 
         return {idVar};
     }
 
-    std::optional<size_t> Scope::visible(const std::string &var_name)
+    std::optional<size_t> Scope::visible(const std::string &name)
     {
-        auto it = gStrToId.find(var_name);
-        if (it == gStrToId.end()) {
+        auto it = g_StrToId.countLeft(name);
+        if (it == 0) {
             return {};
         }
-        if (gScopeTable.access(it->second).has_value()) {
-            return it->second;
+        size_t id = g_StrToId.getRight(name);
+        if (g_ScopeTable.access(id).has_value()) {
+            return id;
         }
         return {};
     }
@@ -53,40 +53,40 @@ namespace ezg {
 
     void Scope::entry()
     {
-        gScopeTable.entryScope(m_idTable);
+        g_ScopeTable.entryScope(m_idTable);
     }
     void Scope::exit()
     {
-        assert(gScopeTable.getCurTableId() == m_idTable);
-        gScopeTable.exitCurScope();
+        assert(g_ScopeTable.getCurTableId() == m_idTable);
+        g_ScopeTable.exitCurScope();
     }
 
     ////////////////////////////////////////////////////////////
 
     int Variable::getVal() const
     {
-        return gVarTable.access(m_id);
+        VarInfo_t* pInfo = dynamic_cast< VarInfo_t* >(g_ScopeTable.access(m_id).value());
+        return pInfo->m_value;
     }
     void Variable::setVal(int v) const
     {
-        gVarTable.access(m_id) = v;
+        VarInfo_t* pInfo = dynamic_cast< VarInfo_t* >(g_ScopeTable.access(m_id).value());
+        pInfo->m_value = v;
     }
 
     /////////////////////////////////////////////////////////////
 
-    IScope* IScope::make_separate()
+    std::unique_ptr< IScope > IScope::make_separate()
     {
-        size_t id = gScopeTable.createTable();
-        IScope* res = new Scope(id);
-        return res;
+        size_t id = g_ScopeTable.createTable();
+        return std::make_unique< Scope >(id);
     }
 
-    IScope* IScope::make_inside_current()
+    std::unique_ptr< IScope > IScope::make_inside_current()
     {
-        size_t cur_id = gScopeTable.getCurTableId();
-        size_t id = gScopeTable.createTable(cur_id);
-        IScope* res = new Scope(id);
-        return res;
+        size_t cur_id = g_ScopeTable.getCurTableId();
+        size_t id = g_ScopeTable.createTable(cur_id);
+        return std::make_unique< Scope >(id);
     }
 
 
@@ -95,16 +95,16 @@ namespace ezg {
 
 #define OpCase(name)             \
 case Operator::name:             \
-    res = new name(left, right); \
+    res = std::make_unique< name >(left, right); \
     break;
 
-    INode* INode::make_op(Operator tOp, INode* left, INode* right)
+    std::unique_ptr< INode > INode::make_op(Operator tOp, INode* left, INode* right)
     {
 #ifdef DEBUG
         std::cout << "operator created: " << (int)tOp << std::endl;
         std::cout << "left:\n" << left->dumpStr() << "\nright:\n" << right->dumpStr() << std::endl;
 #endif
-        INode* res = nullptr;
+        std::unique_ptr< INode > res = nullptr;
         switch (tOp) {
             OpCase(Greater);
             OpCase(Less);
@@ -122,72 +122,65 @@ case Operator::name:             \
         return res;
     }
 
-    INode* INode::make_val(int val)
+    std::unique_ptr< INode > INode::make_val(int val)
     {
 #ifdef DEBUG
         std::cout << "value created: " << val << std::endl;
 #endif
-        INode* res = new Value(val);
-        return res;
+        return std::make_unique< Value >(val);
     }
 
-    INode* INode::make_assign(INode* var, INode* val)
+    std::unique_ptr< INode > INode::make_assign(INode* var, INode* val)
     {
 #ifdef DEBUG
         std::cout << "assign created:" << std::endl;
         std::cout << "var:\n" << var->dumpStr() << "\nval:\n" << val->dumpStr() << std::endl;
 #endif
-        INode* res = new Assign(dynamic_cast< Variable* >(var), val);
-        return res;
+        return std::make_unique< Assign >(dynamic_cast< Variable* >(var), val);
     }
 
 
-    INode* INode::make_var(size_t id)
+    std::unique_ptr< INode > INode::make_var(size_t id)
     {
 #ifdef DEBUG
         std::cout << "variable created: " << id << '(' << ')' << std::endl;
 #endif
-        INode* res = new Variable(id);
-        return res;
+        return std::make_unique< Variable >(id);
     }
 
-    INode* INode::make_while(INode* condition, INode* scope)
+    std::unique_ptr< INode > INode::make_while(INode* condition, INode* scope)
     {
 #ifdef DEBUG
         std::cout << "while created:" << std::endl;
         std::cout << "condition:\n" << condition->dumpStr() << "\nscope:\n" << scope->dumpStr() << std::endl;
 #endif
-        INode* res = new While_t(condition, scope);
-        return res;
+        return std::make_unique< While_t >(condition, scope);
     }
 
-    INode* INode::make_if(INode* condition, INode* scope)
+    std::unique_ptr< INode > INode::make_if(INode* condition, INode* scope)
     {
 #ifdef DEBUG
         std::cout << "if created:" << std::endl;
         std::cout << "condition:\n" << condition->dumpStr() << "\nscope:\n" << scope->dumpStr() << std::endl;
 #endif
-        INode* res = new If_t(condition, scope);
-        return res;
+        return std::make_unique< If_t >(condition, scope);
     }
 
-    INode* INode::make_print(INode* param)
+    std::unique_ptr< INode > INode::make_print(INode* param)
     {
 #ifdef DEBUG
         std::cout << "print created:" << std::endl;
         std::cout << "param:\n" << param->dumpStr() << std::endl;
 #endif
-        INode* res = new Print_t(param);
-        return res;
+        return std::make_unique< Print_t >(param);
     }
 
-    INode* INode::make_qmark()
+    std::unique_ptr< INode > INode::make_qmark()
     {
 #ifdef DEBUG
         std::cout << "qmark created!" << std::endl;
 #endif
-        INode* res = new QMark_t();
-        return res;
+        return std::make_unique< QMark_t >();
     }
 
 }//namespace ezg

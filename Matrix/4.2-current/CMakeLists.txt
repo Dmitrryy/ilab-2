@@ -36,4 +36,4 @@ add_dependencies(${PROJECT_NAME} ${FB_TARGET})
 
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DDEBUG)
-target_compile_options(${PROJECT_NAME} PRIVATE -O4)
+#target_compile_options(${PROJECT_NAME} PRIVATE -O4)

@@ -28,7 +28,7 @@ int main()
     yy::ParsDriver driver(lexer);
 
 
-    freopen("tests/test1.txt", "r", stdin);
+    freopen("tests/test3.txt", "r", stdin);
     driver.setFileName("tests/test3.txt");
 
     std::istringstream in("");

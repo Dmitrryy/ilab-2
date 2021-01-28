@@ -2,8 +2,11 @@
 
 {
     c = 5;
+    print c;
 }
-tmp = 0;
+tmp = 8;
 {
-    print a;
+    print 10;
+    tmp = ?;
+    print tmp;
 }

@@ -20,14 +20,19 @@ int main(int argc, char* argv[])
 
 #ifdef DEBUG
     yy::Driver driver("tests/test2.txt");
+    auto source = readFile("tests/test2.txt");
 #else
     yy::Driver driver(argv[1]);
+    auto source = readFile(argv[1]);
 #endif
 
-    auto source = readFile("tests/test2.txt");
     driver.setSourceString(source);
 
-    driver.parse ();
+    size_t n_err = driver.parse();
+    if (n_err != 0) {
+        std::cerr << "Bad compilation. Errors: " << n_err << std::endl;
+        return 1;
+    }
     auto n = driver.getData();
     (n[0])->execute();
 

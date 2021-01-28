@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <memory>
 
 namespace ezg
 {
@@ -37,7 +38,7 @@ namespace ezg
 
     class INode
     {
-        INode* m_parent;
+        //INode* m_parent;
 
     public:
 
@@ -48,14 +49,14 @@ namespace ezg
 
     public:
 
-        static INode* make_op(Operator tOp, INode* left, INode* right);
-        static INode* make_assign(INode* var, INode* val);
-        static INode* make_val(int val);
-        static INode* make_var(size_t id);
-        static INode* make_while(INode* condition, INode* scope);
-        static INode* make_if(INode* condition, INode* scope);
-        static INode* make_print(INode* param);
-        static INode* make_qmark();
+        static std::unique_ptr< INode > make_op(Operator tOp, INode* left, INode* right);
+        static std::unique_ptr< INode > make_assign(INode* var, INode* val);
+        static std::unique_ptr< INode > make_val(int val);
+        static std::unique_ptr< INode > make_var(size_t id);
+        static std::unique_ptr< INode > make_while(INode* condition, INode* scope);
+        static std::unique_ptr< INode > make_if(INode* condition, INode* scope);
+        static std::unique_ptr< INode > make_print(INode* param);
+        static std::unique_ptr< INode > make_qmark();
     };
 
 
@@ -75,8 +76,8 @@ namespace ezg
 
     public:
 
-        static IScope* make_separate();
-        static IScope* make_inside_current();
+        static std::unique_ptr< IScope > make_separate();
+        static std::unique_ptr< IScope > make_inside_current();
         //static IScope* make_first();
     };
 
