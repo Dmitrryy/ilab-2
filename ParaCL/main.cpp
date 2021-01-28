@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 
 #ifdef DEBUG
     yy::Driver driver("tests/test2.txt");
-    auto source = readFile("tests/test2.txt");
+    auto source = readFile("tests/test4.txt");
 #else
     yy::Driver driver(argv[1]);
     auto source = readFile(argv[1]);

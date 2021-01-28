@@ -14,6 +14,10 @@ project(ParaCL)
 
 message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
+if( NOT CMAKE_BUILD_TYPE )
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
 endif()

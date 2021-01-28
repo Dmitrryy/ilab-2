@@ -1,0 +1,12 @@
+left = ?;
+right = ?;
+
+step = 1;
+if (right - left < 0) {
+    step = -1;
+}
+
+while (left != right) {
+    print left;
+    left = left + step;
+}
