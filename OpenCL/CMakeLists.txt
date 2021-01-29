@@ -18,13 +18,17 @@ find_package(OpenCL REQUIRED)
 
 SET(MY_COMPILE_FLAGS "-lOpenCL")
 
-# specify the C++ standard
-set(MAKE_CXX_STANDARD 17)
-
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_compile_options(${PROJECT_NAME} PRIVATE -DDEBUG)
+if( NOT CMAKE_BUILD_TYPE )
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+if(${CMAKE_BUILD_TYPE} MATCHES Debug)
+    add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
+endif()
+
 target_compile_options(${PROJECT_NAME} PRIVATE ${MY_COMPILE_FLAGS})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 

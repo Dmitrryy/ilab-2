@@ -12,8 +12,6 @@ add_custom_target(${FB_TARGET}
 # set the project name
 project(ParaCL)
 
-message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
-
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE Release)
 endif()
@@ -21,6 +19,8 @@ endif()
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
 endif()
+
+message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp Compiler/Node.cpp parser/lex.yy.cc parser/gramar.tab.cc)
