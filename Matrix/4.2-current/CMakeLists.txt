@@ -14,7 +14,7 @@ add_custom_target(${FB_TARGET}
 project(Current)
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp lex.yy.cc parser.tab.cc)
+add_executable(${PROJECT_NAME} main.cpp ../Libs/circuit/Circuit.cpp ../Libs/matrix/Matrix_other.cpp lex.yy.cc parser.tab.cc)
 
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE Release)

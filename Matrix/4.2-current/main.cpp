@@ -50,7 +50,7 @@ int main()
     }
 
 #ifdef DEBUG
-    std::cout << circuit.dumpStr() << std::endl;
+    circuit.dump(std::cout);
 #endif
 
     try {
