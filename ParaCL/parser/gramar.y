@@ -61,6 +61,8 @@
   RBRACE        	"}"
   GREATER       	">"
   LESS          	"<"
+  LLESS			"<="
+  LGREATER		">="
   EQUAL         	"=="
   NONEQUAL      	"!="
   ASSIGN        	"="
@@ -78,7 +80,6 @@
 
 
 %nterm < ezg::INode* > act
-%nterm < ezg::INode* > declaration_variable
 %nterm < ezg::INode* > access_variable
 %nterm < ezg::INode* > access_or_declare_variable
 
@@ -149,36 +150,22 @@ inside_scope
 |   inside_scope scope          {   $$.insert($$.end(), $1.begin(), $1.end());
                                     $$.push_back($2);
                                 }
-|   error SCOLON		{   }
+|   inside_scope SCOLON		{   $$.insert($$.end(), $1.begin(), $1.end());	}
+|   error SCOLON		{    }
 |   /* empty */			{}
 ;
 
 
 act
-//:   declaration_variable ASSIGN exprLvl1	{ $$ = ezg::INode::make_assign($1, $3).release();   			driver->insert($$);}
-//|   declaration_variable ASSIGN ntscanf	{ $$ = ezg::INode::make_assign($1, $3).release(); 	driver->insert($$);}
 :   access_or_declare_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3).release(); 			driver->insert($$);}
 |   access_or_declare_variable ASSIGN ntscanf		{ $$ = ezg::INode::make_assign($1, $3).release(); 	driver->insert($$);}
-|   PRINT exprLvl1				{ $$ = ezg::INode::make_print($2).release(); 				driver->insert($$);}
+|   PRINT exprLvl1					{ $$ = ezg::INode::make_print($2).release(); 				driver->insert($$);}
+//|   /* empty */						{}
 ;
 
 
 ntscanf
 :	QMARK			{	$$ = ezg::INode::make_qmark().release(); 	driver->insert($$); }
-;
-
-
-declaration_variable
-:	TYPE VARIABLE		{	auto id = gScopeStack.top()->declareVar($2);
-					if (!id.has_value()) {
-                                        	throw syntax_error(@1, "multiple definition of variable");
-
-					}
-					else {
-						$$ = ezg::INode::make_var(id.value()).release();
-						driver->insert($$);
-					}
-				}
 ;
 
 
@@ -189,14 +176,14 @@ nonscolon_act
 
 
 ntif
-:   IF LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);}
-//|   IF LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);}
+:   IF LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);	}
+|   IF error RBRACE 					{   $$ = nullptr; 						}
 ;
 
 
 ntwhile
-:   WHILE LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);}
-//|   WHILE LPARENTHESES condition RPARENTHESES act SCOLON   {   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);}
+:   WHILE LPARENTHESES condition RPARENTHESES scope     {   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);}
+|   WHILE error RBRACE 					{   $$ = nullptr; 						}
 ;
 
 
@@ -205,6 +192,9 @@ condition
 |   exprLvl1 LESS     exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Less,     $1, $3).release();   driver->insert($$);}
 |   exprLvl1 EQUAL    exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::Equal,    $1, $3).release();   driver->insert($$);}
 |   exprLvl1 NONEQUAL exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::NonEqual, $1, $3).release();   driver->insert($$);}
+|   exprLvl1 LLESS exprLvl1          	{   $$ = ezg::INode::make_op(ezg::Operator::LLess, $1, $3).release();   driver->insert($$);}
+|   exprLvl1 LGREATER exprLvl1          {   $$ = ezg::INode::make_op(ezg::Operator::LGreater, $1, $3).release();   driver->insert($$);}
+|   exprLvl1				{   $$ = $1;	}
 ;
 
 
@@ -270,8 +260,7 @@ namespace yy {
 
 	void parser::error (const parser::location_type& l, const std::string& msg) {
 		auto tmp = symbol_type(0, l);
-
-		context ctx(*this, symbol_type(0, l));
+		context ctx(*this, tmp);
 		driver->error(ctx, msg);
 	}
 

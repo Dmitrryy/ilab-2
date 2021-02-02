@@ -193,6 +193,9 @@ namespace ezg
         int execute() override {
             int val = 0;
             std::cin >> val;
+            if (!std::cin.good()) {
+                throw std::runtime_error("Entered invalid value!");
+            }
             return val;
         }
 
@@ -274,6 +277,8 @@ namespace ezg
 
     OPERATION_TEMPLATE(Greater,   >);
     OPERATION_TEMPLATE(Less,      <);
+    OPERATION_TEMPLATE(LLess,     <=);
+    OPERATION_TEMPLATE(LGreater,  >=);
     OPERATION_TEMPLATE(Equal,    ==);
     OPERATION_TEMPLATE(NonEqual, !=);
     OPERATION_TEMPLATE(Add, +);

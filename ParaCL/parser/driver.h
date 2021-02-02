@@ -26,8 +26,14 @@ namespace yy
                 m_lexer(new Scanner(name))
         {}
 
+        //not supported
+        Driver                   (const Driver&) = delete;
+        const Driver& operator = (const Driver&) = delete;
+        Driver                   (Driver&&     ) = delete;
+        const Driver& operator = (Driver&&     ) = delete;
+
         ~Driver() {
-            for (auto& elem : m_data) {
+            for (auto elem : m_data) {
                 delete elem;
             }
 
@@ -60,7 +66,9 @@ namespace yy
             return tokenType;
         }
 
-        void insert(ezg::INode* point) { m_data.push_back(point); }
+        void insert(ezg::INode* point)
+        { m_data.push_back(point);
+        }
 
         std::vector< ezg::INode* > getData() const { return m_data; }
 
@@ -69,7 +77,6 @@ namespace yy
             bool res = parser.parse ();
             if (res) {
                 std::cerr << "compile terminate!" << std::endl;
-                this->~Driver();
             }
             return m_numErrors;
         }

@@ -65,12 +65,12 @@ namespace ezg {
 
     int Variable::getVal() const
     {
-        VarInfo_t* pInfo = dynamic_cast< VarInfo_t* >(g_ScopeTable.access(m_id).value());
+        VarInfo_t* pInfo = static_cast< VarInfo_t* >(g_ScopeTable.access(m_id).value());
         return pInfo->m_value;
     }
     void Variable::setVal(int v) const
     {
-        VarInfo_t* pInfo = dynamic_cast< VarInfo_t* >(g_ScopeTable.access(m_id).value());
+        VarInfo_t* pInfo = static_cast< VarInfo_t* >(g_ScopeTable.access(m_id).value());
         pInfo->m_value = v;
     }
 
@@ -100,6 +100,7 @@ case Operator::name:             \
 
     std::unique_ptr< INode > INode::make_op(Operator tOp, INode* left, INode* right)
     {
+        if(left == nullptr || right == nullptr) { return nullptr; }
 #ifdef DEBUG
         std::cout << "operator created: " << (int)tOp << std::endl;
         std::cout << "left:\n" << left->dumpStr() << "\nright:\n" << right->dumpStr() << std::endl;
@@ -108,6 +109,8 @@ case Operator::name:             \
         switch (tOp) {
             OpCase(Greater);
             OpCase(Less);
+            OpCase(LLess);
+            OpCase(LGreater);
             OpCase(Equal);
             OpCase(NonEqual);
             OpCase(Add);
@@ -132,11 +135,12 @@ case Operator::name:             \
 
     std::unique_ptr< INode > INode::make_assign(INode* var, INode* val)
     {
+        if(var == nullptr || val == nullptr) { return nullptr; }
 #ifdef DEBUG
         std::cout << "assign created:" << std::endl;
         std::cout << "var:\n" << var->dumpStr() << "\nval:\n" << val->dumpStr() << std::endl;
 #endif
-        return std::make_unique< Assign >(dynamic_cast< Variable* >(var), val);
+        return std::make_unique< Assign >(static_cast< Variable* >(var), val);
     }
 
 
@@ -150,6 +154,7 @@ case Operator::name:             \
 
     std::unique_ptr< INode > INode::make_while(INode* condition, INode* scope)
     {
+        if(condition == nullptr || scope == nullptr) { return nullptr; }
 #ifdef DEBUG
         std::cout << "while created:" << std::endl;
         std::cout << "condition:\n" << condition->dumpStr() << "\nscope:\n" << scope->dumpStr() << std::endl;
@@ -159,6 +164,7 @@ case Operator::name:             \
 
     std::unique_ptr< INode > INode::make_if(INode* condition, INode* scope)
     {
+        if(condition == nullptr || scope == nullptr) { return nullptr; }
 #ifdef DEBUG
         std::cout << "if created:" << std::endl;
         std::cout << "condition:\n" << condition->dumpStr() << "\nscope:\n" << scope->dumpStr() << std::endl;
@@ -168,6 +174,7 @@ case Operator::name:             \
 
     std::unique_ptr< INode > INode::make_print(INode* param)
     {
+        if(param == nullptr) { return nullptr; }
 #ifdef DEBUG
         std::cout << "print created:" << std::endl;
         std::cout << "param:\n" << param->dumpStr() << std::endl;

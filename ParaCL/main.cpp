@@ -34,7 +34,14 @@ int main(int argc, char* argv[])
         return 1;
     }
     auto n = driver.getData();
-    (n[0])->execute();
+
+    try {
+        (n[0])->execute();
+    }
+    catch (const std::exception& err) {
+        std::cerr << "execute error!\n"
+                << "what: " << err.what() << std::endl;
+    }
 
     return 0;
 }

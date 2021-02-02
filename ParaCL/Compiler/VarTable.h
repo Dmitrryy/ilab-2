@@ -67,6 +67,21 @@ namespace ezg
 
     public:
 
+        ScopeTable() = default;
+
+        //not supported
+        ScopeTable                   (const ScopeTable&) = delete;
+        const ScopeTable& operator = (const ScopeTable&) = delete;
+        ScopeTable                   (ScopeTable&&     ) = delete;
+        const ScopeTable& operator = (ScopeTable&&     ) = delete;
+
+        ~ScopeTable()
+        {
+            for(const auto& pN : m_tables) {
+                delete pN;
+            }
+        }
+
         void entryScope(size_t id)
         {
             assert(id < m_tables.size());
@@ -108,13 +123,6 @@ namespace ezg
         }
 
         void addElem(size_t idTable, size_t idElem, std::unique_ptr< IInfo_t >&& data) { m_tables[idTable]->addObj(idElem, std::move(data)); }
-
-        ~ScopeTable()
-        {
-            for(const auto& pN : m_tables) {
-                delete pN;
-            }
-        }
     };
 
 

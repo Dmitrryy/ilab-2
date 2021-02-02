@@ -39,6 +39,8 @@ VARIABLE        {LETTER}{LETTER_OR_DIGIT}*
 
 ">"                         return yy::parser::token_type::GREATER;
 "<"                         return yy::parser::token_type::LESS;
+"<="                         return yy::parser::token_type::LLESS;
+">="                         return yy::parser::token_type::LGREATER;
 "=="                        return yy::parser::token_type::EQUAL;
 "!="                        return yy::parser::token_type::NONEQUAL;
 

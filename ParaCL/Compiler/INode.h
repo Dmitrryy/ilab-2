@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <memory>
+#include <iostream>
 
 namespace ezg
 {
@@ -17,6 +18,8 @@ namespace ezg
 
         , Greater
         , Less
+        , LLess
+        , LGreater
         , Equal
         , NonEqual
 
@@ -42,7 +45,7 @@ namespace ezg
 
     public:
 
-        virtual ~INode() = default;
+        virtual ~INode() { };
 
         virtual int execute() = 0;
         virtual std::string dumpStr() const = 0;
@@ -63,8 +66,6 @@ namespace ezg
     class IScope : public INode
     {
     public:
-
-        virtual ~IScope() = default;
 
         virtual void addNode(INode* node) = 0;
         virtual void insertNode(const std::vector< INode* > &vec) = 0;

@@ -1,0 +1,14 @@
+a = ?;
+if(a >= 3)
+    print 4;
+}
+
+wefdwef;
+
+print a;
+
+
+tmp = 10;
+{
+    print tmp;
+}

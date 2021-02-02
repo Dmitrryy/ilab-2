@@ -21,7 +21,7 @@ private:
         m_loc.lines(lineno() - m_storeLine);
         m_loc.begin = m_loc.end;
 
-        m_loc.begin.filename = m_loc.end.filename = & m_name;
+        m_loc.begin.filename = m_loc.end.filename = &m_name;
 
         if (lineno() - m_storeLine == 0)
             m_loc.columns(YYLeng());
@@ -35,7 +35,6 @@ public:
             : m_name(std::move(name))
     {}
 
-    virtual ~Scanner() = default;
     yy::location getLocation() const { return m_loc; }
     int yylex() override;
 };
