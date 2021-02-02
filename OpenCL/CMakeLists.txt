@@ -27,6 +27,7 @@ endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
 endif()
 
 target_compile_options(${PROJECT_NAME} PRIVATE ${MY_COMPILE_FLAGS})

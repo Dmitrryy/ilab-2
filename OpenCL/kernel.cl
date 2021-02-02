@@ -9,6 +9,9 @@ void saxpy_kernel(float alpha,
    C[index] = alpha * A[index] + B[index];
 }*/
 
+//#include <stdlib.h>
+//#include <stdint.h>
+
 #define DATA_TYPE int
 
 //The bitonic sort kernel does an ascending sort

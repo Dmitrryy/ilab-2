@@ -1,9 +1,9 @@
 a = ?;
-if(a >= 3)
+if(a <= 3) {
     print 4;
 }
 
-wefdwef;
+wefdwef = 1;
 
 print a;
 

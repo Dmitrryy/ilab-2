@@ -1,8 +1,5 @@
 #pragma once
 
-#include <CL/cl.h>
-#include <CL/opencl.h>
-
 namespace ezg
 {
     //Error
