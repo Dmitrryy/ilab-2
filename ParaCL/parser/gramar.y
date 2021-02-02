@@ -270,7 +270,8 @@ namespace yy {
 
 	void parser::error (const parser::location_type& l, const std::string& msg) {
 		auto tmp = symbol_type(0, l);
-		context ctx(*this, tmp);
+
+		context ctx(*this, symbol_type(0, l));
 		driver->error(ctx, msg);
 	}
 

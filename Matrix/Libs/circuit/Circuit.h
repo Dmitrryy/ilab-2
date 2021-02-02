@@ -5,22 +5,44 @@
 #include <optional>
 #include <sstream>
 #include <set>
+#include <unordered_set>
 
-#include "Edge.h"
 
 namespace ezg
 {
     class Circuit
     {
+
+        struct Edge
+        {
+            Edge() = default;
+
+
+            Edge(size_t vLeft, size_t vRight)
+                    : v1(vLeft)
+                    , v2(vRight)
+            { }
+
+            size_t id = 0;
+            size_t v1 = 0, v2 = 0;
+            std::optional< float > resistance;
+            std::optional< float > current;
+            std::optional< float > eds;
+
+            bool operator == (const Edge& that) const { return id == that.id; }
+            bool operator != (const Edge& that) const { return !(*this == that); }
+        };//struct Edge
+
+    private:
         matrix::Matrix< int > m_graph;
-        std::vector< Edge >    m_data;
+        std::vector< Edge >   m_data;
 
     public:
 
         void connect(size_t v1, size_t v2, float resistance, float eds)
         {
             //vertex id is index of the line in the graph
-            m_graph.resize(std::max(m_graph.getLines(), static_cast<size_t>(std::max(v1, v2)) + 1), m_graph.getColumns() + 1);
+            m_graph.resize(std::max(m_graph.getLines(), std::max(v1, v2)) + 1, m_graph.getColumns() + 1);
             m_graph.at(v1, m_graph.getColumns() - 1) = 1;
             m_graph.at(v2, m_graph.getColumns() - 1) = 1;
 
@@ -68,10 +90,6 @@ namespace ezg
                 auto line = secondRuleKirchhoff_(cycles[c]);
                 assert(line.size() - 1 == LSystem.getColumns());
 
-                if (checkInfinityCurrent(line)) {
-                    throw std::runtime_error("infinite current loop detected");
-                }
-
                 for (size_t clm = 0; clm < mGcolumns; clm++) {
                     LSystem.at(c, clm) = line[clm];
                 }
@@ -92,12 +110,15 @@ namespace ezg
                 }
             }
 #ifdef DEBUG
-            std::cout << "line system:\n";
+            std::cout << "\nline system:\n";
             std::cout << LSystem << std::endl;
 #endif
             auto solv = LSystem.solve(freeMembers);
             //assert(solv.second.isZero());
+#ifdef DEBUG
+            std::cout << "\nSolution system:\n";
             std::cout << solv.first << std::endl;
+#endif
             for (size_t c = 0; c < mGcolumns; c++) {
                 m_data[c].current = solv.first.at(c, 0);
             }
@@ -123,9 +144,24 @@ namespace ezg
 
         std::vector< std::vector< Edge > > findCycles() const
         {
-            if (!m_data.empty())
-                return findCycles_(m_data[0].v1, {});
-            return {};
+            //used to quickly find and remove vertices
+            std::unordered_set< size_t > vertices;
+            for (const auto& edg : m_data) {
+                vertices.insert(edg.v1);
+                vertices.insert(edg.v2);
+            }
+
+            std::vector< std::vector< Edge > > res;
+            while(!vertices.empty()) {//in the case of a disconnected graph
+                auto part_res = findCycles_(*vertices.begin(), {}, vertices);
+
+                //move the result to a common container
+                res.insert(res.end()
+                           , std::make_move_iterator(part_res.begin())
+                           , std::make_move_iterator(part_res.end()));
+            }
+
+            return res;
         }
 
 
@@ -146,6 +182,7 @@ namespace ezg
             const size_t num_edges = cycle.size();
             std::vector< float > result(m_data.size() + 1);
             size_t pre = 0;
+            float sum_resistance = 0.f;
 
             for (size_t k = 0; k < num_edges; k++)
             {
@@ -167,10 +204,15 @@ namespace ezg
                 }
 
                 eds += cur.eds.value_or(0) * sign;
+                sum_resistance += cur.resistance.value() * sign;
 
                 result.at(cur.id) = cur.resistance.value() * sign;
             }
             result.back() = eds;
+
+            if (sum_resistance == 0 && eds != 0) {
+                throw std::runtime_error("infinite current loop detected");
+            }
 
             return result;
         }
@@ -183,7 +225,7 @@ namespace ezg
          * cur - current vertex id
          * trace - story of the way(edges)
          */
-        std::vector< std::vector< Edge > > findCycles_(size_t cur, std::vector< Edge > trace) const
+        std::vector< std::vector< Edge > > findCycles_(size_t cur, std::vector< Edge > trace, std::unordered_set< size_t >& unused_vertices) const
         {
             std::vector< std::vector< Edge > > multi_res;
 
@@ -192,6 +234,7 @@ namespace ezg
              * Figuratively speaking, it is a snake.
              * Recursively walk along the edges and if you stumble on your tail, fix the cycle.
              */
+            unused_vertices.erase(cur);
 
             const size_t columns = m_graph.getColumns();
             for (size_t c = 0; c < columns; c++)
@@ -212,7 +255,7 @@ namespace ezg
                         multi_res.emplace_back(it, tmp_trace.cend());
                     }
                     else {
-                        auto re_res = findCycles_(next_vert, tmp_trace);
+                        auto re_res = findCycles_(next_vert, tmp_trace, unused_vertices);
                         multi_res.insert(multi_res.end(), re_res.begin(), re_res.end());
                     }
 
@@ -220,8 +263,6 @@ namespace ezg
 
             }
 
-            //remove the same cycles
-            removeSameExcludingOrder_< Edge >(multi_res);
             return multi_res;
         }
 
@@ -229,15 +270,17 @@ namespace ezg
         using Edgelt = std::vector< Edge >::const_iterator;
         Edgelt checkCircuitCloser_(Edgelt begin, Edgelt end) const
         {
-            if (end - begin == 1 && begin->v1 == begin->v2) {
-                return begin;
+            if (end - begin >= 1 && (end - 1)->v1 == (end - 1)->v2) {
+                return end - 1;
             }
             else if (end - begin < 2 || (end - 1)->id == (end - 2)->id) {
                 return end;
             }
             const Edge& last_edge = *(end - 1);
             const Edge& prev_last = *(end - 2);
-            if (std::set< size_t >{ last_edge.v1, last_edge.v2 } == std::set< size_t >{ prev_last.v1, prev_last.v2 }) {
+            if ((last_edge.v1 == prev_last.v1 && last_edge.v2 == prev_last.v2)
+                || (last_edge.v2 == prev_last.v1 && last_edge.v1 == prev_last.v2))
+            {
                 //loop on two vertices
                 return end - 2;
             }
@@ -257,57 +300,6 @@ namespace ezg
                 return it;
             }
             return end;
-        }
-
-
-        template<typename T>
-        static void removeSameExcludingOrder_(std::vector< std::vector< T > >& multi_vec)
-        {
-            std::vector< std::vector< Edge > > res;
-            {
-                std::set< std::set< Edge > > set;
-
-                const size_t size = multi_vec.size();
-                for (size_t i = 0; i < size; i++)
-                {
-                    const size_t old_size = set.size();
-                    std::set< Edge > ts;
-                    for (const auto& ed : multi_vec[i])
-                    {
-                        ts.insert(ed);
-                    }
-                    set.emplace(std::move(ts));
-                    if (old_size < set.size())
-                    {
-                        res.emplace_back(std::move(multi_vec[i]));
-                    }
-                }
-            }
-
-            ///
-
-            multi_vec = std::move(res);
-        }
-
-
-        bool checkInfinityCurrent(const std::vector< float >& src) const
-        {
-            bool result = true;
-            const size_t size = src.size();
-
-            if (std::abs(src.back()) < matrix::EPSIL) {
-                result = false;
-            }
-            else {
-                for (size_t k = 0; k < size - 1; k++)
-                {
-                    if (std::abs(src[k]) > matrix::EPSIL) {
-                        result = false;
-                    }
-                }
-            }
-
-            return result;
         }
 
     };//class Circuit

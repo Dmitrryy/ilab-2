@@ -26,7 +26,7 @@ private:
 
 public:
 
-    virtual ~Scanner() = default;
+    ~Scanner() override = default;
     yy::location getLocation() const { return m_loc; }
     int yylex() override;
 };

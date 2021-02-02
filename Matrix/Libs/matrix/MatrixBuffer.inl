@@ -105,6 +105,9 @@ namespace matrix
 			return *(m_data + column * m_lines + line);
 		}
 		else { assert(0); }
+
+		//to remove the warning
+		return *(T*)nullptr;
 	}
 
 

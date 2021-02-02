@@ -22,11 +22,12 @@ namespace yy {
         std::string m_fileName;
 
     public:
-        explicit ParsDriver(Scanner *plex) : plex_(plex) {}
+        explicit ParsDriver()
+            : plex_(new Scanner) {}
 
         parser::token_type yylex(parser::location_type* l, parser::semantic_type *yylval) {
 
-            parser::token_type tt = static_cast<parser::token_type>(plex_->yylex());
+            auto tt = static_cast<parser::token_type>(plex_->yylex());
             if (tt == yy::parser::token_type::NUMBER)
                 yylval->as<float>() = std::stof(plex_->YYText());
 

@@ -11,10 +11,30 @@
 #include <sstream>
 
 
+//#define GEN_TESTS
+
+#ifdef GEN_TESTS
+namespace ezg {
+    void genTest(size_t x, size_t y, float eds, std::ostream &test_out, std::ostream &ans_out);
+}
+#endif
+
+
 int main()
 {
-    auto* lexer = new Scanner;
-    yy::ParsDriver driver(lexer);
+#ifdef GEN_TESTS
+    std::ofstream out ("tests/test9.txt");
+    std::ofstream ans ("tests/test9a.txt");
+
+    ezg::genTest(3, 3, 120, out, ans);
+    return 0;
+#endif
+
+#ifdef DEBUG
+    freopen("tests/test1.txt", "r", stdin);
+#endif
+
+    yy::ParsDriver driver;
 
     auto res_pars = driver.parse();
     if (!res_pars) {
@@ -24,13 +44,14 @@ int main()
 
     auto data = driver.getData();
 
-    delete lexer;
-
     ezg::Circuit circuit;
     for (const auto& edge : data) {
         circuit.connect(edge.v1, edge.v2, edge.res, edge.eds);
     }
 
+#ifdef DEBUG
+    std::cout << circuit.dumpStr() << std::endl;
+#endif
 
     try {
         circuit.calculateCurrent();

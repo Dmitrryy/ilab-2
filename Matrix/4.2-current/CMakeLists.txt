@@ -16,24 +16,18 @@ project(Current)
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp lex.yy.cc parser.tab.cc)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+if( NOT CMAKE_BUILD_TYPE )
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-add_dependencies(${PROJECT_NAME} ${FB_TARGET})
-
-
-####################################################################
-
-project(CurrenTest)
-
-
-add_executable(${PROJECT_NAME} tests/main_test.cpp ../Libs/matrix/Matrix_other.cpp lex.yy.cc parser.tab.cc tests/gen_tests.cpp)
+if(${CMAKE_BUILD_TYPE} MATCHES Debug)
+    target_sources(${PROJECT_NAME} PRIVATE tests/gen_tests.cpp)
+    add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
+    target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 add_dependencies(${PROJECT_NAME} ${FB_TARGET})
 
-
-target_compile_definitions(${PROJECT_NAME} PRIVATE -DDEBUG)
-#target_compile_options(${PROJECT_NAME} PRIVATE -O4)

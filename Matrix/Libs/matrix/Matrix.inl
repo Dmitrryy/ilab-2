@@ -144,12 +144,12 @@ namespace matrix
     }
 
     template <typename T>
-    std::vector< size_t > Matrix<T>::basicLinesAfterDG_() const
+    std::vector< std::optional< size_t > > Matrix<T>::basicLinesAfterDG_() const
     {
         const size_t nClm = getColumns();
         const size_t nLines = getLines();
 
-        std::vector< size_t > res(nClm, -1);
+        std::vector< std::optional< size_t > > res(nClm);
         for (size_t l = 0, bc = 0; l < nLines; l++) {
             for (size_t c = bc; c < nClm; c++) {
                 if (std::abs(at(l, c) - T{}) > EPSIL)
@@ -206,7 +206,7 @@ namespace matrix
         }
 
         const size_t dim_solution = getColumns() - rang;
-        const std::vector< size_t > is_basicClm = tmp.basicLinesAfterDG_();
+        const std::vector< std::optional< size_t > > is_basicClm = tmp.basicLinesAfterDG_();
         const bool haveGeneralSolve = dim_solution > 0;
         const size_t num_iterations = (dim_solution == 0) ? 1 : dim_solution;
 
@@ -217,7 +217,7 @@ namespace matrix
             size_t nonbasic_clm = 0;
             bool haveNonBasic = false;
             for (size_t l = 0, num = 0; l < nClm; l++) { //find nonbasic column with number 'c'
-                if (is_basicClm[l] == -1) {
+                if (!is_basicClm[l].has_value()) {
                     if (num == c) {
                         nonbasic_clm = l;
                         haveNonBasic = true;
@@ -229,16 +229,17 @@ namespace matrix
 
             for (size_t l = 0; l < nClm; l++)
             {
-                if (is_basicClm[l] != -1)
+                if (is_basicClm[l].has_value())
                 {
+                    const size_t line_in_basic = is_basicClm[l].value();
                     if (haveNonBasic) {
-                        generalSolution.at(l, c) = -tmp.at(is_basicClm[l], nonbasic_clm) / tmp.at(is_basicClm[l], l);
-                        particularSolution.at(l, c) = (tmp.at(is_basicClm[l], nClm) - tmp.at(is_basicClm[l], nonbasic_clm)) / tmp.at(is_basicClm[l], l);
+                        generalSolution.at(l, c) = -tmp.at(line_in_basic, nonbasic_clm) / tmp.at(line_in_basic, l);
+                        particularSolution.at(l, c) = (tmp.at(line_in_basic, nClm) - tmp.at(line_in_basic, nonbasic_clm)) / tmp.at(line_in_basic, l);
                     }
                     else {
                         if (haveGeneralSolve)
                             generalSolution.at(l, c) = 0;
-                        particularSolution.at(l, c) = tmp.at(is_basicClm[l], nClm) / tmp.at(is_basicClm[l], l);
+                        particularSolution.at(l, c) = tmp.at(line_in_basic, nClm) / tmp.at(line_in_basic, l);
                     }
                 }
                 else

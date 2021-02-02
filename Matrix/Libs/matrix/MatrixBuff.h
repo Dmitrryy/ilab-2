@@ -25,7 +25,7 @@ namespace matrix
 	{
 		size_t m_lines   = 0;
 		size_t m_columns = 0;
-		Order  m_order = Order::Row;
+		Order  m_order   = Order::Row;
 
 		using IBuff_t<T>::m_used;
 		using IBuff_t<T>::m_size;

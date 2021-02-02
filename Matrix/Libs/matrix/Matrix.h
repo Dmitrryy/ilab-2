@@ -128,7 +128,7 @@ namespace matrix
         Matrix& reversGaussian_from_(size_t bc = 0)&;
         Matrix& doubleGaussian_()&;
 
-        std::vector< size_t > basicLinesAfterDG_() const;
+        std::vector< std::optional< size_t > > basicLinesAfterDG_() const;
 
 	};//class Matrix
 
