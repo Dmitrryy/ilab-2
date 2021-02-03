@@ -1,51 +1,26 @@
-/*__kernel
-void saxpy_kernel(float alpha,
-                   __global float *A,
-                   __global float *B,
-                   __global float *C)
+
+__kernel void bitonic_sort_kernel(__global DATA_TYPE *input_ptr, const uint stage, const uint passOfStage)
 {
-   int index = get_global_id(0);
-   //printf(\"%f + %f\", A[index], B[index]);
-   C[index] = alpha * A[index] + B[index];
-}*/
+    const uint threadId = get_global_id(0);
 
-//#include <stdlib.h>
-//#include <stdint.h>
+    const uint pairDistance = pow(2.0, stage - passOfStage);
+    const uint blockWidth   = 2 * pairDistance;
+    const uint blockId      = threadId / (blockWidth / 2);
 
-#define DATA_TYPE int
+    const uint leftId  = blockId * blockWidth + threadId % (blockWidth / 2);
+    const uint rightId = leftId + pairDistance;
 
-//The bitonic sort kernel does an ascending sort
-__kernel
-void bitonic_sort_kernel(__global DATA_TYPE * input_ptr,
-           const uint stage,
-           const uint passOfStage )
-{
- uint threadId = get_global_id(0);
- uint pairDistance = 1 << (stage - passOfStage);
- uint blockWidth = 2 * pairDistance;
- uint temp;
- bool compareResult;
- uint leftId = (threadId & (pairDistance -1))
- + (threadId >> (stage - passOfStage) ) * blockWidth;
- uint rightId = leftId + pairDistance;
+    const uint sameDirectionBlockWidth = blockId >> passOfStage;
+    const uint sameDirection = sameDirectionBlockWidth % 2;
 
- DATA_TYPE leftElement, rightElement;
- DATA_TYPE greater, lesser;
- leftElement = input_ptr[leftId];
- rightElement = input_ptr[rightId];
+#ifdef DEBUG
+    printf("id %d, blockId %d, pDist %d, width %d, dir %d, blockDir %d, leftId %d, rightId %d\n", threadId, blockId,
+           pairDistance, blockWidth, sameDirection, sameDirectionBlockWidth, leftId, rightId);
+#endif //DEBUG
 
- uint sameDirectionBlockWidth = threadId >> stage;
- uint sameDirection = sameDirectionBlockWidth & 0x1;
+    const DATA_TYPE greater = max(input_ptr[rightId], input_ptr[leftId]);
+    const DATA_TYPE lesser = min(input_ptr[rightId], input_ptr[leftId]);
 
- temp = sameDirection?rightId:temp;
- rightId = sameDirection?leftId:rightId;
- leftId = sameDirection?temp:leftId;
-
- compareResult = (leftElement < rightElement) ;
-
- greater = compareResult?rightElement:leftElement;
- lesser= compareResult?leftElement:rightElement;
-
- input_ptr[leftId] = lesser;
- input_ptr[rightId] = greater;
+    input_ptr[leftId] = sameDirection ? greater : lesser;
+    input_ptr[rightId] = sameDirection ? lesser : greater;
 }
