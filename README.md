@@ -6,9 +6,10 @@
 |      project      | LVL |
 |:-----------------:|:---:|
 | LALib (triangles) |  3  |
-| Matrix            |  2  |
+| Matrix            |  3  |
 | ParaCL            |  1  |
 | OpenCL            |  1  |
+| Combinatorics     |  1  |
   
 ### done
 

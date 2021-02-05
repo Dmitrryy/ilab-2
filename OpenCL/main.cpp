@@ -20,6 +20,13 @@ std::string readFile(const std::string &fileName) {
     return ss.str();
 }
 
+#ifdef DEBUG
+#define DEBUG_ACTION(act) { act }
+
+#else
+#define DEBUG_ACTION(act) {}
+
+#endif //DEBUG
 
 int main() {
     size_t size_vec = 0;
@@ -30,9 +37,7 @@ int main() {
         extended_size <<= 1;
     }
 
-#ifdef DEBUG
-    std::cout << "natural vector size: " << extended_size << std::endl;
-#endif
+    DEBUG_ACTION(std::cout << "natural vector size: " << extended_size << std::endl;);
 
     std::vector<int> data(extended_size, std::numeric_limits< int >::max());
     for (size_t k = 0; k < size_vec; k++) {
@@ -51,22 +56,14 @@ int main() {
     cl::Buffer a_buff(context, CL_MEM_READ_WRITE, extended_size * sizeof(int));
     commandQueue.enqueueWriteBuffer(a_buff, CL_TRUE, 0, extended_size * sizeof(int), data.data());
 
-#ifdef DEBUG
-    auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
-    for(size_t i = 0; i < extended_size; i++)
-        std::cout << map_data[i] << ' ';
-    std::cout << std::endl;
-    commandQueue.enqueueUnmapMemObject(a_buff, map_data);
-#endif //DEBUG
-
     std::string source_kernel = readFile("kernel.cl");
     cl::Program program(context, source_kernel);
 
     try {
         std::string options(" -D DATA_TYPE=int ");
-#ifdef DEBUG
-        options += " -D DEBUG ";
-#endif //DEBUG
+
+        DEBUG_ACTION(options += " -D DEBUG ";);
+
         program.build(options.data());
     }
     catch (const std::exception& ex) {
@@ -91,10 +88,10 @@ int main() {
 
         for (passOfStage = 0; passOfStage < stage + 1; ++passOfStage)
         {
-#ifdef DEBUG
-            std::cout << "Stage " << stage << ", Pass no " << passOfStage
+            DEBUG_ACTION(std::cout << "Stage " << stage << ", Pass no " << passOfStage
             << ": global size " << global_size << ", local size " << local_size <<  std::endl;
-#endif //DEBUG
+            );
+
             kernel.setArg(0, a_buff);
             kernel.setArg(1, stage);
             kernel.setArg(2, passOfStage);
@@ -102,13 +99,14 @@ int main() {
             commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, local_size, nullptr, &event);
 
             event.wait();
-#ifdef DEBUG
-            map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
-            for(size_t i = 0; i < extended_size; i++)
-                std::cout << map_data[i] << ' ';
-            std::cout << std::endl << std::endl;
-            commandQueue.enqueueUnmapMemObject(a_buff, map_data);
-#endif //DEBUG
+
+            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
+                for(size_t i = 0; i < extended_size; i++)
+                    std::cout << map_data[i] << ' ';
+                std::cout << std::endl << std::endl;
+                commandQueue.enqueueUnmapMemObject(a_buff, map_data);
+            );
+
         }//end of for passStage = 0:stage-1
     }//end of for stage = 0:numStage-1
 

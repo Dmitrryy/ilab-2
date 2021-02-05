@@ -38,7 +38,7 @@ namespace ezg
         using Edgelt = std::vector< Edge >::const_iterator;
 
     private:
-        //incidence graph
+        //incidence combinatorics
         matrix::Matrix< int > m_graph;
         std::vector< Edge >   m_data;
 

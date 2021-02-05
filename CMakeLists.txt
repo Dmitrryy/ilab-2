@@ -33,3 +33,7 @@ add_subdirectory(ParaCL)
 
 
 add_subdirectory(OpenCL)
+
+
+
+add_subdirectory(combinatorics)

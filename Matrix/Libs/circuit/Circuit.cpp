@@ -7,7 +7,7 @@ namespace ezg
 
     void Circuit::connect(size_t v1, size_t v2, float resistance, float eds)
     {
-        //vertex id is index of the line in the graph
+        //vertex id is index of the line in the combinatorics
         m_graph.resize(std::max(m_graph.getLines(), std::max(v1, v2)) + 1, m_graph.getColumns() + 1);
         m_graph.at(v1, m_graph.getColumns() - 1) = 1;
         m_graph.at(v2, m_graph.getColumns() - 1) = 1;
@@ -101,7 +101,7 @@ namespace ezg
         }
 
         std::vector< std::vector< Edge > > res;
-        while(!vertices.empty()) {//in the case of a disconnected graph
+        while(!vertices.empty()) {//in the case of a disconnected combinatorics
             auto part_res = findCycles_(*vertices.begin(), {}, vertices);
 
             //move the result to a common container
