@@ -7,7 +7,7 @@
 |:-----------------:|:---:|
 | LALib (triangles) |  3  |
 | Matrix            |  3  |
-| ParaCL            |  1  |
+| ParaCL            |  2  |
 | OpenCL            |  1  |
 | Combinatorics     |  1  |
   

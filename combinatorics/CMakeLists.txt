@@ -14,6 +14,10 @@ project(Graph)
 # specify the C++ standard
 set(MAKE_CXX_STANDARD 17)
 
+
+#set(GEN_TESTS true)
+
+
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -33,6 +37,10 @@ endif()
 if(GTESTS)
     add_compile_definitions(${PROJECT_NAME} PRIVATE GTESTS)
     target_sources(${PROJECT_NAME} PRIVATE gtests.cpp)
+endif()
+
+if(GEN_TESTS)
+    add_compile_definitions(${PROJECT_NAME} PRIVATE GEN_TESTS)
 endif()
 
 

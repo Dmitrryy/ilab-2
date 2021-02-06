@@ -1,8 +1,11 @@
 #include <iostream>
+#include <fstream>
 #include <unordered_set>
 
+#include "test_gen.h"
 #include "graph/graph.h"
 #include <gtest/gtest.h>
+
 
 int main(int argc, char* argv[])
 {
@@ -11,7 +14,14 @@ int main(int argc, char* argv[])
     return RUN_ALL_TESTS();
 #endif
 
-    freopen("tests/1.txt", "r", stdin);
+#ifdef GEN_TESTS
+    std::ofstream outTest("tests/6.txt");
+    std::ofstream outAns ("tests/6a.txt");
+    genDoublyConnected(outTest, outAns, 10000, 30000);
+
+    freopen("tests/6.txt", "r", stdin);
+    freopen("tests/ma.txt", "w", stdout);
+#endif
 
     std::unordered_map< size_t, size_t > uniqVertices;
     std::vector< size_t > idToVert;
@@ -45,7 +55,7 @@ int main(int argc, char* argv[])
     }
     else
     {
-        std::cout << "graph doesn't doubly connected\n";
+        std::cout << "graph is not doubly connected\n";
     }
     std::cout << std::endl;
 
