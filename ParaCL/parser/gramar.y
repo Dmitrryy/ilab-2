@@ -17,6 +17,7 @@
 	#include <algorithm>
 	#include <string>
 	#include <vector>
+	#include "../Compiler/INode.h"
 
 	// forward declaration of argument to parser
 	namespace yy { class Driver; }
@@ -50,8 +51,8 @@
 }
 
 %token
-  ADD 			"+"
-  SUB			"-"
+  PLUS 			"+"
+  MINUS			"-"
   MUL			"*"
   DIV			"/"
   SCOLON  		";"
@@ -84,9 +85,10 @@
 %nterm < ezg::INode* > access_or_declare_variable
 
 %nterm < ezg::INode* > nonscolon_act
-%nterm < ezg::INode* > ntif
-%nterm < ezg::INode* > ntwhile
-%nterm < ezg::INode* > ntscanf
+%nterm < ezg::INode* > nt_if
+%nterm < ezg::INode* > nt_while
+%nterm < ezg::INode* > nt_scanf
+%nterm < ezg::UnOp   > nt_unop
 
 %nterm < ezg::IScope* > scope
 %nterm < ezg::IScope* > open_first
@@ -95,7 +97,7 @@
 
 %nterm < ezg::INode* > condition;
 
-%nterm < ezg::INode* > exprLvl1 exprLvl2 exprLvl3
+%nterm < ezg::INode* > exprLvl1 exprLvl2 exprLvl3 exprLvl4
 
 
 %left '+' '-'
@@ -122,8 +124,8 @@ open_first
 
 
 scope
-:   open_scope inside_scope RBRACE      {   $$ = $1;
-                                            $$->insertNode($2);
+:   LBRACE open_scope inside_scope RBRACE      {   $$ = $2;
+                                            $$->insertNode($3);
                                             $$->exit();
                                             gScopeStack.pop();
                                         }
@@ -132,7 +134,7 @@ scope
 
 
 open_scope
-:   LBRACE                              {   	$$ = ezg::IScope::make_inside_current().release();
+:   	                              {   	$$ = ezg::IScope::make_inside_current().release();
 						driver->insert($$);
                                             	$$->entry();
                                             	gScopeStack.push($$);
@@ -158,32 +160,36 @@ inside_scope
 
 act
 :   access_or_declare_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3).release(); 			driver->insert($$);}
-|   access_or_declare_variable ASSIGN ntscanf		{ $$ = ezg::INode::make_assign($1, $3).release(); 	driver->insert($$);}
+|   access_or_declare_variable ASSIGN nt_scanf		{ $$ = ezg::INode::make_assign($1, $3).release(); 	driver->insert($$);}
 |   PRINT exprLvl1					{ $$ = ezg::INode::make_print($2).release(); 				driver->insert($$);}
 //|   /* empty */						{}
 ;
 
 
-ntscanf
+nt_scanf
 :	QMARK			{	$$ = ezg::INode::make_qmark().release(); 	driver->insert($$); }
 ;
 
 
 nonscolon_act
-:   ntif                        {   $$ = $1; }
-|   ntwhile                     {   $$ = $1; }
+:   nt_if                        {   $$ = $1; }
+|   nt_while                     {   $$ = $1; }
 ;
 
 
-ntif
-:   IF LPARENTHESES condition RPARENTHESES scope        {   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);	}
-|   IF error RBRACE 					{   $$ = nullptr; 						}
+nt_if
+:   IF LPARENTHESES condition RPARENTHESES scope        		{   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);	}
+|   IF LPARENTHESES condition RPARENTHESES open_scope act SCOLON   	{   $$ = ezg::INode::make_if($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
+|   IF LPARENTHESES condition RPARENTHESES open_scope nonscolon_act	{   $$ = ezg::INode::make_if($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
+|   IF error RBRACE 							{   $$ = nullptr; 								}
 ;
 
 
-ntwhile
-:   WHILE LPARENTHESES condition RPARENTHESES scope     {   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);}
-|   WHILE error RBRACE 					{   $$ = nullptr; 						}
+nt_while
+:   WHILE LPARENTHESES condition RPARENTHESES scope     		{   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);	}
+|   WHILE LPARENTHESES condition RPARENTHESES open_scope act SCOLON     {   $$ = ezg::INode::make_while($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
+|   WHILE LPARENTHESES condition RPARENTHESES open_scope nonscolon_act  {   $$ = ezg::INode::make_while($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
+|   WHILE error RBRACE 							{   $$ = nullptr; 								}
 ;
 
 
@@ -199,8 +205,8 @@ condition
 
 
 exprLvl1
-:	exprLvl2 ADD exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::Add, $1, $3).release();   driver->insert($$);}
-| 	exprLvl2 SUB exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::Sub, $1, $3).release();   driver->insert($$);}
+:	exprLvl2 PLUS exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::PLUS, $1, $3).release();   driver->insert($$);}
+| 	exprLvl2 MINUS exprLvl1           {   $$ = ezg::INode::make_op(ezg::Operator::MINUS, $1, $3).release();   driver->insert($$);}
 | 	exprLvl2			{   $$ = $1; }
 ;
 
@@ -213,11 +219,22 @@ exprLvl2
 
 
 exprLvl3
-:	LPARENTHESES exprLvl1 RPARENTHESES  	{   $$ = $2;              }
-| 	NUMBER				  	{   $$ = ezg::INode::make_val($1).release();    driver->insert($$);}
-|	access_variable				{   $$ = $1; }
+:	nt_unop exprLvl4		{	$$ = ezg::INode::make_unop($1, $2).release();	driver->insert($$);	}
+|	exprLvl4			{	$$ = $1;								}
 ;
 
+
+exprLvl4
+:	LPARENTHESES exprLvl1 RPARENTHESES  	{   $$ = $2;              						}
+| 	NUMBER				  	{   $$ = ezg::INode::make_val($1).release();    driver->insert($$);	}
+|	access_variable				{   $$ = $1; 								}
+;
+
+
+nt_unop
+:	PLUS		{	$$ = ezg::UnOp::PLUS;	}
+|	MINUS		{	$$ = ezg::UnOp::MINUS;	}
+;
 
 access_variable
 :	VARIABLE				{   	auto is_visible = gScopeStack.top()->visible($1);

@@ -11,8 +11,8 @@ namespace ezg
 
     enum class Operator
     {
-          Add
-        , Sub
+          PLUS
+        , MINUS
         , Mul
         , Div
 
@@ -38,6 +38,12 @@ namespace ezg
         , SColon*/
     };
 
+    enum class UnOp
+    {
+        MINUS
+        , PLUS
+    };
+
 
     class INode
     {
@@ -53,6 +59,7 @@ namespace ezg
     public:
 
         static std::unique_ptr< INode > make_op(Operator tOp, INode* left, INode* right);
+        static std::unique_ptr< INode > make_unop(UnOp tOp, INode* right);
         static std::unique_ptr< INode > make_assign(INode* var, INode* val);
         static std::unique_ptr< INode > make_val(int val);
         static std::unique_ptr< INode > make_var(size_t id);

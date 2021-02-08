@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
 {
 
 #ifdef DEBUG
-    yy::Driver driver("tests/test2.txt");
-    auto source = readFile("tests/test4.txt");
+    yy::Driver driver("tests/test5.txt");
+    auto source = readFile("tests/test5.txt");
 #else
     yy::Driver driver(argv[1]);
     auto source = readFile(argv[1]);

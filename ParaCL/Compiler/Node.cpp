@@ -113,8 +113,8 @@ case Operator::name:             \
             OpCase(LGreater);
             OpCase(Equal);
             OpCase(NonEqual);
-            OpCase(Add);
-            OpCase(Sub);
+            OpCase(PLUS);
+            OpCase(MINUS);
             OpCase(Mul);
             OpCase(Div);
 
@@ -124,6 +124,31 @@ case Operator::name:             \
 
         return res;
     }
+
+
+    std::unique_ptr< INode > INode::make_unop(UnOp tOp, INode* arg)
+    {
+#ifdef DEBUG
+        std::cout << "unary operator created: " << (int)tOp << std::endl;
+        std::cout << "arg:\n" << arg->dumpStr() << std::endl;
+#endif
+        std::unique_ptr< INode > res = nullptr;
+        switch (tOp) {
+            case UnOp::MINUS:
+                res = std::make_unique< UnMinus_t >(arg);
+                break;
+
+            case UnOp::PLUS:
+                res = std::make_unique< UnPlus_t >(arg);
+                break;
+
+            default:
+                assert(0);
+        }
+
+        return res;
+    }
+
 
     std::unique_ptr< INode > INode::make_val(int val)
     {

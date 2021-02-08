@@ -240,6 +240,50 @@ namespace ezg
     };
 
 
+    class UnOp_t : public INode
+    {
+    protected:
+        INode* m_arg;
+
+    public:
+
+        UnOp_t(INode* arg)
+            : m_arg(arg)
+        {}
+
+        std::string dumpStr() const override
+        {
+            std::ostringstream out;
+            out << "Type: unary operation" << std::endl
+                << "arg: \n" << m_arg->dumpStr() << std::endl;
+
+            return out.str();
+        }
+    };
+
+
+    class UnMinus_t : public UnOp_t
+    {
+    public:
+        UnMinus_t(INode* arg)
+            : UnOp_t(arg)
+        {}
+
+        int execute() override { return -(m_arg->execute()); }
+    };
+
+
+    class UnPlus_t : public UnOp_t
+    {
+    public:
+        UnPlus_t(INode* arg)
+                : UnOp_t(arg)
+        {}
+
+        int execute() override { return +(m_arg->execute()); }
+    };
+
+
     class Op_t : public INode
     {
     protected:
@@ -281,8 +325,8 @@ namespace ezg
     OPERATION_TEMPLATE(LGreater,  >=);
     OPERATION_TEMPLATE(Equal,    ==);
     OPERATION_TEMPLATE(NonEqual, !=);
-    OPERATION_TEMPLATE(Add, +);
-    OPERATION_TEMPLATE(Sub, -);
+    OPERATION_TEMPLATE(PLUS, +);
+    OPERATION_TEMPLATE(MINUS, -);
     OPERATION_TEMPLATE(Mul, *);
     OPERATION_TEMPLATE(Div, /);
 
