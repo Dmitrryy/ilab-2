@@ -42,7 +42,7 @@ namespace ezg
         {}
 
         std::optional< size_t > visible(const std::string& var_name) override;
-        std::optional< size_t > declareVar(const std::string& var_name) override;
+        std::optional< size_t > declareVariable(const std::string& var_name) override;
 
         void addNode(INode* nNode) override { m_nodes.push_back(nNode); }
         void insertNode(const std::vector< INode* > &vec) override { m_nodes.insert(m_nodes.end(), vec.begin(), vec.end()); }

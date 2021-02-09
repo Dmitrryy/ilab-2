@@ -5,37 +5,27 @@
 
 #include <stack>
 
-namespace ezg {
-    size_t gCurFreeId = 1;
+namespace ezg
+{
 
     ScopeTable g_ScopeTable;
-    dst< std::string, size_t > g_StrToId;
-    //VarTable g_VarTable;
 
-    std::optional<size_t> Scope::declareVar(const std::string &var_name)
+
+    std::optional<size_t> Scope::declareVariable(const std::string &var_name)
     {
-        if (g_StrToId.countLeft(var_name) != 0) {
+        auto id = g_ScopeTable.declareName(m_idTable, var_name);
+        if (!id.has_value()) {
             return {};
         }
-        size_t idVar = gCurFreeId++;
-        g_StrToId.add(var_name, idVar);
 
-        g_ScopeTable.addElem(m_idTable, idVar, std::make_unique< VarInfo_t >());
+        g_ScopeTable.addElem(m_idTable, id.value(), std::make_unique< VarInfo_t >());
 
-        return {idVar};
+        return id.value();
     }
 
     std::optional<size_t> Scope::visible(const std::string &name)
     {
-        auto it = g_StrToId.countLeft(name);
-        if (it == 0) {
-            return {};
-        }
-        size_t id = g_StrToId.getRight(name);
-        if (g_ScopeTable.access(id).has_value()) {
-            return id;
-        }
-        return {};
+        return g_ScopeTable.visibleName(m_idTable, name);
     }
 
     int Scope::execute()

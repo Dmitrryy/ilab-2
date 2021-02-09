@@ -31,9 +31,9 @@ COMMENT1        "//".*
 
 %%
                             /* Сопоставляем каждой лексеме её константу для парсера */
-{WS}                        /* skip blanks and tabs */
-{ENDL}
-{COMMENT1}
+{WS}                        { /* DO NOTHING */  }
+{ENDL}                      { /* DO NOTHING */  }
+{COMMENT1}                  { /* DO NOTHING */  }
 
 "+"                         return yy::parser::token_type::PLUS;
 "-"                         return yy::parser::token_type::MINUS;
@@ -55,10 +55,11 @@ COMMENT1        "//".*
 
 "?"                         return yy::parser::token_type::QMARK;
 "="                         return yy::parser::token_type::ASSIGN;
-"while"                     return yy::parser::token_type::WHILE;
-"if"                        return yy::parser::token_type::IF;
-"print"                     return yy::parser::token_type::PRINT;
-"int"                       return yy::parser::token_type::TYPE;
+"while"                     return yy::parser::token_type::KW_WHILE;
+"if"                        return yy::parser::token_type::KW_IF;
+"print"                     return yy::parser::token_type::KW_PRINT;
+"func"                      return yy::parser::token_type::KW_FUNC;
+"return"                    return yy::parser::token_type::KW_RETURN;
 
 {INTEGER}                   return yy::parser::token_type::NUMBER;
 {DIGIT}                     return yy::parser::token_type::NUMBER;

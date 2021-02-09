@@ -27,4 +27,16 @@ namespace ezg
         Type type() const noexcept override { return Type::Variable; }
     };
 
+
+
+    struct FuncInfo_t : public IInfo_t
+    {
+        INode* m_pFunc;
+        size_t m_numArgs;
+
+        Type type() const noexcept override { return Type::Function; }
+    };
+
+
+
 }//namespace ezg

@@ -46,7 +46,8 @@
 
 	}
 
-	std::stack< ezg::IScope* > gScopeStack;
+	std::stack< ezg::IScope* > g_ScopeStack;
+	ezg::IScope* g_pGlobalScope;
 
 }
 
@@ -67,17 +68,18 @@
   EQUAL         	"=="
   NONEQUAL      	"!="
   ASSIGN        	"="
-  WHILE			"while"
-  IF			"if"
-  PRINT			"print"
   QMARK         	"?(scanf)"
+  KW_WHILE		"while"
+  KW_IF			"if"
+  KW_PRINT		"print"
+  KW_FUNC		"func"
+  KW_RETURN		"return"
   ERROR
 ;
 
 %token < double >      NUMBER
 %token < std::string > VARIABLE
 %token < std::string > WORD
-%token TYPE
 
 
 %nterm < ezg::INode* > act
@@ -109,7 +111,7 @@
 
 program
 :   open_first inside_scope     {   $1->insertNode($2);
-                                    gScopeStack.pop();
+                                    g_ScopeStack.pop();
                                 }
 ;
 
@@ -118,7 +120,8 @@ open_first
 :   /* empty */     {   $$ = ezg::IScope::make_separate().release();
 			driver->insert($$);
                         $$->entry();
-                        gScopeStack.push($$);
+                        g_ScopeStack.push($$);
+                        g_pGlobalScope = $$;
                     }
 ;
 
@@ -127,7 +130,7 @@ scope
 :   LBRACE open_scope inside_scope RBRACE      {   $$ = $2;
                                             $$->insertNode($3);
                                             $$->exit();
-                                            gScopeStack.pop();
+                                            g_ScopeStack.pop();
                                         }
 |   LBRACE RBRACE                       {   /* empty */  }
 ;
@@ -137,7 +140,7 @@ open_scope
 :   	                              {   	$$ = ezg::IScope::make_inside_current().release();
 						driver->insert($$);
                                             	$$->entry();
-                                            	gScopeStack.push($$);
+                                            	g_ScopeStack.push($$);
                                         }
 ;
 
@@ -161,8 +164,7 @@ inside_scope
 act
 :   access_or_declare_variable ASSIGN exprLvl1		{ $$ = ezg::INode::make_assign($1, $3).release(); 			driver->insert($$);}
 |   access_or_declare_variable ASSIGN nt_scanf		{ $$ = ezg::INode::make_assign($1, $3).release(); 	driver->insert($$);}
-|   PRINT exprLvl1					{ $$ = ezg::INode::make_print($2).release(); 				driver->insert($$);}
-//|   /* empty */						{}
+|   KW_PRINT exprLvl1					{ $$ = ezg::INode::make_print($2).release(); 				driver->insert($$);}
 ;
 
 
@@ -178,18 +180,18 @@ nonscolon_act
 
 
 nt_if
-:   IF LPARENTHESES condition RPARENTHESES scope        		{   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);	}
-|   IF LPARENTHESES condition RPARENTHESES open_scope act SCOLON   	{   $$ = ezg::INode::make_if($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
-|   IF LPARENTHESES condition RPARENTHESES open_scope nonscolon_act	{   $$ = ezg::INode::make_if($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
-|   IF error RBRACE 							{   $$ = nullptr; 								}
+:   KW_IF LPARENTHESES condition RPARENTHESES scope        		{   $$ = ezg::INode::make_if($3, $5).release(); 	driver->insert($$);	}
+|   KW_IF LPARENTHESES condition RPARENTHESES open_scope act SCOLON   	{   $$ = ezg::INode::make_if($3, $6).release(); 	driver->insert($$);	$5->exit();	g_ScopeStack.pop();}
+|   KW_IF LPARENTHESES condition RPARENTHESES open_scope nonscolon_act	{   $$ = ezg::INode::make_if($3, $6).release(); 	driver->insert($$);	$5->exit();	g_ScopeStack.pop();}
+|   KW_IF error RBRACE 							{   $$ = nullptr; 								}
 ;
 
 
 nt_while
-:   WHILE LPARENTHESES condition RPARENTHESES scope     		{   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);	}
-|   WHILE LPARENTHESES condition RPARENTHESES open_scope act SCOLON     {   $$ = ezg::INode::make_while($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
-|   WHILE LPARENTHESES condition RPARENTHESES open_scope nonscolon_act  {   $$ = ezg::INode::make_while($3, $6).release(); 	driver->insert($$);	$5->exit();	gScopeStack.pop();}
-|   WHILE error RBRACE 							{   $$ = nullptr; 								}
+:   KW_WHILE LPARENTHESES condition RPARENTHESES scope     			{   $$ = ezg::INode::make_while($3, $5).release(); 	driver->insert($$);	}
+|   KW_WHILE LPARENTHESES condition RPARENTHESES open_scope act SCOLON     	{   $$ = ezg::INode::make_while($3, $6).release(); 	driver->insert($$);	$5->exit();	g_ScopeStack.pop();}
+|   KW_WHILE LPARENTHESES condition RPARENTHESES open_scope nonscolon_act  	{   $$ = ezg::INode::make_while($3, $6).release(); 	driver->insert($$);	$5->exit();	g_ScopeStack.pop();}
+|   KW_WHILE error RBRACE 							{   $$ = nullptr; 								}
 ;
 
 
@@ -237,7 +239,7 @@ nt_unop
 ;
 
 access_variable
-:	VARIABLE				{   	auto is_visible = gScopeStack.top()->visible($1);
+:	VARIABLE				{   	auto is_visible = g_ScopeStack.top()->visible($1);
                                                    	if (is_visible.has_value()) {
                                                         	$$ = ezg::INode::make_var(is_visible.value()).release();
                                                         	driver->insert($$);
@@ -249,13 +251,13 @@ access_variable
 
 
 access_or_declare_variable
-:	VARIABLE			{	auto is_visible = gScopeStack.top()->visible($1);
+:	VARIABLE			{	auto is_visible = g_ScopeStack.top()->visible($1);
                                                 if (is_visible.has_value()) {
                                                 	$$ = ezg::INode::make_var(is_visible.value()).release();
                                                 	driver->insert($$);
                                                 }
                                                 else {
-                                                	auto id = gScopeStack.top()->declareVar($1);
+                                                	auto id = g_ScopeStack.top()->declareVariable($1);
                                                 	if (!id.has_value()) {
                                                 		throw syntax_error(@1, "cant access or declare of variable");
                                                 	}

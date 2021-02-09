@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(FB_TARGET fb_targ)
+set(FB_TARGET fb_targ_paracl)
 add_custom_target(${FB_TARGET}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/parser
         BYPRODUCTS ${CMAKE_CURRENT_SOURCE_DIR}/parser/gramar.tab.cc ${CMAKE_CURRENT_SOURCE_DIR}/parser/lex.yy.cc
