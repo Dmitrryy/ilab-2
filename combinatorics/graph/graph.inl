@@ -4,8 +4,8 @@
 namespace ezg
 {
 
-    template< typename VT_ >
-    size_t Graph_t< VT_ >::addVertex(const VT_& data)
+    template< typename VT_ , typename ET_ >
+    size_t Graph_t< VT_ , ET_>::addVertex(const VT_& data)
     {
         if (m_endVertId == m_vertCapacity) {
             resizeVertCapacity_(m_vertCapacity * 2);
@@ -16,20 +16,33 @@ namespace ezg
         return m_endVertId++;
     }
 
-    template< typename VT_ >
-    void Graph_t< VT_ >::addEdge(size_t idV1, size_t idV2)
+    template< typename VT_ , typename ET_ >
+    std::pair< size_t, size_t > Graph_t< VT_ , ET_>::addEdge(size_t idV1, size_t idV2, const ET_& to /*= {}*/, const ET_& from /*= {}*/)
     {
         if (idV1 >= m_endVertId || idV2 >= m_endVertId) {
             throw std::invalid_argument("vertex id doesn't exists");
         }
-        addEssence_(idV1);
-        addEssence_(idV2);
+        const size_t left = addEssence_(idV1, to);
+        const size_t right = addEssence_(idV2, from);
+
+        return { left, right };
     }
 
 
-    template< typename VT_ >
+    template< typename VT_, typename ET_ >
+    const ET_& Graph_t< VT_, ET_ >::atEdgeData(size_t id) const
+    {
+        if (id < m_vertCapacity) {
+            throw std::invalid_argument("out of range: " + std::to_string(id) + "  ∉ ["
+            + std::to_string(m_vertCapacity) + ", " + std::to_string(m_graph.size() - 1) + ']');
+        }
+        return m_graph.at(id);
+    }
+
+
+    template< typename VT_ , typename ET_ >
     template< typename T >
-    void Graph_t< VT_ >::dumpTable(std::basic_ostream< T >& out) const
+    void Graph_t< VT_ , ET_>::dumpTable(std::basic_ostream< T >& out) const
     {
         const size_t widthColumn = 5;
         out << "Table:\n";
@@ -59,8 +72,8 @@ namespace ezg
     }
 
 
-    template< typename VT_ >
-    std::vector< size_t > Graph_t< VT_ >::getEdges(size_t vertId) const
+    template< typename VT_ , typename ET_ >
+    std::vector< size_t > Graph_t< VT_ , ET_>::getEdges(size_t vertId) const
     {
         if (vertId >= m_endVertId) {
             throw std::invalid_argument("vertex id doesn't exists");
@@ -78,58 +91,129 @@ namespace ezg
 
 
 
-    template< typename VT_ >
-    std::pair< bool, Graph_t< VT_ > > Graph_t< VT_ >::isDoublyConnected(const VT_& color1
-                                                                        , const VT_& color2
-                                                                        , const VT_& notColor) const
+    template< typename VT_ , typename ET_ >
+    std::pair<bool, std::vector<size_t> > Graph_t< VT_ , ET_>::isDoublyConnected() const
     {
-        if (notColor == color1 || notColor == color2) {
-            throw std::invalid_argument("color cant be equal with not color");
+        //because it's so easy to follow the depth
+        std::stack<std::stack<size_t> > nextVert;
+        std::stack<size_t> trace;
+        std::vector<size_t> deeps(m_endVertId, 0);
+
+        nextVert.push({});
+        trace.push(0);
+        for (size_t k = m_endVertId; k != 0; k--) {
+            nextVert.top().push(k - 1);
         }
 
-        Graph_t resGraph = *this;
-        bool isDC = true;
+        //result
+        bool isDB = true;
+        std::vector<size_t> oddCycle;
 
-        resGraph.m_vertData = std::vector< VT_ >(m_endVertId, notColor);
+        while (!nextVert.empty() && isDB) {
+            if (nextVert.top().empty()) {
+                nextVert.pop();
+                trace.pop();
+                continue;
+            }
 
-        for (size_t vert = 0; vert < m_endVertId && isDC; vert++)
-        {
-            isDC = resGraph.paintDB_(vert, color1, color2, notColor);
-        }
+            const size_t cur = nextVert.top().top();
+            nextVert.top().pop();
 
-        return { isDC, resGraph };
+            if (deeps[cur] == 0) {
+                //nextVert.size() and depth are equal
+                deeps[cur] = nextVert.size();
+                trace.push(cur);
+            } else {
+                continue;
+            }
+
+            auto toVertices = getEdges(cur);
+            nextVert.push({});
+            for (size_t i = toVertices.size(); i != 0; i--) {
+                const size_t nVert = toVertices[i - 1];
+                if (deeps[nVert] == 0) {
+                    nextVert.top().push(nVert);
+                } else {
+                    if ((deeps[nVert] - deeps[cur]) % 2 == 0) {//cycle of odd length detected
+                        while (trace.top() != nVert) {
+                            oddCycle.push_back(trace.top());
+                            trace.pop();
+                        }
+                        oddCycle.push_back(trace.top());
+                        isDB = false;
+                        break;
+                    }
+                }
+            }
+
+        }//while(!nextVert.empty() && isDB)
+
+        return {isDB, oddCycle};
     }
+
+    template< typename VT_ , typename ET_ >
+    Graph_t< VT_ >& Graph_t< VT_ , ET_>::paint(const std::vector< VT_ >& colors, size_t startVert /* = 0 */)&
+    {
+        assert(startVert < m_endVertId);
+        if (colors.empty()) {
+            return *this;
+        }
+        //TODO come up with a suitable workaround function to avoid copy-paste
+        //because it's so easy to follow the depth
+        std::stack< std::stack<size_t> > nextVert;
+        std::stack< size_t > trace;
+        std::vector< size_t > deeps(m_endVertId, 0);
+
+        nextVert.push({});
+        trace.push(0);
+        for (size_t k = m_endVertId; k != 0; k--) {
+            nextVert.top().push(k - 1);
+        }
+        nextVert.top().push(startVert);
+
+        const size_t colorsSize = colors.size();
+
+        while (!nextVert.empty())
+        {
+            if (nextVert.top().empty()) {
+                nextVert.pop();
+                trace.pop();
+                continue;
+            }
+
+            const size_t cur = nextVert.top().top();
+            nextVert.top().pop();
+
+            if (deeps[cur] == 0) {
+                //nextVert.size() and depth are equal
+                const size_t depth = nextVert.size();
+                deeps[cur] = depth;
+                atVertData(cur) = colors.at((depth - 1) % colorsSize);
+                trace.push(cur);
+            } else {
+                continue;
+            }
+
+            auto toVertices = getEdges(cur);
+            nextVert.push({});
+            for (size_t i = toVertices.size(); i != 0; i--) {
+                const size_t nVert = toVertices[i - 1];
+                if (deeps[nVert] == 0) {
+                    nextVert.top().push(nVert);
+                }
+            }
+
+        }
+
+        return *this;
+    }
+
 
     //private:
 
-    template< typename VT_ >
-    bool Graph_t< VT_ >::paintDB_(size_t vert, const VT_& curColor, const VT_& nextColor, const VT_& notColor)
-    {
-        if (atVertData(vert) != notColor) {
-            return true;
-        }
-        atVertData(vert) = curColor;
 
-        bool res = true;
-        std::vector< size_t > vertices = getEdges(vert);
-        for (size_t k = 0, mk = vertices.size(); k < mk && res; k++)
-        {
-            const size_t nVert = vertices[k];
-
-            if (atVertData(nVert) != notColor && atVertData(nVert) != nextColor) {
-                res = false;
-                continue;
-            }
-            else if (atVertData(nVert) == notColor) {
-                res = paintDB_(nVert, nextColor, curColor, notColor);
-            }
-        }
-
-        return res;
-    }
-
-    template< typename VT_ >
-    void Graph_t< VT_ >::resizeVertCapacity_(size_t nCap)
+    template< typename VT_ , typename ET_ >
+    void Graph_t< VT_ , ET_>::resizeVertCapacity_(size_t nCap)
     {
         assert(nCap > m_vertCapacity);
 
@@ -140,8 +224,8 @@ namespace ezg
         m_vertData.resize(m_vertCapacity);
     }
 
-    template< typename VT_ >
-    size_t Graph_t< VT_ >::moveEdges_(size_t offset, size_t new_size, size_t new_capacity)
+    template< typename VT_ , typename ET_ >
+    size_t Graph_t< VT_ , ET_>::moveEdges_(size_t offset, size_t new_size, size_t new_capacity)
     {
         if (offset % 2) { offset++; }
 
@@ -175,8 +259,8 @@ namespace ezg
         return offset;
     }
 
-    template< typename VT_ >
-    void Graph_t< VT_ >::addEssence_(size_t vId)
+    template< typename VT_ , typename ET_ >
+    size_t Graph_t< VT_ , ET_>::addEssence_(size_t vId, const ET_& data)
     {
         assert(vId < m_endVertId);
         if (m_graph.capacity() == m_graph.size()) {
@@ -185,7 +269,7 @@ namespace ezg
         assert(m_graph.capacity() != m_graph.size());
 
         Essence& curVert = m_graph[vId];
-        size_t idEss = m_graph.size();
+        const size_t idEss = m_graph.size();
         if (curVert.next == vId)
         {
             m_graph.push_back({ vId, vId, vId });
@@ -199,6 +283,9 @@ namespace ezg
             prevEdge.next = idEss;
             curVert.prev = idEss;
         }
+        m_graph.back().data = data;
+
+        return idEss;
     }
 
 }//namespace ezg

@@ -7,11 +7,15 @@
 #include <algorithm>
 #include <cmath>
 #include <cassert>
+#include <stack>
+#include <deque>
+
+#define MIN_VERT_CAPACITY 4
 
 namespace ezg
 {
 
-    template< typename VT_ = size_t >
+    template< typename VT_ = size_t, typename ET_ = size_t >
     class Graph_t
     {
         struct Essence
@@ -19,19 +23,19 @@ namespace ezg
             size_t vert = 0;
             size_t next = 0;
             size_t prev = 0;
+
+            ET_    data = {};
         };
 
         std::vector< VT_ >     m_vertData;
 
         std::vector< Essence > m_graph;
-        size_t                 m_vertCapacity;
-        size_t                 m_endVertId = 0;
+        size_t                 m_vertCapacity = MIN_VERT_CAPACITY;
+        size_t                 m_endVertId    = 0;
 
     public:
 
         Graph_t()
-            : m_vertCapacity(4)
-            , m_endVertId   (0)
         {
             m_vertData.resize(m_vertCapacity);
             m_graph.reserve  (m_vertCapacity * 2);
@@ -41,10 +45,14 @@ namespace ezg
     public:
 
         size_t addVertex(const VT_& data);
-        void   addEdge  (size_t idV1, size_t idV2);
+        std::pair< size_t, size_t > addEdge  (size_t idV1, size_t idV2, const ET_& to = {}, const ET_& from = {});
+
 
         const VT_& atVertData(size_t id) const { return m_vertData.at(id); }
         VT_&       atVertData(size_t id) { return const_cast< VT_& >(static_cast< const Graph_t* >(this)->atVertData(id)); }
+
+        const ET_& atEdgeData(size_t id) const;
+        ET_&       atEdgeData(size_t id) { return const_cast< VT_& >(static_cast< const Graph_t* >(this)->atEdgeData(id)); }
 
         size_t vertCapacity() const noexcept { return m_vertCapacity; }
         size_t vertSize    () const noexcept { return m_endVertId; }
@@ -55,9 +63,9 @@ namespace ezg
 
         std::vector< size_t > getEdges(size_t vertId) const;
 
-        std::pair< bool, Graph_t< VT_ > > isDoublyConnected(const VT_& color1
-                                                            , const VT_& color2
-                                                            , const VT_& notColor) const;
+        std::pair< bool, std::vector< size_t > > isDoublyConnected() const;
+
+        Graph_t< VT_ >& paint(const std::vector< VT_ >& colors, size_t startVert = 0)&;
 
     public:
 
@@ -70,12 +78,7 @@ namespace ezg
 
         size_t moveEdges_(size_t offset, size_t new_size, size_t new_capacity);
 
-        void addEssence_(size_t vId);
-
-        bool paintDB_(size_t vert, const VT_& curColor, const VT_& nextColor, const VT_& nonColor);
-
-/*        template< typename T >
-        void copyTable(const Graph_t< T >& that);*/
+        size_t addEssence_(size_t vId, const ET_& data);
     };//class Graph
 
 }//namespace ezg

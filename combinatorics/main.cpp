@@ -15,9 +15,9 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef GEN_TESTS
-    std::ofstream outTest("tests/6.txt");
+/*    std::ofstream outTest("tests/6.txt");
     std::ofstream outAns ("tests/6a.txt");
-    genDoublyConnected(outTest, outAns, 10000, 30000);
+    genDoublyConnected(outTest, outAns, 10000, 30000);*/
 
     freopen("tests/6.txt", "r", stdin);
     freopen("tests/ma.txt", "w", stdout);
@@ -47,17 +47,22 @@ int main(int argc, char* argv[])
         graph.addEdge(uniqVertices[v1], uniqVertices[v2]);
     }
 
-    auto res = graph.isDoublyConnected('b', 'r', 0);
-    if (res.first) {
-        for (size_t k = 0, mk = idToVert.size(); k < mk; k++) {
-            std::cout << idToVert[k] << ' ' << res.second.atVertData(k) << ' ';
+    auto res = graph.isDoublyConnected();
+
+    if(!res.first) {
+        std::cout << "graph is not doubly connected!" << '\n' << "Cycle of odd length:" << '\n';
+        for (const auto &v : res.second) {
+            std::cout << idToVert[v] << ' ';
         }
+        std::cout << std::endl;
     }
     else
     {
-        std::cout << "graph is not doubly connected\n";
+        graph.paint({ 'b', 'r' }, uniqVertices.at(1));
+        for (size_t k = 0, mk = idToVert.size(); k < mk; k++) {
+            std::cout << idToVert[k] << ' ' << graph.atVertData(k) << ' ';
+        }
     }
-    std::cout << std::endl;
 
     return 0;
 }

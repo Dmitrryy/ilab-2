@@ -15,7 +15,7 @@ project(Graph)
 set(MAKE_CXX_STANDARD 17)
 
 
-#set(GEN_TESTS true)
+set(GEN_TESTS true)
 
 
 find_package(GTest REQUIRED)
