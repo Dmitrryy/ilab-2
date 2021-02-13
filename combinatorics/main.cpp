@@ -6,6 +6,7 @@
 #include "graph/graph.h"
 #include <gtest/gtest.h>
 
+//#define GEN_TESTS
 
 int main(int argc, char* argv[])
 {
@@ -15,11 +16,11 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef GEN_TESTS
-/*    std::ofstream outTest("tests/6.txt");
+    std::ofstream outTest("tests/6.txt");
     std::ofstream outAns ("tests/6a.txt");
-    genDoublyConnected(outTest, outAns, 10000, 30000);*/
+    genDoublyConnected(outTest, outAns, 10000, 30000);
 
-    freopen("tests/empty.txt", "r", stdin);
+    freopen("tests/4.txt", "r", stdin);
     //freopen("tests/ma.txt", "w", stdout);
 #endif
 
@@ -56,9 +57,9 @@ int main(int argc, char* argv[])
         }
         std::cout << std::endl;
     }
-    else if(graph.vertSize() != 0)
+    else
     {
-        graph.paint({ 'b', 'r' }, uniqVertices.at(1));
+        graph.paint({ 'b', 'r' }, uniqVertices[1]);
         for (size_t k = 0, mk = idToVert.size(); k < mk; k++) {
             std::cout << idToVert[k] << ' ' << graph.atVertData(k) << ' ';
         }
