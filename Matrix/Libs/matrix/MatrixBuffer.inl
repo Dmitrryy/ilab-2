@@ -14,7 +14,7 @@ namespace matrix
 
         std::for_each(cbegin(), cend(), [&that_, &result](Elem<const T> elem)
         {
-            result = result && (elem.val == that_.at_(elem.line, elem.column));
+            result = result && (elem.val == that_.at(elem.line, elem.column));
         });
 
         return result;
@@ -90,7 +90,7 @@ namespace matrix
 	//////////////////////////////////////////////////////////////////////
 
 	template< typename T >
-	const T& MatrixBuffer_t<T>::at_(size_t line, size_t column) const&
+	const T& MatrixBuffer_t<T>::atDefault_(size_t line, size_t column) const&
 	{
 		if (line >= m_lines || column >= m_columns) {
 			throw std::out_of_range("Out of range valid value.");
@@ -152,7 +152,7 @@ namespace matrix
 			{
 				if (elem.line < min_y && elem.column < min_x)
 				{
-					elem = src.at_(elem.line, elem.column);
+					elem = src.at(elem.line, elem.column);
 				}
 			});
 
@@ -195,7 +195,7 @@ namespace matrix
 			for (size_t l = lines; l < m_lines; l++) {
 				for (size_t c = 0; c < m_columns; c++)
 				{
-					at_(l, c).~T();
+                    at(l, c).~T();
 					m_used--;
 				}
 			}
@@ -206,7 +206,7 @@ namespace matrix
 			for (size_t l = m_lines; l < lines; l++) {
 				for (size_t c = 0; c < m_columns; c++)
 				{
-					new(&at_(l, c)) T();
+					new(&at(l, c)) T();
 					m_used++;
 				}
 			}
@@ -217,7 +217,7 @@ namespace matrix
 			for (size_t c = columns; c < m_columns; c++) {
 				for (size_t l = 0; l < m_lines; l++)
 				{
-					at_(l, c).~T();
+                    at(l, c).~T();
 					m_used--;
 				}
 			}
@@ -228,7 +228,7 @@ namespace matrix
 			for (size_t i = 0; i < m_lines; i++) {
 				for (size_t k = m_columns; k < columns; k++)
 				{
-					new(&at_(i, k)) T();
+					new(&at(i, k)) T();
 					m_used++;
 				}
 			}
@@ -256,7 +256,7 @@ namespace matrix
 			out << "| ";
 			for (size_t x = 0; x < m_columns; x++)
 			{
-				out << std::setw(6) << at_(y, x) << ' ';
+				out << std::setw(6) << at(y, x) << ' ';
 			}
 			out << "|\n";
 		}

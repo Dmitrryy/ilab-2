@@ -68,6 +68,10 @@ namespace matrix
         template <typename U>
         bool   equal(const MatrixBuffer_t<U>& that_) const;
 
+        virtual const T& at(size_t line, size_t column) const& { return atDefault_(line, column); }
+        virtual T& at(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t * >(this)->atDefault_(
+                    lines, column)); }
+
         template <typename U>
         bool operator == (const MatrixBuffer_t<U>& that_) const { return equal(that_); }
 
@@ -93,10 +97,11 @@ namespace matrix
 	//private:
     protected:
 
-        const T& at_(size_t line, size_t column) const&;
-        T& at_(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t* >(this)->at_(lines, column)); }
+        const T& atDefault_(size_t line, size_t column) const&;
+        T& atDefault_(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t * >(this)->atDefault_(
+                    lines, column)); }
 
-		[[nodiscard]] std::string dumpStr() const;
+		std::string dumpStr() const;
 
         friend std::ostream& operator << (std::ostream& stream_, const MatrixBuffer_t<T>& mtr_) {
             return stream_ << mtr_.dumpStr();

@@ -21,7 +21,7 @@ namespace matrix
 		T m_rang = {};
 		bool m_actualRang = false;
 
-        using MatrixBuffer_t<T>::at_;
+        using MatrixBuffer_t<T>::atDefault_;
 
 	public:
 
@@ -69,19 +69,14 @@ namespace matrix
 
         bool isZero() const { return *this == Matrix< T >(getLines(), getColumns());}
 
-        const T& at(size_t line, size_t column) const& { return at_(line, column); }
-        T& at(size_t lines, size_t column)& { m_actualRang = false; /**/ return const_cast< T& >(static_cast< const Matrix< T >* >(this)->at(lines, column)); }
+        const T& at(size_t line, size_t column) const& override { return atDefault_(line, column); }
+        T& at(size_t lines, size_t column)& override{ m_actualRang = false; /**/ return const_cast< T& >(static_cast< const Matrix< T >* >(this)->at(lines, column)); }
 
 		size_t rang() const;
 
 		Matrix& add(const Matrix& rhs_)&;
 		Matrix& sub(const Matrix& rhs_)&;
 		Matrix& mul(const T& num_)&;
-
-        void foldLines(size_t to, size_t what, const T& mult);
-        void foldColumns(size_t to, size_t what, const T& mult);
-        void mulLine(size_t what, const T& mult);
-        void mulColumn(size_t what, const T& mult);
 
 		Matrix& multiplication(const Matrix& that_)&;
 
