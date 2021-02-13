@@ -134,7 +134,8 @@ namespace ezg
                 if (deeps[nVert] == 0) {
                     nextVert.top().push(nVert);
                 } else {
-                    if ((deeps[nVert] - deeps[cur]) % 2 == 0) {//cycle of odd length detected
+                    if ((deeps[nVert] - deeps[cur]) % 2 == 0)
+                    {//cycle of odd length detected
                         while (trace.top() != nVert) {
                             oddCycle.push_back(trace.top());
                             trace.pop();
@@ -161,6 +162,7 @@ namespace ezg
         assert(startVert < m_endVertId);
 
         //TODO come up with a suitable workaround function to avoid copy-paste
+
         //because it's so easy to follow the depth
         std::stack< std::stack<size_t> > nextVert;
         std::stack< size_t > trace;

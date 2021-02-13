@@ -16,11 +16,11 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef GEN_TESTS
-    std::ofstream outTest("tests/6.txt");
+/*    std::ofstream outTest("tests/6.txt");
     std::ofstream outAns ("tests/6a.txt");
-    genDoublyConnected(outTest, outAns, 10000, 30000);
+    genDoublyConnected(outTest, outAns, 10000, 30000);*/
 
-    freopen("tests/4.txt", "r", stdin);
+    freopen("tests/1.txt", "r", stdin);
     //freopen("tests/ma.txt", "w", stdout);
 #endif
 
