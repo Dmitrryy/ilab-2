@@ -19,8 +19,8 @@ int main(int argc, char* argv[])
     std::ofstream outAns ("tests/6a.txt");
     genDoublyConnected(outTest, outAns, 10000, 30000);*/
 
-    freopen("tests/6.txt", "r", stdin);
-    freopen("tests/ma.txt", "w", stdout);
+    freopen("tests/empty.txt", "r", stdin);
+    //freopen("tests/ma.txt", "w", stdout);
 #endif
 
     std::unordered_map< size_t, size_t > uniqVertices;
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
         }
         std::cout << std::endl;
     }
-    else
+    else if(graph.vertSize() != 0)
     {
         graph.paint({ 'b', 'r' }, uniqVertices.at(1));
         for (size_t k = 0, mk = idToVert.size(); k < mk; k++) {

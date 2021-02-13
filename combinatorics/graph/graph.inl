@@ -154,10 +154,12 @@ namespace ezg
     template< typename VT_ , typename ET_ >
     Graph_t< VT_ >& Graph_t< VT_ , ET_>::paint(const std::vector< VT_ >& colors, size_t startVert /* = 0 */)&
     {
-        assert(startVert < m_endVertId);
-        if (colors.empty()) {
+        if (colors.empty() || m_endVertId == 0) {
             return *this;
         }
+
+        assert(startVert < m_endVertId);
+
         //TODO come up with a suitable workaround function to avoid copy-paste
         //because it's so easy to follow the depth
         std::stack< std::stack<size_t> > nextVert;
