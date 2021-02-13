@@ -9,6 +9,8 @@
 #include <cstring>
 #include <cmath>
 
+#include "gen_test.h"
+
 
 std::string readFile(const std::string &fileName) {
     std::ifstream f(fileName);
@@ -20,6 +22,27 @@ std::string readFile(const std::string &fileName) {
     return ss.str();
 }
 
+
+template< typename T, typename U >
+void gen_test(std::basic_ostream< T >& outTest, std::basic_ostream< U >& outAns, size_t size)
+{
+    std::vector< int > test;
+    test.reserve(size);
+
+    Random rand(-10000, 10000);
+    outTest << size << std::endl;
+    for (size_t k = 0; k < size; k++) {
+        test.push_back(rand());
+        outTest << test.back() << ' ';
+    }
+
+    std::sort(test.begin(), test.end());
+
+    for (size_t k = 0; k < size; k++) {
+        outAns << test[k] << ' ';
+    }
+}
+
 #ifdef DEBUG
 #define DEBUG_ACTION(act) { act }
 
@@ -28,7 +51,20 @@ std::string readFile(const std::string &fileName) {
 
 #endif //DEBUG
 
+//#define GEN_TESTS_
+
 int main() {
+#ifdef GEN_TESTS_
+    std::ofstream test("tests/1.txt");
+    std::ofstream ans("tests/1a.txt");
+
+    gen_test(test, ans, 1000);
+    return 1;
+#endif
+
+    freopen("tests/2.txt", "r", stdin);
+    freopen("tests/my.txt", "w", stdout);
+
     size_t size_vec = 0;
     std::cin >> size_vec;
 
@@ -37,7 +73,7 @@ int main() {
         extended_size <<= 1;
     }
 
-    DEBUG_ACTION(std::cout << "natural vector size: " << extended_size << std::endl;);
+    //DEBUG_ACTION(std::cout << "natural vector size: " << extended_size << std::endl;);
 
     std::vector<int> data(extended_size, std::numeric_limits< int >::max());
     for (size_t k = 0; k < size_vec; k++) {
@@ -62,7 +98,7 @@ int main() {
     try {
         std::string options(" -D DATA_TYPE=int ");
 
-        DEBUG_ACTION(options += " -D DEBUG ";);
+        //DEBUG_ACTION(options += " -D DEBUG ";);
 
         program.build(options.data());
     }
@@ -78,19 +114,25 @@ int main() {
     size_t local_size = std::min(global_size, devices[0].getInfo< CL_DEVICE_MAX_WORK_GROUP_SIZE >());
     size_t num_of_work_groups = global_size / local_size;
 
-
     unsigned int stage = 0, passOfStage = 0, numStages = 0, temp = 0;
     for (temp = extended_size; temp > 1; temp >>= 1)
         ++numStages;
+std::unordered_map
+/*    kernel.setArg(0, a_buff);
+    kernel.setArg(1, numStages);
+    cl::Event event;
+    commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, local_size, nullptr, &event);
+
+    event.wait();*/
 
     global_size = extended_size / 2;
     for (stage = 0; stage < numStages; ++stage) {
 
         for (passOfStage = 0; passOfStage < stage + 1; ++passOfStage)
         {
-            DEBUG_ACTION(std::cout << "Stage " << stage << ", Pass no " << passOfStage
+/*            DEBUG_ACTION(std::cout << "Stage " << stage << ", Pass no " << passOfStage
             << ": global size " << global_size << ", local size " << local_size <<  std::endl;
-            );
+            );*/
 
             kernel.setArg(0, a_buff);
             kernel.setArg(1, stage);
@@ -100,15 +142,15 @@ int main() {
 
             event.wait();
 
-            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
+/*            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
                 for(size_t i = 0; i < extended_size; i++)
                     std::cout << map_data[i] << ' ';
                 std::cout << std::endl << std::endl;
-                commandQueue.enqueueUnmapMemObject(a_buff, map_data);
-            );
+                commandQueue.enqueueUnmapMemObject(a_buff, map_data);*/
+//            );
 
         }//end of for passStage = 0:stage-1
-    }//end of for stage = 0:numStage-1
+    }//end of for stage = 0:numStage-1*/
 
     int* res_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
     for(size_t i = 0; i < size_vec; i++)

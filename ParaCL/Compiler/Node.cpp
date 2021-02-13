@@ -7,8 +7,10 @@
 
 namespace ezg
 {
-
     ScopeTable g_ScopeTable;
+
+    bool g_needReturn = false;
+    int g_returnValue = 0;
 
 
     std::optional<size_t> Scope::declareVariable(const std::string &var_name)
@@ -33,12 +35,15 @@ namespace ezg
         entry();
 
         for (auto& curNode : m_nodes) {
-            curNode->execute();
+            g_returnValue = curNode->execute();
+            if (g_needReturn) {
+                break;
+            }
         }
 
         exit();
 
-        return 0;
+        return g_returnValue;
     }
 
     void Scope::entry()
@@ -46,6 +51,52 @@ namespace ezg
         g_ScopeTable.entryScope(m_idTable);
     }
     void Scope::exit()
+    {
+        assert(g_ScopeTable.getCurTableId() == m_idTable);
+        g_ScopeTable.exitCurScope();
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    std::optional<size_t> FuncScope::declareVariable(const std::string &var_name)
+    {
+        auto id = g_ScopeTable.declareName(m_idTable, var_name);
+        if (!id.has_value()) {
+            return {};
+        }
+
+        g_ScopeTable.addElem(m_idTable, id.value(), std::make_unique< VarInfo_t >());
+
+        return id.value();
+    }
+
+    int FuncScope::execute()
+    {
+        entry();
+
+        for (auto& curNode : m_nodes) {
+            g_returnValue = curNode->execute();
+            if(g_needReturn) {
+                g_needReturn = false;
+                break;
+            }
+        }
+
+        exit();
+
+        return g_returnValue;
+    }
+
+    std::optional<size_t> FuncScope::visible(const std::string &name)
+    {
+        return g_ScopeTable.visibleName(m_idTable, name);
+    }
+
+    void FuncScope::entry()
+    {
+        g_ScopeTable.entryScope(m_idTable);
+    }
+    void FuncScope::exit()
     {
         assert(g_ScopeTable.getCurTableId() == m_idTable);
         g_ScopeTable.exitCurScope();

@@ -67,6 +67,47 @@ namespace ezg
     };
 
 
+    class FuncScope : public IScope
+    {
+        std::vector< INode* > m_nodes;
+        size_t m_idTable;
+
+        std::vector< size_t > m_argsId;
+
+    public:
+
+        FuncScope(size_t idTable)
+            : m_idTable(idTable)
+        {}
+
+        std::optional< size_t > visible(const std::string& var_name) override;
+        std::optional< size_t > declareVariable(const std::string& var_name) override;
+        std::optional< size_t > addArg(const std::string& name);
+
+
+        void addNode(INode* nNode) override { m_nodes.push_back(nNode); }
+        void insertNode(const std::vector< INode* > &vec) override { m_nodes.insert(m_nodes.end(), vec.begin(), vec.end()); }
+
+        void entry() override;
+        void exit() override;
+
+        int execute() override;
+
+        std::string dumpStr() const override
+        {
+            std::ostringstream out;
+            out << "Scope.\n"
+                << "size = " << m_nodes.size() << '\n'
+                <<  "They are:\n";
+            for (auto m_node : m_nodes)
+            {
+                out << m_node->dumpStr() << std::endl;
+            }
+            return out.str();
+        }
+    };
+
+
     class Variable final : public INode
     {
         size_t m_id;
