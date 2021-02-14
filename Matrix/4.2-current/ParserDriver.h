@@ -22,7 +22,7 @@ namespace yy {
         std::string m_fileName;
 
     public:
-        explicit ParsDriver()
+        ParsDriver()
             : plex_(new Scanner) {}
 
         parser::token_type yylex(parser::location_type* l, parser::semantic_type *yylval) {
