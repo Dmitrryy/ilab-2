@@ -9,7 +9,7 @@
 
 //this is how my acquaintance with boost library
 #include <boost/property_tree/ptree.hpp>
-//#include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
 #define PRINT_STAT_MULTIPLICATION
@@ -47,7 +47,7 @@ namespace ezg
             return m_chain.size() - 1;
         }
 
-        matrix_tree optimalOrder() const
+        tree< size_t > optimalOrderId() const
         {
             if (m_chain.empty()) { return {}; }
 
@@ -110,6 +110,7 @@ namespace ezg
                     assert(resActions != std::numeric_limits< size_t >::max());
                     assert(indexTrees.at(left, right).empty());
 
+                    minActions.at(left, right) = resActions;
                     indexTrees.at(left, right).data() = resActions;
                     indexTrees.at(left, right).put_child(LEFT_CHILD_NAME , indexTrees.at(left, sought_k));
                     indexTrees.at(left, right).put_child(RIGHT_CHILD_NAME, indexTrees.at(sought_k + 1, right));
@@ -120,7 +121,7 @@ namespace ezg
             assert(minActions.at(0, m_chain.size() - 1).has_value());
             assert(indexTrees.at(0, m_chain.size() - 1).size() == 2);
 
-            //TODO return;
+            return indexTrees.at(0, m_chain.size() - 1);
         }
 
         matrix_type optimalMultiplication() const;
@@ -136,12 +137,31 @@ namespace ezg
 
             matrix_tree result;
 
-            std::stack< std::pair< matrix_tree*, tree< size_t >* > > recursionStack;
-            recursionStack.push({ &result, &index_tree });
+            std::stack< std::pair< matrix_tree *, tree<size_t> *> > recursionStack;
+            recursionStack.push({&result, &index_tree});
 
-            while(!recursionStack.empty())
+            while (!recursionStack.empty())
             {
+                const auto curPair = recursionStack.top();
+                matrix_tree *mTree = curPair.first;
+                tree<size_t> *idTree = curPair.second;
 
+                assert(idTree->empty() || idTree->size() == 2);
+
+                if(idTree->empty())
+                {
+                    mTree->data() = m_chain[idTree->data()];
+
+                    recursionStack.pop();
+                    continue;
+                }
+                else
+                {
+                    recursionStack.pop();
+
+                    recursionStack.push( {&(mTree->put_child(LEFT_CHILD_NAME, {})), &(idTree->get_child(LEFT_CHILD_NAME))} );
+                    recursionStack.push( {&(mTree->put_child(RIGHT_CHILD_NAME, {})), &(idTree->get_child(RIGHT_CHILD_NAME))} );
+                }
             }
 
             return result;

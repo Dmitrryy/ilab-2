@@ -4,27 +4,15 @@
 
 int main()
 {
-    boost::property_tree::basic_ptree< std::string, int > tree1;
-    boost::property_tree::basic_ptree< std::string, int > tree2;
+    ezg::MatrixChain< double > chain;
+    chain.add(matrix::Matrix< double >(10, 30));
+    chain.add(matrix::Matrix< double >(30, 5));
+    chain.add(matrix::Matrix< double >(5, 60));
 
+    auto tree = chain.optimalOrderId();
 
-    tree1.put("1", 2);
-    tree1.put("2", 1);
+    //boost::property_tree::xml_parser::write_xml(std::cout, tree);
 
-
-    tree2.put("1", 4);
-    tree2.put("2", 5);
-
-
-
-    tree1.put_child("left", tree2);
-
-    std::cout << tree1.size() << std::endl;
-
-    for(const auto& v : tree1) {
-        std::cout << v.first << ' ';
-        std::cout << v.second.size()<< '\n';
-    }
 
 
     return 0;

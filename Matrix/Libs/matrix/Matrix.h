@@ -30,6 +30,7 @@ namespace matrix
         using MatrixBuffer_t<T>::cbegin;
         using MatrixBuffer_t<T>::cend;
 
+        using MatrixBuffer_t<T>::empty;
         using MatrixBuffer_t<T>::resize;
         using MatrixBuffer_t<T>::equal;
         using MatrixBuffer_t<T>::getLines;
