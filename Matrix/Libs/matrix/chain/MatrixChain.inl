@@ -19,7 +19,7 @@ namespace ezg
     {
         if (m_chain.empty()) { return tree< size_t >(); }
 
-        matrix::Matrix< std::optional< size_t > > minActions(m_chain.size(), m_chain.size());
+        matrix::Matrix< std::optional< size_t > > minActions(m_chain.size(), m_chain.size(), matrix::Order::Column);
 
         tree< size_t > res_tree;
         matrix::Matrix< size_t > indexTrees(m_chain.size(), m_chain.size());
@@ -82,16 +82,17 @@ namespace ezg
                         sought_k = k;
                     }
                 }
+                const size_t idLR = indexTrees.at(left, right);
                 assert(resActions != std::numeric_limits< size_t >::max());
-                assert(!res_tree.getLeftOptional(indexTrees.at(left, right)).has_value());
-                assert(!res_tree.getRightOptional(indexTrees.at(left, right)).has_value());
+                assert(!res_tree.getLeftOptional(idLR).has_value());
+                assert(!res_tree.getRightOptional(idLR).has_value());
 
                 minActions.at(left, right) = resActions;
-                res_tree.at(indexTrees.at(left, right)) = resActions;
+                res_tree.at(idLR) = resActions;
 
 
-                res_tree.setLeft(indexTrees.at(left, right), indexTrees.at(left, sought_k));
-                res_tree.setRight(indexTrees.at(left, right), indexTrees.at(sought_k + 1, right));
+                res_tree.setLeft(idLR, indexTrees.at(left, sought_k));
+                res_tree.setRight(idLR, indexTrees.at(sought_k + 1, right));
                 /////
                 //need optimisation
                 //indexTrees.at(left, right).add_child(LEFT_CHILD_NAME , indexTrees.at(left, sought_k));
@@ -145,39 +146,7 @@ namespace ezg
     {
         matrix_tree tree = buildMatrixTree(optimalOrderId());
 
-        std::stack< size_t > recursionStack;
-        recursionStack.push(tree);
-
-        while(!recursionStack.empty())
-        {
-            matrix_tree* curNode = recursionStack.top();
-            matrix_type& curMatrix = curNode->data();
-
-            assert(curNode->size() == 2 || curNode->empty());
-
-            if (curMatrix.empty() && curNode->size() == 2)
-            {
-                matrix_tree* left = &(curNode->get_child(LEFT_CHILD_NAME));
-                matrix_tree* right = &(curNode->get_child(RIGHT_CHILD_NAME));
-
-                if (left->data().empty()) {
-                    recursionStack.push(left);
-                    continue;
-                }
-                if (right->data().empty()) {
-                    recursionStack.push(right);
-                    continue;
-                }
-
-                curMatrix = std::move(left->data());
-                curMatrix.multiplication(right->data());
-
-                recursionStack.pop();
-            }
-
-        }
-
-        return tree.data();
+        return multiplicationByTree_(tree);
     }
 
 
@@ -186,49 +155,54 @@ namespace ezg
     {
         matrix_tree tree = buildMatrixTree(defaultOrderId());
 
-        std::stack< matrix_tree * > recursionStack;
-        recursionStack.push(&tree);
+        return multiplicationByTree_(tree);
+    }
+
+
+    //private:
+
+    template< typename T >
+    typename MatrixChain< T >::matrix_type MatrixChain< T >::multiplicationByTree_(matrix_tree tree) const
+    {
+        std::stack< size_t > recursionStack;
+        recursionStack.push(tree.getRootId());
 
         while(!recursionStack.empty())
         {
-            matrix_tree* curNode = recursionStack.top();
-            matrix_type& curMatrix = curNode->data();
+            const size_t curNode = recursionStack.top();
+            matrix_type& curMatrix = tree.at(curNode);
 
-            assert(curNode->size() == 2 || curNode->empty());
+            //assert(curNode->size() == 2 || curNode->empty());
 
-            if (curMatrix.empty() && curNode->size() == 2)
+            if (curMatrix.empty() && tree.haveChildren(curNode))
             {
-                matrix_tree* left = &(curNode->get_child(LEFT_CHILD_NAME));
-                matrix_tree* right = &(curNode->get_child(RIGHT_CHILD_NAME));
+                const size_t left = tree.getLeftOptional(curNode).value();
+                const size_t right = tree.getRightOptional(curNode).value();
 
-                if (left->data().empty()) {
+                if (tree.at(left).empty()) {
                     recursionStack.push(left);
                     continue;
                 }
-                if (right->data().empty()) {
+                if (tree.at(right).empty()) {
                     recursionStack.push(right);
                     continue;
                 }
 
-                curMatrix = std::move(left->data());
-                curMatrix.multiplication(right->data());
+                curMatrix = std::move(tree.at(left));
+                curMatrix.multiplication(tree.at(right));
 
                 recursionStack.pop();
             }
 
         }
 
-        return tree.data();
+        return tree.at(tree.getRootId());
     }
-
-
-    //private:
-
 
     template< typename T >
     typename MatrixChain< T >::matrix_tree MatrixChain< T >::buildMatrixTree(const tree< size_t >& index_tree) const
     {
-        if (m_chain.empty()) { return matrix_tree(matrix_type()); }
+        if (m_chain.empty()) { return {}; }
 
         matrix_tree result;
         result.resize(index_tree.size());

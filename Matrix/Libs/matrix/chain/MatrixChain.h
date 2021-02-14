@@ -47,6 +47,7 @@ namespace ezg
 
         matrix_tree buildMatrixTree(const tree< size_t >& index_tree) const;
 
+        matrix_type multiplicationByTree_(matrix_tree mTree) const;
     };//class MatrixChain
 
 

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #include <matrix/chain/MatrixChain.h>
 
@@ -32,41 +33,44 @@ public:
 
 int main()
 {
+
 #ifndef NDEBUG
-    freopen("tests/4.txt", "r", stdin);
+    std::ifstream in("tests/3.txt");
+#else
+    auto& in = std::cin;
 #endif
+
+
 
     ezg::MatrixChain< int > chain;
 
-    while(std::cin)
+    while(in)
     {
         size_t left = 0, right = 0;
-        std::cin >> left >> right;
+        in >> left >> right;
 
-        if (!std::cin) { break; }
+        if (!in) { break; }
 
         chain.add(matrix::Matrix< int >(left, right));
     }
     Timer t;
 
-/*    t.reset();
+    t.reset();
     chain.defaultMultiplication();
     const double defTime = t.elapsed();
 
     t.reset();
     chain.optimalMultiplication();
-    const double optTime = t.elapsed();*/
+    const double optTime = t.elapsed();
 
     auto optimalTree = chain.optimalOrderId();
     auto defaultTree = chain.defaultOrderId();
 
-    //std::cout << "optimal order take " << optTime << " sec" << std::endl;
+    std::cout << "optimal order take " << optTime << " sec" << std::endl;
     std::cout << "operations: " << optimalTree.at(optimalTree.getRootId()) << std::endl << std::endl;
 
-    //std::cout << "default order take " << defTime << " sec" << std::endl;
+    std::cout << "default order take " << defTime << " sec" << std::endl;
     std::cout << "operations: " << defaultTree.at(defaultTree.getRootId()) << std::endl << std::endl;
-    //boost::property_tree::xml_writer_settings< std::string > prop('\t', 1);
-    //boost::property_tree::xml_parser::write_xml(std::cout, tree, prop);
 
     return 0;
 }

@@ -195,7 +195,7 @@ namespace matrix
 			for (size_t l = lines; l < m_lines; l++) {
 				for (size_t c = 0; c < m_columns; c++)
 				{
-                    at(l, c).~T();
+                    atDefault_(l, c).~T();
 					m_used--;
 				}
 			}
@@ -206,7 +206,7 @@ namespace matrix
 			for (size_t l = m_lines; l < lines; l++) {
 				for (size_t c = 0; c < m_columns; c++)
 				{
-					new(&at(l, c)) T();
+					new(&atDefault_(l, c)) T();
 					m_used++;
 				}
 			}
@@ -217,7 +217,7 @@ namespace matrix
 			for (size_t c = columns; c < m_columns; c++) {
 				for (size_t l = 0; l < m_lines; l++)
 				{
-                    at(l, c).~T();
+                    atDefault_(l, c).~T();
 					m_used--;
 				}
 			}
@@ -228,7 +228,7 @@ namespace matrix
 			for (size_t i = 0; i < m_lines; i++) {
 				for (size_t k = m_columns; k < columns; k++)
 				{
-					new(&at(i, k)) T();
+					new(&atDefault_(i, k)) T();
 					m_used++;
 				}
 			}
@@ -256,7 +256,7 @@ namespace matrix
 			out << "| ";
 			for (size_t x = 0; x < m_columns; x++)
 			{
-				out << std::setw(6) << at(y, x) << ' ';
+				out << std::setw(6) << atDefault_(y, x) << ' ';
 			}
 			out << "|\n";
 		}
