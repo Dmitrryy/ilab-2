@@ -11,7 +11,7 @@ add_custom_target(${FB_TARGET}
 project(MatricChain)
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp)
 
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE Release)
@@ -21,6 +21,7 @@ if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     #target_sources(${PROJECT_NAME} PRIVATE tests/gen_tests.cpp)
     add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
