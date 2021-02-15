@@ -19,9 +19,11 @@ namespace ezg
     {
         if (m_chain.empty()) { return tree< size_t >(); }
 
-        matrix::Matrix< std::optional< size_t > > minActions(m_chain.size(), m_chain.size(), matrix::Order::Column);
 
         tree< size_t > res_tree;
+        //the matrix contains the indices of the nodes in the tree.
+        //the node with coordinates i, j contains the optimal order
+        //of multiplication of matrices Аi .... Aj.
         matrix::Matrix< size_t > indexTrees(m_chain.size(), m_chain.size());
         for (size_t l = 0, ml = indexTrees.getLines(); l < ml; l++) {
             for (size_t c = l, mc = indexTrees.getColumns(); c < mc; c++) {
@@ -29,7 +31,14 @@ namespace ezg
             }
         }
 
-        //recursion stack
+        //stores the results of calculations to avoid repeated.
+        //O(n!) -> O(n^3)
+        matrix::Matrix< std::optional< size_t > > minActions(m_chain.size(), m_chain.size(), matrix::Order::Column);
+
+        //recursion stack.
+        //  first - i
+        //  second - j
+        //      next step find minAction[i][j].
         std::stack< std::pair< size_t, size_t > > recursionStack;
         recursionStack.push({ 0, m_chain.size() - 1 });
 
@@ -41,12 +50,14 @@ namespace ezg
             const size_t left = curPair.first;
             const size_t right = curPair.second;
 
-            if (minActions.at(left, right).has_value()) {
+            if (minActions.at(left, right).has_value())
+            {//the value has already been calculated.
                 recursionStack.pop();
                 continue;
             }
 
-            if (left == right) {
+            if (left == right)
+            {//the range of length zero is the matrix. zero operations required.
                 minActions.at(left, left) = 0;
                 res_tree.at(indexTrees.at(left, left)) = left;
 
@@ -55,7 +66,7 @@ namespace ezg
             }
 
             for (size_t k = left; k < right; k++)
-            {
+            {//add to the stack all available permutations in the current range.
                 if(!minActions.at(left, k).has_value()) {
                     recursionStack.push({ left, k });
                 }
@@ -102,7 +113,6 @@ namespace ezg
         }
 
         assert(minActions.at(0, m_chain.size() - 1).has_value());
-        //assert(indexTrees.at(0, m_chain.size() - 1).size() == 2);
 
         //std::cout << minActions << std::endl;
 
@@ -221,44 +231,6 @@ namespace ezg
             }
         }
         result.setRootId(index_tree.getRootId());
-        /*
-
-
-
-        std::stack< std::pair< size_t, size_t > > recursionStack;
-        recursionStack.push({ result.getRootId(), index_tree.getRootId()});
-
-        while (!recursionStack.empty())
-        {
-            const auto curPair = recursionStack.top();
-            const size_t mTree = curPair.first;
-            const size_t idTree = curPair.second;
-
-            //assert(idTree->empty() || idTree->size() == 2);
-
-            if(!index_tree.getLeftOptional(idTree).has_value() && !index_tree.getRightOptional(idTree).has_value())
-            {
-                result.at(mTree) = m_chain[index_tree.at(idTree)];
-
-                recursionStack.pop();
-                continue;
-            }
-            else
-            {
-                recursionStack.pop();
-
-                const size_t nLeft = result.createNode({});
-                const size_t nRight = result.createNode({});
-                result.setLeft(mTree, nLeft);
-                result.setRight(mTree, nRight);
-
-                recursionStack.push( { nLeft, index_tree.getLeftOptional(idTree).value() } );
-                recursionStack.push( { nRight, index_tree.getRightOptional(idTree).value() } );
-
-*//*                recursionStack.push( {&(mTree->put_child(LEFT_CHILD_NAME, {})), &(idTree->get_child(LEFT_CHILD_NAME))} );
-                recursionStack.push( {&(mTree->put_child(RIGHT_CHILD_NAME, {})), &(idTree->get_child(RIGHT_CHILD_NAME))} );*//*
-            }
-        }*/
 
         return result;
     }

@@ -9,9 +9,6 @@
 
 #include "../../binary_tree/binary_tree.h"
 
-#define LEFT_CHILD_NAME "0"
-#define RIGHT_CHILD_NAME "1"
-
 namespace ezg
 {
 

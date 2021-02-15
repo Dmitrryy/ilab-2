@@ -56,12 +56,13 @@ int main()
     Timer t;
 
     t.reset();
+    chain.optimalMultiplication();
+    const double optTime = t.elapsed();
+
+    t.reset();
     chain.defaultMultiplication();
     const double defTime = t.elapsed();
 
-    t.reset();
-    chain.optimalMultiplication();
-    const double optTime = t.elapsed();
 
     auto optimalTree = chain.optimalOrderId();
     auto defaultTree = chain.defaultOrderId();
