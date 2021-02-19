@@ -61,6 +61,7 @@ namespace ezg
         //If the order was optimal, then recalculate the new one.
         if(m_isOptimal) {
             m_isOptimal = false;
+            m_chain.push_back(matrix);
             setOptimalOrder();
         }
         else {
@@ -86,9 +87,9 @@ namespace ezg
 
                 m_curOrderTree.setRootId(newIdRoot);
             }
-        }
 
-        m_chain.push_back(matrix);
+            m_chain.push_back(matrix);
+        }
 
         return idMatrix;
     }
@@ -150,7 +151,7 @@ namespace ezg
         matrix::Matrix< size_t > indexTrees(m_chain.size(), m_chain.size());
         for (size_t l = 0, ml = indexTrees.getLines(); l < ml; l++) {
             for (size_t c = l, mc = indexTrees.getColumns(); c < mc; c++) {
-                indexTrees.at(l, c) = res_tree.createNode();
+                indexTrees.at(l, c) = res_tree.createNode(/*std::numeric_limits< size_t >::max()*/);
             }
         }
 
