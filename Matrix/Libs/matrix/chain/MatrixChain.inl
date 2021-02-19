@@ -1,21 +1,144 @@
+//===----------------------------------------------------------------------===//
+///
+///  Created by Dmitryyy (https://github.com/Dmitrryy)
+///
+///  Allow you to write off it.
+///
+//===----------------------------------------------------------------------===//
+
+
+//
+/// MatrixChain
+///-----------
+///
+/// In this solution, we will consider approaches to multiplying a chain of matrices.
+/// As a rule, the multiplication of matrices of order is not optimal. Let's say you
+/// have a 10x30 A, 30 x 5V, and 5x60 S matrix.
+///
+/// Calculating their product as A (BC) would take(30 × 5 × 60) + (10 × 30 × 60) = 27000
+/// multiplications. At the same time, their product as (A B) C will give the same result
+/// in 4500 operations.
+///
+/// As a solution, it is proposed to reduce the task to subtasks. Denote the result of
+/// multiplying the matrices A (i) * A(i+1) * ... * A(j), where i <= j. If i < j, then
+/// there is a 'k' that splits this chain between the matrices A(k) and A(k+1), i <= k < j.
+/// That is, to calculate A (i,..., j), first calculate A(i,..., k),
+/// then A(k+1,..., j) and then multiply them.
+/// Going through all 'k', we select such that the number of required operations is minimal.
+///
+/// Choosing 'k' is equivalent to placing parentheses.
+/// For example, for some matrices, the following multiplication order is optimal:
+/// ((A * B) * (C * D))
+/// It is convenient to represent such a record as a binary tree.
+///
+/// Two types of trees can be found in algorithms:
+/// 1. Index tree. A tree whose leaves contain the numbers of matrices (equal to the ID in
+/// the array of matrices), and in the nodes the number of operations required for
+/// multiplying children. It is constructed using methods buildOptimalOrderTree_
+/// and buildDefaultOrderTree_.
+/// 2. Matrix tree. it looks the same as the index tree, but the leaves contain the
+/// matrices corresponding to the index in the index tree.
+/// The space in the nodes is reserved for the result of multiplying children.
+/// It is constructed using methods buildMatrixTree_.
+///
+///
+//===----------------------------------------------------------------------===//
+
+#pragma once
 
 
 namespace ezg
 {
 
     template< typename T >
-    size_t MatrixChain< T >::add(const matrix_type& matrix)
+    size_t MatrixChain< T >::addMatrix(const matrix_type& matrix)
     {
         if (!m_chain.empty() && matrix.getLines() != m_chain.back().getColumns()) {
             throw std::invalid_argument("invalid matrix size");
         }
+        const size_t idMatrix = m_chain.size();
+
+        //If the order was optimal, then recalculate the new one.
+        if(m_isOptimal) {
+            m_isOptimal = false;
+            setOptimalOrder();
+        }
+        else {
+            if (m_chain.empty())
+            {//the tree contains one node
+                const auto idRoot = m_curOrderTree.createNode(idMatrix);
+                m_curOrderTree.setRootId(idRoot);
+            }
+            else
+            {//attach a new node with the number of the new matrix on the right.
+                /*
+                 *              newIdRoot
+                 *             /        \
+                 *         oldTree    idMatrixNode
+                 */
+                const size_t actions = m_curOrderTree.at(m_curOrderTree.getRootId())
+                        + m_chain[0].getLines() * matrix.getLines() * matrix.getColumns();
+                const auto newIdRoot = m_curOrderTree.createNode(actions);
+                const auto IdMatrixNode = m_curOrderTree.createNode(idMatrix);
+
+                m_curOrderTree.setLeft(newIdRoot, m_curOrderTree.getRootId());
+                m_curOrderTree.setRight(newIdRoot, IdMatrixNode);
+
+                m_curOrderTree.setRootId(newIdRoot);
+            }
+        }
+
         m_chain.push_back(matrix);
-        return m_chain.size() - 1;
+
+        return idMatrix;
     }
 
 
     template< typename T >
-    ezg::binary_tree_t< size_t > MatrixChain< T >::optimalOrderId() const
+    void MatrixChain< T >::setOptimalOrder()
+    {
+        if (!m_isOptimal)
+        {
+            m_curOrderTree = buildOptimalOrderTree_();
+            m_isOptimal = true;
+        }
+    }
+
+
+    template< typename T >
+    void MatrixChain< T >::setDefaultOrder()
+    {
+        if (m_isOptimal)
+        {
+            m_curOrderTree = buildDefaultOrderTree_();
+            m_isOptimal = false;
+        }
+    }
+
+
+    template< typename T >
+    size_t MatrixChain< T >::getNumReqOperations() const
+    {
+        if (m_chain.size() <= 1u) {
+            return 0;
+        }
+
+        return m_curOrderTree.at(m_curOrderTree.getRootId());
+    }
+
+
+    template< typename T >
+    typename MatrixChain< T >::matrix_type MatrixChain< T >::multiplication() const
+    {
+        return multiplicationByTree_( buildMatrixTree_( m_curOrderTree ) );
+    }
+
+
+    //private:
+
+
+    template< typename T >
+    ezg::binary_tree_t< size_t > MatrixChain< T >::buildOptimalOrderTree_() const
     {
         if (m_chain.empty()) { return tree< size_t >(); }
 
@@ -104,11 +227,6 @@ namespace ezg
 
                 res_tree.setLeft(idLR, indexTrees.at(left, sought_k));
                 res_tree.setRight(idLR, indexTrees.at(sought_k + 1, right));
-                /////
-                //need optimisation
-                //indexTrees.at(left, right).add_child(LEFT_CHILD_NAME , indexTrees.at(left, sought_k));
-                //indexTrees.at(left, right).add_child(RIGHT_CHILD_NAME, indexTrees.at(sought_k + 1, right));
-                /////
             }
         }
 
@@ -123,7 +241,7 @@ namespace ezg
 
 
     template< typename T >
-    ezg::binary_tree_t< size_t > MatrixChain< T >::defaultOrderId() const
+    ezg::binary_tree_t< size_t > MatrixChain< T >::buildDefaultOrderTree_() const
     {
         tree< size_t > result;
         if (m_chain.size() == 0) { return result; }
@@ -150,26 +268,6 @@ namespace ezg
         return result;
     }
 
-
-    template< typename T >
-    typename MatrixChain< T >::matrix_type MatrixChain< T >::optimalMultiplication() const
-    {
-        matrix_tree tree = buildMatrixTree(optimalOrderId());
-
-        return multiplicationByTree_(tree);
-    }
-
-
-    template< typename T >
-    typename MatrixChain< T >::matrix_type MatrixChain< T >::defaultMultiplication() const
-    {
-        matrix_tree tree = buildMatrixTree(defaultOrderId());
-
-        return multiplicationByTree_(tree);
-    }
-
-
-    //private:
 
     template< typename T >
     typename MatrixChain< T >::matrix_type MatrixChain< T >::multiplicationByTree_(matrix_tree tree) const
@@ -209,8 +307,9 @@ namespace ezg
         return tree.at(tree.getRootId());
     }
 
+
     template< typename T >
-    typename MatrixChain< T >::matrix_tree MatrixChain< T >::buildMatrixTree(const tree< size_t >& index_tree) const
+    typename MatrixChain< T >::matrix_tree MatrixChain< T >::buildMatrixTree_(const tree< size_t >& index_tree) const
     {
         if (m_chain.empty()) { return {}; }
 

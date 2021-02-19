@@ -70,9 +70,9 @@ namespace matrix
 
 		bool empty() const noexcept { return m_lines == 0; }
 
-/*        const T& at(size_t line, size_t column) const& { return atDefault_(line, column); }
-        T& at(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t * >(this)->atDefault_(
-                    lines, column)); }*/
+        virtual const T& at(size_t line, size_t column) const& { return atDefault_(line, column); }
+        virtual T& at(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t * >(this)->atDefault_(
+                    lines, column)); }
 
         template <typename U>
         bool operator == (const MatrixBuffer_t<U>& that_) const { return equal(that_); }

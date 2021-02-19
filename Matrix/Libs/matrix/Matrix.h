@@ -70,8 +70,8 @@ namespace matrix
 
         bool isZero() const { return *this == Matrix< T >(getLines(), getColumns());}
 
-        const T& at(size_t line, size_t column) const&  { return atDefault_(line, column); }
-        T& at(size_t lines, size_t column)& { m_actualRang = false; /**/ return const_cast< T& >(static_cast< const Matrix< T >& >(*this).at(lines, column)); }
+        const T& at(size_t line, size_t column) const& override { return atDefault_(line, column); }
+        T& at(size_t lines, size_t column)& override { m_actualRang = false; /**/ return const_cast< T& >(static_cast< const Matrix< T >& >(*this).at(lines, column)); }
 
 		size_t rang() const;
 
@@ -101,6 +101,7 @@ namespace matrix
 	public:
 
 		static Matrix identity(size_t size_);
+		static Matrix random(size_t lines, size_t columns, const T& max, const T& min);
 
 	public:
 

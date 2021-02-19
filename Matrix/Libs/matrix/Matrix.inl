@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <set>
 
+#include <other/random.h>
+
 namespace matrix
 {
 
@@ -614,5 +616,18 @@ namespace matrix
         }
 
 	    return result;
+    }
+
+    template< typename T >
+    /*static*/ Matrix< T > Matrix< T >::random(size_t lines, size_t columns, const T& max, const T& min)
+    {
+        Matrix result(lines, columns);
+        ezg::Random r(static_cast<uint64_t>(max), static_cast<uint64_t>(min));
+
+        std::for_each(result.begin(), result.end(), [&r](auto elem) {
+            elem = r();
+        });
+
+        return result;
     }
 }//namespace matrix
