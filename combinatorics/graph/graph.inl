@@ -11,12 +11,50 @@
 /// Graph
 ///------
 ///
-/// todo
+/// Here we consider the representation of a directed graph in the form of a table
+/// (on a single vector) and the advantages of this representation.
+///
+/// Let there be a graph of n vertices and m edges, then
+/// the graph is represented as a table(4 * (n + m)), the columns of which are:
+/// idEssence - индекс массива, которому соответствует данная сущность.
+/// vertex    - index of the vertex
+/// next      - index of the next entity
+/// prev      - index of the previous entity
+///
+/// Now in more detail and with an example.
+/// graph:
+///              -- 2 --
+///            /    |    \
+///         --      |      --
+///      1          |         4
+///         --      |      --
+///            \    |    /
+///              -- 3 --
+///
+/// might be represented by:
+///                                v1 and v3       v2 and v4
+///      |<---vertices--->|        |<----->|       |<----->|
+/// id   | 0  1   2   3   :  4   5   6   7   8   9   10  11  12  13
+/// vert | 0  0   0   0   :  1   2   1   3   2   3   2   4   3   4
+/// next | 5  4   6   10  :  9   7   8   0   13  11  12  1   3   2
+/// prev | 7  11  13  12  :  1   0   2   5   6   4   3   9   10  8
+///                       |<----->|        |<----->|       |<----->|
+///                  edge on v1 and v2     v2 and v3       v3 and v4
+///
+/// There's not much to say about the 'id'. [0, n) (in our case, n == 4) these are the
+/// indices of the vertices, then these are the indices of the entities(edges).
+///
+/// Vert:
+/// The first n are zero and do not represent anything. Further refers to the vertex id,
+/// from which there is an edge. Entities can be divided into pairs.
+/// One pair is two edges on two vertices (in one direction and in the other).
+///
+/// next and prev:
+/// it should be considered as a doubly connected list whose beginning and end are
+/// the same entity - the entity of the vertex from which these edges come.
 ///
 //===----------------------------------------------------------------------===//
 
-
-#include <unordered_map>
 
 namespace ezg
 {
