@@ -13,7 +13,7 @@ int main()
 {
 
 #ifndef NDEBUG
-    std::ifstream in("tests/3.txt");
+    std::ifstream in("tests/5.txt");
 #else
     auto& in = std::cin;
 #endif

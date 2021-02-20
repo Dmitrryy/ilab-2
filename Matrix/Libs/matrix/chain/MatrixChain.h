@@ -5,6 +5,7 @@
 ///  Allow you to write off it.
 ///
 ///=================================================================//
+
 #pragma once
 
 //std
@@ -21,6 +22,7 @@ namespace ezg
 {
 
     /// Class that implements multiplication of a chain of matrices in different ways.
+    ///
     /// \invariant
     /// The matrices in the chain have a valid size.
     /// If the setOptimalOrder method was called (without a subsequent

@@ -8,11 +8,7 @@
 
 #pragma once
 
-#include <functional>
 #include <random>
-#include <vector>
-#include <matrix/Matrix.h>
-
 
 
 namespace ezg {

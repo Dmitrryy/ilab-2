@@ -20,7 +20,7 @@ namespace ezg
     /// - Сopying/moving is equivalent to copying/moving a single vector
     ///
     /// \Example
-    ///   Nodes: |1|2|3|4|5|6|7|8|
+    ///  Nodes: |1|2|3|4|5|6|7|8|
     ///
     ///   Tree:
     ///                  5                8
@@ -35,7 +35,6 @@ namespace ezg
     template< typename T >
     class binary_tree_t
     {
-
         ///node class.
         ///Contains data and two numbers for children.
         class binary_tree_node_t
@@ -60,7 +59,7 @@ namespace ezg
 
             ///constructor:
             ///set data = val;
-            binary_tree_node_t(const val_type& val)
+            explicit binary_tree_node_t(const val_type& val)
                     : m_data(val)
             {}
 

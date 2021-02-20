@@ -1,3 +1,12 @@
+///=================================================================//
+///
+///  Created by Dmitryyy (https://github.com/Dmitrryy)
+///
+///  Allow you to write off it.
+///
+///=================================================================//
+
+
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
@@ -6,7 +15,7 @@
 #include "graph/graph.h"
 #include <gtest/gtest.h>
 
-//#define GEN_TESTS
+#define GEN_TESTS
 
 int main(int argc, char* argv[])
 {
@@ -20,7 +29,7 @@ int main(int argc, char* argv[])
     std::ofstream outAns ("tests/6a.txt");
     genDoublyConnected(outTest, outAns, 10000, 30000);*/
 
-    freopen("tests/1.txt", "r", stdin);
+    freopen("tests/6.txt", "r", stdin);
     //freopen("tests/ma.txt", "w", stdout);
 #endif
 
@@ -48,7 +57,7 @@ int main(int argc, char* argv[])
         graph.addEdge(uniqVertices[v1], uniqVertices[v2]);
     }
 
-    auto res = graph.isDoublyConnected();
+    auto res = graph.isBipartite();
 
     if(!res.first) {
         std::cout << "graph is not doubly connected!" << '\n' << "Cycle of odd length:" << '\n';

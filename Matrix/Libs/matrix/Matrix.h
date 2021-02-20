@@ -6,14 +6,14 @@
 #include <sstream>
 #include <iomanip>
 #include <cassert>
-#include <string.h>
+
 
 #include "MatrixBuff.h"
 
 namespace matrix
 {
 
-	constexpr double EPSIL = 0.000000001;
+#define EPSIL 0.000000001
 
 	template <typename T = double>
 	class Matrix : public MatrixBuffer_t< T >

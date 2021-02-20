@@ -9,7 +9,7 @@
 
 //
 /// MatrixChain
-///-----------
+///------------
 ///
 /// In this solution, we will consider approaches to multiplying a chain of matrices.
 /// As a rule, the multiplication of matrices of order is not optimal. Let's say you
@@ -151,7 +151,7 @@ namespace ezg
         matrix::Matrix< size_t > indexTrees(m_chain.size(), m_chain.size());
         for (size_t l = 0, ml = indexTrees.getLines(); l < ml; l++) {
             for (size_t c = l, mc = indexTrees.getColumns(); c < mc; c++) {
-                indexTrees.at(l, c) = res_tree.createNode(/*std::numeric_limits< size_t >::max()*/);
+                indexTrees.at(l, c) = res_tree.createNode(std::numeric_limits< size_t >::max());
             }
         }
 
@@ -233,8 +233,6 @@ namespace ezg
 
         assert(minActions.at(0, m_chain.size() - 1).has_value());
 
-        //std::cout << minActions << std::endl;
-
         res_tree.setRootId(indexTrees.at(0, m_chain.size() - 1));
 
         return res_tree;
@@ -273,6 +271,14 @@ namespace ezg
     template< typename T >
     typename MatrixChain< T >::matrix_type MatrixChain< T >::multiplicationByTree_(matrix_tree tree) const
     {
+        if (m_chain.empty()) {
+            return {};
+        }
+
+        if (m_chain.size() == 1) {
+            return m_chain[0];
+        }
+
         std::stack< size_t > recursionStack;
         recursionStack.push(tree.getRootId());
 

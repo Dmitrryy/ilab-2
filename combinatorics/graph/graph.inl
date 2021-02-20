@@ -1,3 +1,20 @@
+///=================================================================//
+///
+///  Created by Dmitryyy (https://github.com/Dmitrryy)
+///
+///  Allow you to write off it.
+///
+///=================================================================//
+
+
+//
+/// Graph
+///------
+///
+/// todo
+///
+//===----------------------------------------------------------------------===//
+
 
 #include <unordered_map>
 
@@ -92,7 +109,7 @@ namespace ezg
 
 
     template< typename VT_ , typename ET_ >
-    std::pair<bool, std::vector<size_t> > Graph_t< VT_ , ET_>::isDoublyConnected() const
+    std::pair<bool, std::vector<size_t> > Graph_t< VT_ , ET_>::isBipartite() const
     {
         //because it's so easy to follow the depth
         std::stack<std::stack<size_t> > nextVert;
@@ -121,7 +138,8 @@ namespace ezg
 
             if (deeps[cur] == 0) {
                 //nextVert.size() and depth are equal
-                deeps[cur] = nextVert.size();
+                assert(trace.size() == nextVert.size());
+                deeps[cur] = trace.size();
                 trace.push(cur);
             } else {
                 continue;
@@ -153,7 +171,7 @@ namespace ezg
     }
 
     template< typename VT_ , typename ET_ >
-    Graph_t< VT_ >& Graph_t< VT_ , ET_>::paint(const std::vector< VT_ >& colors, size_t startVert /* = 0 */)&
+    Graph_t< VT_, ET_ >& Graph_t< VT_ , ET_>::paint(const std::vector< VT_ >& colors, size_t startVert /* = 0 */)&
     {
         if (colors.empty() || m_endVertId == 0) {
             return *this;
