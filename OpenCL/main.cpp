@@ -55,14 +55,14 @@ void gen_test(std::basic_ostream< T >& outTest, std::basic_ostream< U >& outAns,
 
 int main() {
 #ifdef GEN_TESTS_
-    std::ofstream test("tests/1.txt");
-    std::ofstream ans("tests/1a.txt");
+    std::ofstream test("../../OpenCL/tests/1.txt");
+    std::ofstream ans("../../OpenCL/tests/1a.txt");
 
-    gen_test(test, ans, 1000);
+    gen_test(test, ans, 2100);
     return 1;
 #endif
 
-    freopen("tests/2.txt", "r", stdin);
+    freopen("tests/1.txt", "r", stdin);
     freopen("tests/my.txt", "w", stdout);
 
     size_t size_vec = 0;
@@ -85,11 +85,12 @@ int main() {
     std::vector< cl::Device > devices;
     platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
 
-    cl::Context context(devices);
+    cl::Context context(devices[0]);
 
     cl::CommandQueue commandQueue(context, devices.at(0), CL_QUEUE_PROFILING_ENABLE);
 
     cl::Buffer a_buff(context, CL_MEM_READ_WRITE, extended_size * sizeof(int));
+    cl::Buffer cmp_buff(context, CL_MEM_READ_WRITE, extended_size * sizeof(bool));
     commandQueue.enqueueWriteBuffer(a_buff, CL_TRUE, 0, extended_size * sizeof(int), data.data());
 
     std::string source_kernel = readFile("kernel.cl");
@@ -108,7 +109,8 @@ int main() {
         return 1;
     }
 
-    cl::Kernel kernel(program, "bitonic_sort_kernel");
+    cl::Kernel kernel_cmp(program, "bitonic_sort_compare_kernel");
+    cl::Kernel kernel_swap(program, "bitonac_sort_swap_kernel");
 
     size_t global_size = extended_size / 2;
     size_t local_size = std::min(global_size, devices[0].getInfo< CL_DEVICE_MAX_WORK_GROUP_SIZE >());
@@ -117,13 +119,6 @@ int main() {
     unsigned int stage = 0, passOfStage = 0, numStages = 0, temp = 0;
     for (temp = extended_size; temp > 1; temp >>= 1)
         ++numStages;
-std::unordered_map
-/*    kernel.setArg(0, a_buff);
-    kernel.setArg(1, numStages);
-    cl::Event event;
-    commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, local_size, nullptr, &event);
-
-    event.wait();*/
 
     global_size = extended_size / 2;
     for (stage = 0; stage < numStages; ++stage) {
@@ -134,14 +129,24 @@ std::unordered_map
             << ": global size " << global_size << ", local size " << local_size <<  std::endl;
             );*/
 
-            kernel.setArg(0, a_buff);
-            kernel.setArg(1, stage);
-            kernel.setArg(2, passOfStage);
-            cl::Event event;
-            commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, local_size, nullptr, &event);
+            kernel_cmp.setArg(0, a_buff);
+            kernel_cmp.setArg(1, cmp_buff);
+            kernel_cmp.setArg(2, stage);
+            kernel_cmp.setArg(3, passOfStage);
 
+            cl::Event event;
+            commandQueue.enqueueNDRangeKernel(kernel_cmp, 0, global_size, local_size, nullptr, &event);
             event.wait();
 
+
+            cl::Event event2;
+            kernel_swap.setArg(0, a_buff);
+            kernel_swap.setArg(1, cmp_buff);
+            kernel_swap.setArg(2, stage);
+            kernel_swap.setArg(3, passOfStage);
+
+            commandQueue.enqueueNDRangeKernel(kernel_swap, 0, global_size, local_size, nullptr, &event2);
+            event2.wait();
 /*            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
                 for(size_t i = 0; i < extended_size; i++)
                     std::cout << map_data[i] << ' ';
