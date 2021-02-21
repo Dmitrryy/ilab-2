@@ -1,12 +1,10 @@
 
-#include "Application/VulkanDriver.h"
+#include "Application/App.h"
 
 #include <cmath>
 
 #include "../LAL/include/LALmath.h"
 #include "../Octree/Octree.h"
-
-#define IN_FROM_TESTS1 "../2.1-Intersec/tests/010rr.txt"
 
 struct TRiangleColor
 {
@@ -43,27 +41,16 @@ struct PointToRef
 };
 
 glm::vec3 toGLM(const la::Vector3f& vec) { return { vec.x, vec.y, vec.z }; }
-template <typename T>
-std::vector< TRiangleColor > getData(T& _source);
+std::vector< TRiangleColor > getData(std::istream& _source);
 
 int main()
 {
-#ifdef IN_FROM_TESTS1
+    //std::istream& inPut = std::cin;
 
-    std::ifstream fin(IN_FROM_TESTS1);
-    if (!fin.is_open()) {
-        std::cerr << "cant opent test file: " << IN_FROM_TESTS1 << std::endl;
-        exit(1);
-    }
-    auto triangles = getData(fin);
+    std::ifstream inPut("tests/10000.1.txt");
 
-#else
+    auto triangles = getData(inPut);
 
-    auto triangles = getData(std::cin);
-
-#endif // IN_FROM_TESTS
-
-    
     using std::min;
     using std::max;
 
@@ -95,13 +82,16 @@ int main()
 
 
         std::vector< vks::Vertex > vkData;
-        vkData.resize(triangles.size() * 3);
+        vkData.reserve(triangles.size() * 3);
 
-        for (const auto& tr : triangles)
+        for (size_t i = 0, mi = triangles.size(); i < mi; ++i)
         {
+            const auto& tr = triangles[i];
+
             vks::Vertex vert = {};
             vert.color = toGLM(tr.color);
             vert.normal = glm::normalize(toGLM(tr.triangle.getPlane().getN()));
+            vert.entityId = i;
             vert.pos = toGLM(tr.triangle.getA());
             vkData.push_back(vert);
 
@@ -112,16 +102,14 @@ int main()
             vkData.push_back(vert);
         }
 
-        vks::VulkanDriver app("vulkan");
+        vks::VulkanApp app("vulkan");
 
+        app.setVertexBuffer(vkData);
         app.setCameraView(vks::CameraView(toGLM(b) * 1.3f, toGLM((a + b) / 2.f) - toGLM(b) * 1.3f));
         float speed = (a - b).modul() / 8.f;
         app.setCameraSpeed((speed > 1.f) ? speed : 1.f);
 
         app.Init();
-
-        app.updataVertexBuf(vkData);
-
 
         app.Run();
     }
@@ -130,8 +118,8 @@ int main()
 }
 
 
-template <typename T>
-std::vector< TRiangleColor > getData(T& _source)
+
+std::vector< TRiangleColor > getData(std::istream& _source)
 {
     int n = 0;
     _source >> n;

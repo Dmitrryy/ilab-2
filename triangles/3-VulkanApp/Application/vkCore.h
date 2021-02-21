@@ -72,7 +72,8 @@ namespace vks
 #endif
 
         const std::vector<const char*> m_deviceExtensions = {
-                VK_KHR_SWAPCHAIN_EXTENSION_NAME
+                VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+                VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME
         };
 
 #ifdef ENABLE_DEBUG_LAYERS

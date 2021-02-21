@@ -4,9 +4,9 @@ cmake_minimum_required(VERSION 3.10)
 add_subdirectory(LAL)
 set(LAL_FOUND TRUE)
 
-add_subdirectory(2.1-Intersec)
+add_subdirectory(1-Intersec)
 
-add_subdirectory(2.2-VulkanApp)
+add_subdirectory(3-VulkanApp)
 
 #[[
 #================================================================

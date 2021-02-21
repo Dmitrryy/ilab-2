@@ -147,12 +147,12 @@ int main() {
 
             commandQueue.enqueueNDRangeKernel(kernel_swap, 0, global_size, local_size, nullptr, &event2);
             event2.wait();
-/*            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
-                for(size_t i = 0; i < extended_size; i++)
-                    std::cout << map_data[i] << ' ';
-                std::cout << std::endl << std::endl;
-                commandQueue.enqueueUnmapMemObject(a_buff, map_data);*/
-//            );
+    /*            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
+                    for(size_t i = 0; i < extended_size; i++)
+                        std::cout << map_data[i] << ' ';
+                    std::cout << std::endl << std::endl;
+                    commandQueue.enqueueUnmapMemObject(a_buff, map_data);*/
+    //            );
 
         }//end of for passStage = 0:stage-1
     }//end of for stage = 0:numStage-1*/
