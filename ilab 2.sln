@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		triangles\README.md = triangles\README.md
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.2-VulkanApp", "triangles\2.2-VulkanApp\2.2-VulkanApp.vcxproj", "{97001F25-21BC-4590-B060-E2CC02452304}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.2-VulkanDriver", "triangles\2.2-VulkanDriver\2.2-VulkanDriver.vcxproj", "{97001F25-21BC-4590-B060-E2CC02452304}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "2.1-Intersec", "triangles\2.1-Intersec\2.1-Intersec.vcxproj", "{414E7A55-2B52-447D-9648-59CCC374033D}"
 EndProject

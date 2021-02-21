@@ -22,7 +22,7 @@ find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
 find_package(glfw3 REQUIRED)
 
-add_executable(${PROJECT_NAME} app_main.cpp Application/App.cpp Application/vkCore.cpp Application/Helpa/helpa.cpp)
+add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp Application/Helpa/helpa.cpp)
 
 if(NOT LAL_FOUND)
     add_subdirectory(../LAL ../LAL/build)

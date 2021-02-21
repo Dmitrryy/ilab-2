@@ -1,5 +1,5 @@
 
-#include "Application/App.h"
+#include "Application/Driver.h"
 
 #include <cmath>
 
@@ -102,10 +102,10 @@ int main()
             vkData.push_back(vert);
         }
 
-        vks::VulkanApp app("vulkan");
+        vks::VulkanDriver app("vulkan");
 
         app.setVertexBuffer(vkData);
-        app.setCameraView(vks::CameraView(toGLM(b) * 1.3f, toGLM((a + b) / 2.f) - toGLM(b) * 1.3f));
+        app.setCameraView(ezg::CameraView(toGLM(b) * 1.3f, toGLM((a + b) / 2.f) - toGLM(b) * 1.3f));
         float speed = (a - b).modul() / 8.f;
         app.setCameraSpeed((speed > 1.f) ? speed : 1.f);
 

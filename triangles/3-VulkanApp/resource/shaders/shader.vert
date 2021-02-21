@@ -19,7 +19,7 @@ layout(set = 0, binding = 1) readonly buffer object_transform
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec3 inNormal;
-layout(location = 3) in uint entityId;
+layout(location = 3) in uint inEntityId;
 
 layout(location = 0) out vec3 fragColor;
 
@@ -29,6 +29,6 @@ float minLight = 0.2;
 
 void main() 
 {
-    gl_Position = ubo.proj * ubo.view * model_matrix[  entityId  ] * vec4(inPosition, 1.0);
+    gl_Position = ubo.proj * ubo.view * model_matrix[  inEntityId  ] * vec4(inPosition, 1.0);
     fragColor = inColor * min(1.0, max(minLight, abs(dot(inNormal, light1)) + abs(dot(inNormal, light2))));
 }
