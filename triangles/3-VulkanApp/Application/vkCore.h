@@ -1,6 +1,12 @@
-//
-// Created by dmitry on 10.11.2020.
-//
+/*************************************************************************
+ *
+ * vkCore.h
+ *
+ * Created by dmitry
+ * 22.02.2021
+ *
+ ***/
+
 #pragma once
 
 #include <vulkan/vulkan.h>

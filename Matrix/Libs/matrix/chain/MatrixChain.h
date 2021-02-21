@@ -1,10 +1,11 @@
-///=================================================================//
-///
-///  Created by Dmitryyy (https://github.com/Dmitrryy)
-///
-///  Allow you to write off it.
-///
-///=================================================================//
+/*************************************************************************
+ *
+ * MatrixChain.h
+ *
+ * Created by dmitry
+ * 22.02.2021
+ *
+ ***/
 
 #pragma once
 
@@ -17,6 +18,7 @@
 //my lib
 #include <matrix/Matrix.h>
 #include <binary_tree/binary_tree.h>
+
 
 namespace ezg
 {

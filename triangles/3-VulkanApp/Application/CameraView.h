@@ -1,3 +1,12 @@
+/*************************************************************************
+ *
+ * CameraView.h
+ *
+ * Created by dmitry
+ * 22.02.2021
+ *
+ ***/
+
 #pragma once
 
 #define GLM_FORCE_RADIANS

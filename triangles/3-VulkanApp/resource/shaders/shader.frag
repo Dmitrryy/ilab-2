@@ -1,3 +1,12 @@
+/*************************************************************************
+ *
+ * shader.frag
+ *
+ * Created by dmitry
+ * 22.02.2021
+ *
+ ***/
+
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 

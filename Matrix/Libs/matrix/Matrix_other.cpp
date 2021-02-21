@@ -1,3 +1,12 @@
+/*************************************************************************
+ *
+ * Matrix_other.cpp
+ *
+ * Created by dmitry
+ * 22.02.2021
+ *
+ ***/
+
 #include "Matrix.h"
 
 #define orCase(a) \
