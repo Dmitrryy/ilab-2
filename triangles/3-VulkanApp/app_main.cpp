@@ -56,22 +56,36 @@ int main()
 {
     //std::istream& inPut = std::cin;
 
-    std::ifstream inPut("tests/002.txt");
+    std::ifstream inPut("tests/1.txt");
 
-    auto triangles = getData(inPut);
+    //auto triangles = getData(inPut);
+
+    size_t num = 0;
+    int time = 0;
+    inPut >> num >> time;
 
     ezg::AppLVL3 app;
+    for (size_t i = 0; i < num; ++i) {
+        glm::vec3 a, b, c, rot_dir_v1, rot_dir_v2;
+        float speed = 0;
+        inPut >> a.x >> a.y >> a.z
+                >> b.x >> b.y >> b.z
+                >> c.x >> c.y >> c.z;
 
-    for (const auto& trcl : triangles) {
-        const auto& tr = trcl.triangle;
+        inPut >> rot_dir_v1.x >> rot_dir_v1.y >> rot_dir_v1.z
+                >> rot_dir_v2.x >> rot_dir_v2.y >> rot_dir_v2.z;
 
-        app.addTriangle(toGLM(tr.getA()), toGLM(tr.getB()), toGLM(tr.getC())
-                        , {}, { 0.f, 0.f, 1.f }, 10, 10);
+        inPut >> speed;
+
+        app.addTriangle(a - rot_dir_v1, b - rot_dir_v1, c - rot_dir_v1
+                        , rot_dir_v1, rot_dir_v2 - rot_dir_v1, speed, time);
     }
 
     app.run();
 
     return 0;
+
+
 /*
     if (!triangles.empty())
     {

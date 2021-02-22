@@ -43,6 +43,8 @@ float minLight = 0.2;
 
 void main() 
 {
+    vec4 validNormal = object_info[  gl_BaseInstance  ].model_matrix * vec4(inNormal, 0.f);
+
     // "We are using gl_BaseInstance to access the object buffer. This is due to how Vulkan works
     // on its normal draw calls. All the draw commands in Vulkan request “first Instance” and
     // “instance count”. We are not doing instanced rendering, so instance count is always 1. But
@@ -51,5 +53,6 @@ void main()
     // to send a single integer to the shader without setting up pushconstants or descriptors."
     // Source: https://vkguide.dev/docs/chapter-4/storage_buffers/
     gl_Position = ubo.proj * ubo.view * object_info[  gl_BaseInstance  ].model_matrix * vec4(inPosition, 1.0);
-    fragColor = object_info[  gl_BaseInstance  ].color * min(1.0, max(minLight, abs(dot(inNormal, light1)) + abs(dot(inNormal, light2))));
+    vec3 ObjColor = object_info[  gl_BaseInstance  ].color;
+    fragColor = ObjColor * max(minLight, abs(dot(validNormal.xyz, light1)));
 }

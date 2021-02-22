@@ -34,7 +34,7 @@ namespace ezg
         {
             std::vector< vks::Vertex > m_vertices;
 
-            glm::vec3 m_color         = { 0.f, 240.f, 0.f };
+            glm::vec3 m_color         = { 0.f, 1.f, 0.f };
 
             glm::vec3 m_position;
 
