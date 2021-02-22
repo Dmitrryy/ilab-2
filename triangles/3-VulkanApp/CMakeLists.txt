@@ -22,7 +22,7 @@ find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
 find_package(glfw3 REQUIRED)
 
-add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp Application/Helpa/helpa.cpp)
+add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp Application/App.cpp Application/Helpa/helpa.cpp)
 
 if(NOT LAL_FOUND)
     add_subdirectory(../LAL ../LAL/build)
@@ -36,6 +36,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/include")
 target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/lib")
 target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/etc/explicit_layer.d")
 
+target_include_directories(${PROJECT_NAME} PRIVATE ../../)
 
 # Link dependencies
 target_link_libraries(${PROJECT_NAME} LAL)

@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "Driver.h"
+#include <OtherLibs/timer.h>
+
 
 ///======================================================================================
 /// This file defines a class that performs a level-3 triangle task:
@@ -32,11 +34,11 @@ namespace ezg
         {
             std::vector< vks::Vertex > m_vertices;
 
-            glm::vec3 m_color         = { 0.f, 256.f, 0.f };
+            glm::vec3 m_color         = { 0.f, 240.f, 0.f };
 
             glm::vec3 m_position;
 
-            glm::vec3 m_dirRotation;
+            glm::vec3 m_dirRotation   = { 0.f, 0.f, 1.f };
             float     m_angle         = 0;
             float     m_speedRotation = 0;
 
@@ -52,9 +54,27 @@ namespace ezg
 
     private:
 
+        vks::VulkanDriver m_driver;
+        GLFWwindow*       m_pWindow = nullptr;
+
+
         std::vector< Entity > m_entities;
 
-        float m_time = 0;
+        CameraView m_cameraView;
+        float      m_speed = 10.f;
+
+        ezg::Timer     m_time;
+
+    public:
+
+        AppLVL3()
+            : m_driver     ("Triangles-3")
+            , m_cameraView ({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
+        {}
+
+        ~AppLVL3() {
+            glfwDestroyWindow(m_pWindow);
+        }
 
     public:
 
@@ -79,8 +99,19 @@ namespace ezg
 
     private:
 
-        void update_entity_(float time);
-        void checkEvents_();
+        void update_entities_(float time);
+        void update_camera_(float time);
+
+
+        void load_entity_data_in_driver_();
+
+
+        void init_();
+        void init_camera_();
+
+
+        static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+        static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
     };
 
 }//namespace ezg

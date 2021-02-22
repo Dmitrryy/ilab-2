@@ -30,7 +30,7 @@ namespace vks
 	struct Vertex 
 	{
 		glm::vec3 pos;
-		glm::vec3 color;
+		glm::vec3 color = { 255.f, 0.f, 0.f };
 		glm::vec3 normal;
 
         alignas(8) uint64_t entityId;
@@ -74,13 +74,23 @@ namespace vks
 		}
 	};
 
+
+	struct ObjectInfo
+    {
+	    std::vector< Vertex > vertices;
+	    glm::mat4 model_matrix;
+	    glm::vec3 color;
+    };
+
+
 	struct UniformView {
 		glm::mat4 view;
 		glm::mat4 proj;
 	};
 
 	struct UniformModel {
-        alignas(4) glm::mat4 model;
+        alignas(16) glm::mat4 model;
+        alignas(16) glm::vec3 color;
 	};
 
 	class VulkanDriver
@@ -118,20 +128,29 @@ namespace vks
 
 		size_t                         m_maxFramesInFlight = 2;
 
-		VkBuffer                       m_vertexBuffer = nullptr;;
-		VkDeviceMemory                 m_vertexBufferMemory = nullptr;
 
-		std::vector< VkBuffer >        m_uniformBuffersFromUbo;
+        ////////////////////////////////////////
+        /// Scene info from shader(view matrix, projection matrix etc)
+        std::vector< VkBuffer >        m_uniformBuffersFromUbo;
 		std::vector< VkDeviceMemory >  m_uniformBuffersMemoryFromUbo;
+        ////////////////////////////////////////
 
+        ////////////////////////////////////////
+		/// Object info from shader(model matrix, color etc)
 		std::vector< VkBuffer >        m_uniformBuffersFromModel;
 		std::vector< VkDeviceMemory >  m_uniformBuffersMemoryFromModel;
 		std::vector< UniformModel >    m_modelData;
+		/// end OIS
+        ////////////////////////////////////////
 
-		ezg::CameraView                     m_cameraView;
-		float                          m_speed = 1.f;
 
+
+        ezg::CameraView     m_cameraView;
+
+        //todo different buffer for each object
 		std::vector<Vertex> vertices;
+        VkBuffer                       m_vertexBuffer = nullptr;;
+        VkDeviceMemory                 m_vertexBufferMemory = nullptr;
 
 	public:
 
@@ -141,24 +160,33 @@ namespace vks
 			, m_cameraView({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
 		{ }
 
+
 		~VulkanDriver()
 		{
 			cleanup();
 		}
 
-		void Init();
+
+		void detectFrameBufferResized() { m_framebufferResized = true; }
+
+
+		void Init(GLFWwindow* window);
+
+
+		void addObject(const ObjectInfo& info);
+		void setObjectInfo(size_t objectID, const ObjectInfo& info);
+
+
+		void render();
+
+
 		void cleanup();
-		bool isInit() { return m_pWindow != nullptr; }
 
-		void setVertexBuffer(const std::vector< Vertex >& new_data) { vertices = new_data;}
+
 		void setCameraView(const ezg::CameraView& camera) { m_cameraView = camera; }
-		void setCameraSpeed(float speed) { m_speed = speed; }
 
-		void Run();
 
 	private:
-
-		void updateCamera(float time);
 
 		VkShaderModule createShaderModule_(const std::vector< char >& source_);
 
@@ -180,7 +208,7 @@ namespace vks
 		void createCommandBuffer_();
 		void recordCommandBuffers_();
 
-		void renderScene_();
+		//void renderScene_();
 
 		void createFramebuffer_();
 
@@ -196,13 +224,10 @@ namespace vks
 
 		void createSyncObjects_();
 
+
 		bool hasStencilComponent(VkFormat format) {
 			return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D16_UNORM_S8_UINT;
 		}
-
-		static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
-		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	};
 
 }//namespace vks

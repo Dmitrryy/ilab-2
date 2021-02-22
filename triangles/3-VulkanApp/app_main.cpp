@@ -8,7 +8,7 @@
  ***/
 
 
-#include "Application/Driver.h"
+#include "Application/App.h"
 
 #include <cmath>
 
@@ -56,13 +56,23 @@ int main()
 {
     //std::istream& inPut = std::cin;
 
-    std::ifstream inPut("tests/010.txt");
+    std::ifstream inPut("tests/002.txt");
 
     auto triangles = getData(inPut);
 
-    using std::min;
-    using std::max;
+    ezg::AppLVL3 app;
 
+    for (const auto& trcl : triangles) {
+        const auto& tr = trcl.triangle;
+
+        app.addTriangle(toGLM(tr.getA()), toGLM(tr.getB()), toGLM(tr.getC())
+                        , {}, { 0.f, 0.f, 1.f }, 10, 10);
+    }
+
+    app.run();
+
+    return 0;
+/*
     if (!triangles.empty())
     {
         la::Vector3f a = triangles.at(0).triangle.getA(), b = triangles.at(0).triangle.getB();
@@ -123,7 +133,7 @@ int main()
         app.Run();
     }
 
-    return 0;
+    return 0;*/
 }
 
 

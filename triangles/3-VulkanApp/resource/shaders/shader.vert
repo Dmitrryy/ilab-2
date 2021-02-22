@@ -10,17 +10,24 @@
 #version 460
 
 #extension GL_ARB_separate_shader_objects : enable
-
 #extension GL_ARB_shader_draw_parameters : require
+
 
 layout(set = 0, binding = 0) uniform UniformBufferObject {
 	mat4 view;
 	mat4 proj;
 } ubo;
 
+
+struct ObjectInfo
+{
+    mat4 model_matrix;
+    vec3 color;
+};
+
 layout(set = 0, binding = 1) readonly buffer object_transform
 {
-    mat4 model_matrix[];
+    ObjectInfo object_info[];
 };
 
 layout(location = 0) in vec3 inPosition;
@@ -43,7 +50,6 @@ void main()
     // integer we can use for whatever use we want to in the shader. This gives us a simple way
     // to send a single integer to the shader without setting up pushconstants or descriptors."
     // Source: https://vkguide.dev/docs/chapter-4/storage_buffers/
-    gl_Position = ubo.proj * ubo.view * model_matrix[  gl_BaseInstance  ] * vec4(inPosition, 1.0);
-
-    fragColor = inColor * min(1.0, max(minLight, abs(dot(inNormal, light1)) + abs(dot(inNormal, light2))));
+    gl_Position = ubo.proj * ubo.view * object_info[  gl_BaseInstance  ].model_matrix * vec4(inPosition, 1.0);
+    fragColor = object_info[  gl_BaseInstance  ].color * min(1.0, max(minLight, abs(dot(inNormal, light1)) + abs(dot(inNormal, light2))));
 }

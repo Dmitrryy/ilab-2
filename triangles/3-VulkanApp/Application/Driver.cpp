@@ -13,61 +13,35 @@
 #include <cstring>
 #include <chrono>
 
-#define WINDOW_HEIGHT 800
-#define WINDOW_WIDTH  1000
 
 const std::string vert_shader_fname = "resource/shaders/vert.spv";
 const std::string frag_shader_fname = "resource/shaders/frag.spv";
 
 namespace vks
 {
-	/*static*/ void VulkanDriver::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
-	{
-		auto app = static_cast<VulkanDriver*>(glfwGetWindowUserPointer(window));
 
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-			glfwSetWindowShouldClose(window, GL_TRUE);
-		}
-		else if (key == GLFW_KEY_TAB) {
-			if (action == GLFW_PRESS) {
-				glfwSetInputMode(app->m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			}
-			else if (action == GLFW_RELEASE) {
-				int wHeight = 0, wWidth = 0;
-				glfwGetWindowSize(app->m_pWindow, &wWidth, &wHeight);
-				glfwSetCursorPos(app->m_pWindow, wWidth / 2.0, wHeight / 2.0);
-				glfwSetInputMode(app->m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			}
-		}
-	}
-
-	/*static*/ void VulkanDriver::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-		auto app = static_cast<VulkanDriver*>(glfwGetWindowUserPointer(window));
-		app->m_framebufferResized = true;
-		app->m_cameraView.setAspect(width /(float) height);
-	}
-
-	void VulkanDriver::Init()
+	void VulkanDriver::Init(GLFWwindow* window)
 	{
 		try
 		{
-			int res = glfwInit();
+/*			int res = glfwInit();
 			if (res != GLFW_TRUE) {
 				throw std::runtime_error(DEBUG_MSG("failed glfwInit!"));
-			}
+			}*/
 
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			//glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-			m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
-			glfwSetWindowUserPointer(m_pWindow, this);
+            m_pWindow = window;
+
+			//m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
+/*			glfwSetWindowUserPointer(m_pWindow, this);
 			glfwSetFramebufferSizeCallback(m_pWindow, framebufferResizeCallback);
 			glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
 
-			glfwSetKeyCallback(m_pWindow, keyCallback);
+			glfwSetKeyCallback(m_pWindow, keyCallback);*/
 
 
 			m_core.Init(m_pWindow);
-			m_cameraView.setAspect(WINDOW_WIDTH / WINDOW_HEIGHT);
 
 			vkGetDeviceQueue(m_core.getDevice(), m_core.getQueueFamily(), 0, &m_queue);
 
@@ -99,6 +73,29 @@ namespace vks
 			cleanup();
 		}
 	}
+
+
+
+    void VulkanDriver::addObject(const ObjectInfo& info)
+    {
+	    UniformModel cur {};
+	    cur.model = info.model_matrix;
+	    cur.color = info.color;
+	    m_modelData.push_back(cur);
+
+
+	    for(const auto& vert : info.vertices) {
+	        vertices.push_back(vert);
+	    }
+    }
+    void VulkanDriver::setObjectInfo(size_t objectID, const ObjectInfo& info)
+    {
+        auto& md = m_modelData.at(objectID);
+
+        md.model = info.model_matrix;
+        md.color = info.color;
+    }
+
 
 
 	void VulkanDriver::createSwapChain_()
@@ -250,7 +247,7 @@ namespace vks
 		vkDestroyCommandPool(device_, m_cmdBufPool, nullptr);
 		m_cmdBufPool = nullptr;
 
-		glfwDestroyWindow(m_pWindow);
+		//glfwDestroyWindow(m_pWindow);
 		m_pWindow = nullptr;
 
 		m_core.cleanup();
@@ -333,7 +330,6 @@ namespace vks
 			vkCmdBindDescriptorSets(m_cmdBufs[k], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[k], 1, dynamicOffsets);
 
 			size_t numVec = vertices.size();
-
             for (size_t curT = 1; curT * 3 <= numVec; curT++) {
                 // curT - 1 == gl_BaseInstance in vert shader
                 vkCmdDraw(m_cmdBufs[k], 3u, 1, (curT - 1) * 3, curT - 1);
@@ -494,16 +490,15 @@ namespace vks
         data = nullptr;
 
 
-		m_modelData.resize(vertices.size() / 3);
-		for (size_t i = 0; i < m_modelData.size(); i++) {
-            m_modelData[i].model = glm::rotate(glm::mat4(1.f), glm::radians(time * (i % 50)), {0.f, 0.f, 1.f})
-                    * glm::scale(glm::mat4(1.f),  { std::sin(time), std::sin(time), std::sin(time) });
-        }
-        //todo
-
+        const size_t mSize = m_modelData.size();
         vkMapMemory(device, m_uniformBuffersMemoryFromModel[currentImage_], 0,
                     sizeof(UniformModel) * m_modelData.size(), 0, &data);
-        memcpy(data, m_modelData.data(), sizeof(UniformModel) * m_modelData.size());
+
+        auto* pModelData = static_cast< UniformModel* >(data);
+        for (size_t i = 0, mi = m_modelData.size(); i < mi; i++) {
+            pModelData[i] = m_modelData.at(i);
+        }
+        //memcpy(data, m_modelData.data(), sizeof(UniformModel) * m_modelData.size());
         vkUnmapMemory(device, m_uniformBuffersMemoryFromModel[currentImage_]);
 	}
 
@@ -631,7 +626,7 @@ namespace vks
 	}
 
 
-	void VulkanDriver::renderScene_()
+	void VulkanDriver::render()
 	{
 		vkWaitForFences(m_core.getDevice(), 1, &m_inFlightFences[m_currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -654,7 +649,9 @@ namespace vks
 		// Mark the image as now being in use by this frame
 		m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
 
+		//todo
 		updateUniformBuffer_(imageIndex);
+		//todo
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1011,96 +1008,6 @@ namespace vks
 				vkCreateFence(m_core.getDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS) {
 
 				throw std::runtime_error(DEBUG_MSG("failed to create semaphores!"));
-			}
-		}
-	}
-
-
-	void VulkanDriver::Run()
-	{
-		if (!isInit()) {
-			std::cerr << "function VulkanDriver::Run() call of uninitialized object!";
-			return;
-		}
-		auto startTime = std::chrono::high_resolution_clock::now();
-		int wHeight = 0, wWidth = 0;
-		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
-
-		glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
-		glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-		try {
-
-			while (!glfwWindowShouldClose(m_pWindow))
-			{
-				auto currentTime = std::chrono::high_resolution_clock::now();
-				float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-				startTime = currentTime;
-
-				glfwPollEvents();
-
-				updateCamera(time);
-
-				renderScene_();
-			}
-
-		}
-		catch (std::exception& exc_)
-		{
-			std::cerr << "Fatal error in VulkanDriver::Run():\n";
-			std::cerr << "What(): " << exc_.what() << std::endl;
-            std::cerr << "Called VulkanDriver::cleanup()" << std::endl;
-            cleanup();
-		}
-
-		vkDeviceWaitIdle(m_core.getDevice());
-	}
-
-
-	void VulkanDriver::updateCamera(float time)
-	{
-		int wHeight = 0, wWidth = 0;
-		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
-		if (glfwGetKey(m_pWindow, GLFW_KEY_TAB) != GLFW_PRESS) {
-			double x = 0, y = 0;
-			glfwGetCursorPos(m_pWindow, &x, &y);
-			const float dx = wWidth / 2.f - x;
-			const float dy = wHeight / 2.f - y;
-
-			m_cameraView.turnInHorizontalPlane(glm::radians(90.f * dx / wWidth));
-			m_cameraView.turnInVerticalPlane(glm::radians(90.f * dy / wHeight));
-
-			glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
-		}
-
-		{
-			bool forward = glfwGetKey(m_pWindow, GLFW_KEY_W) == GLFW_PRESS;
-			bool back = glfwGetKey(m_pWindow, GLFW_KEY_S) == GLFW_PRESS;
-			if (forward && back) { forward = back = false; }
-
-			bool left = glfwGetKey(m_pWindow, GLFW_KEY_A) == GLFW_PRESS;
-			bool right = glfwGetKey(m_pWindow, GLFW_KEY_D) == GLFW_PRESS;
-			if (left && right) { left = right = false; }
-
-
-			if (forward || back)
-			{
-				m_cameraView.moveAlongDirection(time * m_speed * ((forward) ? 1.f : -1.f));
-			}
-			if (left || right)
-			{
-				m_cameraView.movePerpendicularDirection(time * m_speed * ((right) ? 1.f : -1.f));
-			}
-		}
-
-		{
-			bool down = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-			bool up = glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS;
-			if (down && up) { down = up = false; }
-
-			if (down || up)
-			{
-				m_cameraView.moveVertical(time * m_speed * ((down) ? -1.f : 1.f));
 			}
 		}
 	}
