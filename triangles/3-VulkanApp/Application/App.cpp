@@ -35,9 +35,9 @@ namespace ezg
 
     glm::mat4 AppLVL3::Entity::getModelMatrix() const
     {
-        glm::mat4 rotateMatrix = glm::rotate(glm::mat4(1.f), glm::radians(m_angle), m_dirRotation);
-        glm::mat4 res = glm::translate(rotateMatrix, m_position);
-        //return res;
+        //todo scale
+        glm::mat4 translationMatrix = glm::translate(glm::mat4(1.f), m_position);
+        glm::mat4 res = glm::rotate(translationMatrix, glm::radians(m_angle), m_dirRotation);
         return res;
     }
 
