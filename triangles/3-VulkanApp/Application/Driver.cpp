@@ -33,13 +33,6 @@ namespace vks
 
             m_pWindow = window;
 
-			//m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
-/*			glfwSetWindowUserPointer(m_pWindow, this);
-			glfwSetFramebufferSizeCallback(m_pWindow, framebufferResizeCallback);
-			glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
-
-			glfwSetKeyCallback(m_pWindow, keyCallback);*/
-
 
 			m_core.Init(m_pWindow);
 
