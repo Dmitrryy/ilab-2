@@ -56,7 +56,7 @@ int main()
 {
     //std::istream& inPut = std::cin;
 
-    std::ifstream inPut("tests/10000.1.txt");
+    std::ifstream inPut("tests/010.txt");
 
     auto triangles = getData(inPut);
 

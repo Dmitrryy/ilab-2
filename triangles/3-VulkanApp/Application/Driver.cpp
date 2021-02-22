@@ -333,14 +333,13 @@ namespace vks
 			vkCmdBindDescriptorSets(m_cmdBufs[k], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[k], 1, dynamicOffsets);
 
 			size_t numVec = vertices.size();
-            //vkCmdDraw(m_cmdBufs[k], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+
             for (size_t curT = 1; curT * 3 <= numVec; curT++) {
-                vkCmdDraw(m_cmdBufs[k], 3u, 1, (curT - 1) * 3, 0);
+                // curT - 1 == gl_BaseInstance in vert shader
+                vkCmdDraw(m_cmdBufs[k], 3u, 1, (curT - 1) * 3, curT - 1);
             }
 
 			vkCmdEndRenderPass(m_cmdBufs[k]);
-
-			//vkCmdClearColorImage(m_cmdBufs[k], m_images[k], VK_IMAGE_LAYOUT_GENERAL, &clearColor, 1, &imageRange);
 
 			if (vkEndCommandBuffer(m_cmdBufs[k]) != VK_SUCCESS) {
 				throw std::runtime_error(DEBUG_MSG("failed to record command buffer!"));
@@ -497,8 +496,8 @@ namespace vks
 
 		m_modelData.resize(vertices.size() / 3);
 		for (size_t i = 0; i < m_modelData.size(); i++) {
-            m_modelData[i].model = glm::rotate(glm::mat4(1.f), glm::radians(time * (i % 50)), {0.f, 0.f, 1.f});
-                    //* glm::scale(glm::mat4(1.f),  { std::sin(time), std::sin(time), std::sin(time) });
+            m_modelData[i].model = glm::rotate(glm::mat4(1.f), glm::radians(time * (i % 50)), {0.f, 0.f, 1.f})
+                    * glm::scale(glm::mat4(1.f),  { std::sin(time), std::sin(time), std::sin(time) });
         }
         //todo
 

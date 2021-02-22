@@ -1,17 +1,16 @@
 /*************************************************************************
  *
- * shader.vert
+ *   shader.vert
  *
- * Created by dmitry
- * 22.02.2021
+ *   Created by dmitry
+ *   22.02.2021
  *
  ***/
 
-#version 450
+#version 460
 
 #extension GL_ARB_separate_shader_objects : enable
 
-//#extension GL_EXT_nonuniform_qualifier : require
 #extension GL_ARB_shader_draw_parameters : require
 
 layout(set = 0, binding = 0) uniform UniformBufferObject {
@@ -37,6 +36,14 @@ float minLight = 0.2;
 
 void main() 
 {
-    gl_Position = ubo.proj * ubo.view * model_matrix[  inEntityId  ] * vec4(inPosition, 1.0);
+    // "We are using gl_BaseInstance to access the object buffer. This is due to how Vulkan works
+    // on its normal draw calls. All the draw commands in Vulkan request “first Instance” and
+    // “instance count”. We are not doing instanced rendering, so instance count is always 1. But
+    // we can still change the “first instance” parameter, and this way get gl_BaseInstance as a
+    // integer we can use for whatever use we want to in the shader. This gives us a simple way
+    // to send a single integer to the shader without setting up pushconstants or descriptors."
+    // Source: https://vkguide.dev/docs/chapter-4/storage_buffers/
+    gl_Position = ubo.proj * ubo.view * model_matrix[  gl_BaseInstance  ] * vec4(inPosition, 1.0);
+
     fragColor = inColor * min(1.0, max(minLight, abs(dot(inNormal, light1)) + abs(dot(inNormal, light2))));
 }

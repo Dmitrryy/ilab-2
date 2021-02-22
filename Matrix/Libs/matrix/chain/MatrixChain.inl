@@ -1,4 +1,4 @@
-/*************************************************************************
+/**************************************************************************************************
  *
  * MatrixChain.inl
  *
@@ -10,11 +10,11 @@
 
 //
 /// MatrixChain
-///------------
+///================================================================================================
 ///
 /// In this solution, we will consider approaches to multiplying a chain of matrices.
 /// As a rule, the multiplication of matrices of order is not optimal. Let's say you
-/// have a 10x30 A, 30 x 5V, and 5x60 S matrix.
+/// have a 10x30 A, 30 x 5 B, and 5x60 C matrix.
 ///
 /// Calculating their product as A (BC) would take(30 × 5 × 60) + (10 × 30 × 60) = 27000
 /// multiplications. At the same time, their product as (A B) C will give the same result
@@ -41,9 +41,8 @@
 /// matrices corresponding to the index in the index tree.
 /// The space in the nodes is reserved for the result of multiplying children.
 /// It is constructed using methods buildMatrixTree_.
-///
-///
-//===----------------------------------------------------------------------===//
+///================================================================================================
+///================================================================================================
 
 #pragma once
 
