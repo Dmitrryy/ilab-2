@@ -1,14 +1,46 @@
-#include <iostream>
+/**************************************************************************************************
+ *
+ *   main.c
+ *
+ *   Created by dmitry
+ *   ?.?.2020
+ *
+ ***/
+
+//
+/// 1-determinant
+///======================================================================================
+/// This program calculates the current in each edge of the circuit.
+///
+/// The input is supplied with the edges of the graph with resistance and EMF(optional).
+/// Flex and bison are used for parsing.
+/// Example:
+/// 1 -- 2, 4.0;
+/// 1 -- 3, 10.0;
+/// 1 -- 4, 2.0; -12.0
+/// 2 -- 3, 60.0;
+/// 2 -- 4, 22.0;
+/// 3 -- 4, 5.0;
+///
+/// At the output, the edges are in the same order with the specified current.
+/// Example:
+/// 1 -- 2: 0.442958 A
+/// 1 -- 3: 0.631499 A
+/// 1 -- 4: -1.07446 A
+/// 2 -- 3: 0.0757193 A
+/// 2 -- 4: 0.367239 A
+/// 3 -- 4: 0.707219 A
+///======================================================================================
+///======================================================================================
+//
+
+
 
 #include "ParserDriver.h"
 #include <circuit/Circuit.h>
 
 #include <set>
-#include <vector>
-#include <cassert>
-#include <algorithm>
-#include <fstream>
-#include <sstream>
+#include <iostream>
 
 
 //#define GEN_TESTS

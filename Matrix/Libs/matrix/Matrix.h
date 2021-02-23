@@ -1,4 +1,4 @@
-/*************************************************************************
+/****************************************************************************************
  *
  * Matrix.h
  *
@@ -6,6 +6,15 @@
  * 22.02.2021
  *
  ***/
+
+//
+/// Matrix
+///======================================================================================
+/// This file defines the Matrix class, which extends the interface of the MatrixBuffer_t
+/// class.
+///======================================================================================
+///======================================================================================
+
 
 #pragma once
 
@@ -24,6 +33,12 @@ namespace matrix
 
 #define EPSIL 0.000000001
 
+    /// \name class Matrix
+    /// \brief
+    ///     The class is an extension of the interface of the base class MatrixBuffer_t.
+    ///     Methods such as calculating the determinant, solving a linear system, calculating
+    ///     the rank, and so on are added.
+    /// \tparam T - data type
 	template <typename T = double>
 	class Matrix : public MatrixBuffer_t< T >
 	{
@@ -101,6 +116,15 @@ namespace matrix
 		Matrix& reversGaussian()& { return reversGaussian_from_(0); }
 
 		Matrix homogeneousSolve() const;
+        /*
+ * Solves a system of linear equations with free members.
+ *
+ * returns a pair of matrices:
+ *      first is a partial solution.
+ *      second is the fundamental matrix of a homogeneous system.
+ *
+ * fixme: problem with integer types
+ */
         std::pair< Matrix< T >, Matrix< T > >  solve(const std::vector< T >& freeMembers) const;
 
 		T determinanteSloww() const;
@@ -176,7 +200,7 @@ namespace matrix
 	}
 
 
-	template <typename T>
+    template <typename T>
     template <typename U>
     Matrix<T>::Matrix(const Matrix<U> &that_) noexcept
         : Matrix(that_.getLines(), that_.getColumns(), that_.getOrder())

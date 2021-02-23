@@ -126,7 +126,7 @@ namespace ezg
     void Circuit::printCurrents(std::ostream& out /*= std::cout*/) const
     {
         for (const auto& edge : m_data) {
-            out << edge.v1 << " -- " << edge.v2 << ": " << ((std::abs(edge.current.value()) < matrix::EPSIL) ? 0.f : edge.current.value())
+            out << edge.v1 << " -- " << edge.v2 << ": " << ((std::abs(edge.current.value()) < EPSIL) ? 0.f : edge.current.value())
                 << " A" << std::endl;
         }
     }

@@ -183,17 +183,8 @@ namespace matrix
     }
 
 
-    /*
-     * Solves a system of linear equations with free members.
-     *
-     * returns a pair of matrices:
-     *      first is a partial solution.
-     *      second is the fundamental matrix of a homogeneous system.
-     *
-     * fixme: problem with integer types
-     */
-    template <typename T>
-    std::pair< Matrix< T >, Matrix< T > > Matrix<T>::solve(const std::vector< T >& freeMembers) const
+    template< typename T >
+    std::pair< Matrix< T >, Matrix< T>> Matrix< T >::solve(const std::vector< T > &freeMembers) const
     {
         if (getLines() != freeMembers.size()) {
             throw std::invalid_argument("");

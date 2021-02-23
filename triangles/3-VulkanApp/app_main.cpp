@@ -12,9 +12,6 @@
 
 #include <cmath>
 
-#include "../LAL/include/LALmath.h"
-#include "../Octree/Octree.h"
-
 
 int main()
 {

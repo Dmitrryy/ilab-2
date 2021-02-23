@@ -144,7 +144,6 @@ namespace vks
         ////////////////////////////////////////
 
 
-
         ezg::CameraView     m_cameraView;
 
         //todo different buffer for each object

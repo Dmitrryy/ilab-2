@@ -1,9 +1,9 @@
 /*************************************************************************
  *
- * MatrixBuffer.h
+ *   MatrixBuffer.h
  *
- * Created by dmitry
- * 22.02.2021
+ *   Created by dmitry
+ *   ?.?.2021
  *
  ***/
 
