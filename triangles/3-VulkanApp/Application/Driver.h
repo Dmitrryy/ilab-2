@@ -93,6 +93,10 @@ namespace vks
         alignas(16) glm::vec3 color;
 	};
 
+	struct OutputVertShader {
+        alignas(16) glm::vec3 world_coord;
+	};
+
 	class VulkanDriver
 	{
 		std::string                    m_appName;
@@ -140,13 +144,18 @@ namespace vks
 		std::vector< VkBuffer >        m_uniformBuffersFromModel;
 		std::vector< VkDeviceMemory >  m_uniformBuffersMemoryFromModel;
 		std::vector< UniformModel >    m_modelData;
+		///
+		std::vector< VkBuffer >        m_storageBufferWorldCoords;
+		std::vector< VkDeviceMemory >  m_storageBufferMemoryWorldCoords;
+		//todo: access to the vertices of a specific element by offset in a shared array
+		std::vector< glm::vec3 >       m_worldCoords;
 		/// end OIS
         ////////////////////////////////////////
 
 
         ezg::CameraView     m_cameraView;
 
-        //todo different buffer for each object
+        //todo: different buffer for each object
 		std::vector<Vertex> vertices;
         VkBuffer                       m_vertexBuffer = nullptr;;
         VkDeviceMemory                 m_vertexBufferMemory = nullptr;
@@ -174,6 +183,9 @@ namespace vks
 
 		void addObject(const ObjectInfo& info);
 		void setObjectInfo(size_t objectID, const ObjectInfo& info);
+
+		void updateWorldCoordsData(uint32_t currentImage_);
+		std::vector< glm::vec3 > getWorldCoords(size_t objectID);
 
 
 		void render();

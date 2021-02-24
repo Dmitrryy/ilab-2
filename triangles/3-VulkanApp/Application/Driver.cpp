@@ -90,8 +90,22 @@ namespace vks
     }
 
 
+    std::vector< glm::vec3 > VulkanDriver::getWorldCoords(size_t objectID)
+    {
+	    //todo objects of different sizes
+	    const size_t num_vertices = 3;
+	    std::vector< glm::vec3 > res(3);
 
-	void VulkanDriver::createSwapChain_()
+	    for(size_t i = 0; i < num_vertices; i++) {
+	        res.at(i) = m_worldCoords[num_vertices * objectID + i];
+	    }
+
+	    return res;
+    }
+
+
+
+    void VulkanDriver::createSwapChain_()
 	{
 		const VkSurfaceCapabilitiesKHR& SurfaceCaps = m_core.getSurfaceCaps();
 		assert(SurfaceCaps.currentExtent.width != -1);
@@ -318,9 +332,10 @@ namespace vks
 			vkCmdBindVertexBuffers(m_cmdBufs[k], 0, 1, vertexBuffers, offsets);
             //todo
             uint32_t dynamicOffsets[] = {
+                    0,
                     0
             };
-			vkCmdBindDescriptorSets(m_cmdBufs[k], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[k], 1, dynamicOffsets);
+			vkCmdBindDescriptorSets(m_cmdBufs[k], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[k], 2, dynamicOffsets);
 
 			size_t numVec = vertices.size();
             for (size_t curT = 1; curT * 3 <= numVec; curT++) {
@@ -449,7 +464,7 @@ namespace vks
         ////////////////////////////////////////////
 
         ////////////////////////////////////////////
-        //create buffers from ubo
+        //create buffers from model info
         VkDeviceSize bufferSize2 = sizeof(UniformModel) * vertices.size() / 3;
         m_uniformBuffersFromModel.resize(m_images.size());
         m_uniformBuffersMemoryFromModel.resize(m_images.size());
@@ -459,6 +474,20 @@ namespace vks
             m_core.createBuffer(bufferSize2, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
                                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                 m_uniformBuffersFromModel[i], m_uniformBuffersMemoryFromModel[i]);
+        }
+        ////////////////////////////////////////////
+
+        ////////////////////////////////////////////
+        // create buffers from world coords
+        VkDeviceSize bufferSize3 = sizeof(OutputVertShader) * vertices.size();
+        m_storageBufferWorldCoords.resize(m_images.size());
+        m_storageBufferMemoryWorldCoords.resize(m_images.size());
+
+        for (size_t i = 0, mi = m_images.size(); i < mi; i++)
+        {
+            m_core.createBuffer(bufferSize3, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                m_storageBufferWorldCoords[i], m_storageBufferMemoryWorldCoords[i]);
         }
         ////////////////////////////////////////////
     }
@@ -483,7 +512,6 @@ namespace vks
         data = nullptr;
 
 
-        const size_t mSize = m_modelData.size();
         vkMapMemory(device, m_uniformBuffersMemoryFromModel[currentImage_], 0,
                     sizeof(UniformModel) * m_modelData.size(), 0, &data);
 
@@ -491,12 +519,33 @@ namespace vks
         for (size_t i = 0, mi = m_modelData.size(); i < mi; i++) {
             pModelData[i] = m_modelData.at(i);
         }
-        //memcpy(data, m_modelData.data(), sizeof(UniformModel) * m_modelData.size());
         vkUnmapMemory(device, m_uniformBuffersMemoryFromModel[currentImage_]);
+
+        //todo
+        updateWorldCoordsData(currentImage_);
 	}
 
 
-	void VulkanDriver::createDescriptorSetLayout_()
+    void VulkanDriver::updateWorldCoordsData(uint32_t currentImage_)
+    {
+        void* data = nullptr;
+        auto device = m_core.getDevice();
+        m_worldCoords.resize(vertices.size());
+
+        vkMapMemory(device, m_storageBufferMemoryWorldCoords[currentImage_], 0,
+                sizeof(OutputVertShader) * vertices.size(), 0, &data);
+
+        auto* pOutData = static_cast< OutputVertShader* >(data);
+        for (size_t i = 0, mi = vertices.size(); i < mi; i++)
+        {
+            m_worldCoords[i] = pOutData->world_coord;
+        }
+        vkUnmapMemory(device, m_storageBufferMemoryWorldCoords[currentImage_]);
+        //std::cout << m_worldCoords[0].x << ' ' << m_worldCoords[0].y << ' ' << m_worldCoords[0].z << std::endl;
+    }
+
+
+    void VulkanDriver::createDescriptorSetLayout_()
 	{
 		VkDescriptorSetLayoutBinding uboLayoutBinding = {};
         uboLayoutBinding.binding            = 0;
@@ -512,14 +561,22 @@ namespace vks
         modelLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
         modelLayoutBinding.pImmutableSamplers = nullptr;
 
+        VkDescriptorSetLayoutBinding coordsLayoutBinding = {};
+        coordsLayoutBinding.binding            = 2;
+        coordsLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+        coordsLayoutBinding.descriptorCount    = 1;
+        coordsLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
+        coordsLayoutBinding.pImmutableSamplers = nullptr;
+
         VkDescriptorSetLayoutBinding bindings[] {
                 uboLayoutBinding,
-                modelLayoutBinding
+                modelLayoutBinding,
+                coordsLayoutBinding
         };
 
 		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = 2;
+		layoutInfo.bindingCount = 3;
 		layoutInfo.pBindings = bindings;
 
 		if (vkCreateDescriptorSetLayout(m_core.getDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
@@ -538,14 +595,19 @@ namespace vks
         poolSizeModel.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
         poolSizeModel.descriptorCount = static_cast<uint32_t> (m_images.size());
 
+        VkDescriptorPoolSize poolSizeCoords = {};
+        poolSizeCoords.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+        poolSizeCoords.descriptorCount = static_cast<uint32_t> (m_images.size());
+
         VkDescriptorPoolSize poolSizes[] = {
                 poolSizeUbo,
-                poolSizeModel
+                poolSizeModel,
+                poolSizeCoords
         };
 
 		VkDescriptorPoolCreateInfo poolInfo = {};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 2;
+		poolInfo.poolSizeCount = 3;
 		poolInfo.pPoolSizes = poolSizes;
 		poolInfo.maxSets = static_cast<uint32_t> (m_images.size());
 
@@ -608,13 +670,32 @@ namespace vks
             descriptorWriteModel1.pImageInfo = nullptr;
             descriptorWriteModel1.pTexelBufferView = nullptr;
 
+            ///
+
+            VkDescriptorBufferInfo bufferInfoColors = {};
+            bufferInfoColors.buffer = m_storageBufferWorldCoords[i];
+            bufferInfoColors.offset = 0;
+            bufferInfoColors.range = sizeof(OutputVertShader) * vertices.size();
+
+            VkWriteDescriptorSet descriptorWriteColors = {};
+            descriptorWriteColors.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWriteColors.dstSet = m_descriptorSets[i];
+            descriptorWriteColors.dstBinding = 2;
+            descriptorWriteColors.dstArrayElement = 0;
+            descriptorWriteColors.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
+            descriptorWriteColors.descriptorCount = 1;
+            descriptorWriteColors.pBufferInfo = &bufferInfoColors;
+            descriptorWriteColors.pImageInfo = nullptr;
+            descriptorWriteColors.pTexelBufferView = nullptr;
+
 
             VkWriteDescriptorSet descriptorWrites[] = {
                     descriptorWriteUbo,
                     descriptorWriteModel1,
+                    descriptorWriteColors
             };
 
-			vkUpdateDescriptorSets(device_, 2, descriptorWrites, 0, nullptr);
+			vkUpdateDescriptorSets(device_, 3, descriptorWrites, 0, nullptr);
 		}
 	}
 
