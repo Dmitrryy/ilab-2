@@ -143,6 +143,7 @@ namespace ezg
         glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
         m_cameraView.setAspect(wHeight /(float) wWidth);
+        m_cameraView.setPosition(m_entities[0].m_vertices[0].pos);
     }
 
 
@@ -159,6 +160,12 @@ namespace ezg
 /*            std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
                                          << curEntity.m_coordsInWorld[1].x << ", " << curEntity.m_coordsInWorld[1].y << ", " << curEntity.m_coordsInWorld[1].z << " | "
                                          << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;*/
+
+/*            for (auto& vec : curEntity.m_coordsInWorld) {
+                vec.x = std::round(vec.x * 10000) / 10000;
+                vec.y = std::round(vec.y * 10000) / 10000;
+                vec.z = std::round(vec.z * 10000) / 10000;
+            }*/
 
             curEntity.updateArea();
             if (curEntity.type() == Entity::Type::Triangle)

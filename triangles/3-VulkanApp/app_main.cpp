@@ -19,9 +19,9 @@ int main()
 #ifdef NDEBUG
     std::istream& inPut = std::cin;
 #else
-    std::ofstream test("../../../triangles/3-VulkanApp/tests/3.txt");
+    std::ofstream test("../../../triangles/3-VulkanApp/tests/4.txt");
     assert(test);
-    ezg::gen_tr3_test_rand(test, 10, 15);
+    ezg::gen_tr3_test_rand(test, 11, 30005);
     //return 0;
 
     std::ifstream inPut("tests/3.txt");

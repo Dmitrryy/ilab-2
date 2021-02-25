@@ -857,9 +857,6 @@ namespace la
             const auto res1 = findIntersec(_lhs, line_inters.first);
             auto lhsp = _lhs.getPlane();
             auto rhsp = _rhs.getPlane();
-            if (res1.second == Intersec::quantity::Error) {
-                assert(lhsp == rhsp);
-            }
             assert(res1.second != Intersec::quantity::Error);
 
             if (res1.second != Intersec::quantity::Nop)
