@@ -17,14 +17,16 @@
 int main()
 {
 #ifdef NDEBUG
-    std::istream& inPut = std::cin;
-#else
-    std::ofstream test("../../../triangles/3-VulkanApp/tests/4.txt");
-    assert(test);
-    ezg::gen_tr3_test_rand(test, 11, 30005);
-    //return 0;
+    //std::istream& inPut = std::cin;
+    std::ifstream inPut("tests/5.txt");
 
-    std::ifstream inPut("tests/3.txt");
+#else
+    std::ofstream test("../../../triangles/3-VulkanApp/tests/5.txt");
+    assert(test);
+    ezg::gen_tr3_test_rand(test, 50, 100);
+    return 0;
+
+    std::ifstream inPut("tests/4.txt");
 #endif
 
     size_t num = 0;

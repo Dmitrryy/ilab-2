@@ -7,6 +7,38 @@
  *
  ***/
 
+//
+/// App
+///======================================================================================
+/// This application visualizes the intersection of triangles that can move.
+///
+/// The vulkan api is used for visualization. In the current version, all objects
+/// (triangles) must be known before the driver is initialized. To create a window, use
+/// the glfw library.
+///
+///
+/// learn more about what happens in the loop located in the run method:
+///
+/// - first of all, the window events are checked(button clicks, cursor movement, etc.).
+///
+/// - then the object states are updated. in this case, the triangle is moved, a collision
+/// is detected, and when it intersects, it is repainted in red. Since the entity class
+/// does not store (store but does not update itself) data about the world position of
+/// vertices, they are taken from the driver (more precisely, from the vertex shader).
+///
+/// - after that, the data in the vulkan driver is updated. The world matrices and the
+/// color for each triangle are sent.
+///
+/// - Next comes the update of the camera position.
+///
+/// - and finally, the scene render command is sent to the driver.
+///
+/// Then the next iteration begins. Exit the loop if the window was closed.
+///
+///======================================================================================
+///======================================================================================
+
+
 #include "App.h"
 #include "../../Octree/Octree.h"
 
@@ -131,16 +163,16 @@ namespace ezg
         glfwSetKeyCallback(m_pWindow, keyCallback);
 
         glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
-        // end create window
-        //-----------------------------------------------
-
-        m_driver.Init(m_pWindow);
 
         int wHeight = 0, wWidth = 0;
         glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
         glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
         glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        // end create window
+        //-----------------------------------------------
+
+        m_driver.Init(m_pWindow);
 
         m_cameraView.setAspect(wHeight /(float) wWidth);
         m_cameraView.setPosition(m_entities[0].m_vertices[0].pos);
@@ -150,7 +182,7 @@ namespace ezg
 
     void AppLVL3::update_entities_(float time)
     {
-        la::Vector3f a, b;
+        la::Vector3f a(std::numeric_limits<double>::max()), b(std::numeric_limits<double>::min());
 
         for(size_t i = 0, mi = m_entities.size(); i < mi; ++i) {
             Entity& curEntity = m_entities.at(i);
@@ -160,12 +192,6 @@ namespace ezg
 /*            std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
                                          << curEntity.m_coordsInWorld[1].x << ", " << curEntity.m_coordsInWorld[1].y << ", " << curEntity.m_coordsInWorld[1].z << " | "
                                          << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;*/
-
-/*            for (auto& vec : curEntity.m_coordsInWorld) {
-                vec.x = std::round(vec.x * 10000) / 10000;
-                vec.y = std::round(vec.y * 10000) / 10000;
-                vec.z = std::round(vec.z * 10000) / 10000;
-            }*/
 
             curEntity.updateArea();
             if (curEntity.type() == Entity::Type::Triangle)
@@ -182,13 +208,15 @@ namespace ezg
             b.y = std::max(b.y, curEntity.m_area.getB().y);
             b.z = std::max(b.z, curEntity.m_area.getB().z);
         }
-        //todo
-        //m_entities[0].intersection(m_entities[1]);
+
+
 
         la::Octree< Entity* > octTree({a, b});
         for (auto& ent : m_entities) {
+            ent.m_color = { 0.f, 1.f, 0.f };
             octTree.add(&ent);
         }
+
 
         octTree.msplit();
 

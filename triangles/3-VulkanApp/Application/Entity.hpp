@@ -47,8 +47,9 @@ namespace ezg
 
         void updateArea()
         {
-            la::Vector3f a;
-            la::Vector3f b;
+            if (m_coordsInWorld.empty()) { return ; }
+            la::Vector3f a = { m_coordsInWorld[0].x, m_coordsInWorld[0].y, m_coordsInWorld[0].z };
+            la::Vector3f b = a;
 
             for (const auto& vec : m_coordsInWorld) {
                 a.x = std::min(static_cast< float >(a.x), vec.x);
@@ -95,9 +96,6 @@ namespace ezg
 
             if (res) {
                 m_color = that.m_color = { 1.f, 0.f, 0.f};
-            }
-            else {
-                m_color = that.m_color = { 0.f, 1.f, 0.f };
             }
 
             return res;

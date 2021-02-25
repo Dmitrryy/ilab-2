@@ -162,6 +162,12 @@ namespace vks
 
 	public:
 
+	    VulkanDriver           (const VulkanDriver&) = delete; //not supported
+	    VulkanDriver& operator=(const VulkanDriver&) = delete; //not supported
+	    VulkanDriver           (VulkanDriver&&)      = delete; //not supported
+	    VulkanDriver& operator=(VulkanDriver&&)      = delete; //not supported
+
+
 		VulkanDriver(std::string appName_)
 			: m_core(appName_)
 			, m_appName(std::move(appName_))
