@@ -97,7 +97,7 @@ namespace la
 	template <typename T>
 	void Octree<T>::add(const T& _elem)
 	{
-		const auto elem_area = _elem.getArea();
+		const auto elem_area = _elem->getArea();
 
 		if (!_tryAdd_(_elem, elem_area))
 		{
@@ -229,7 +229,7 @@ namespace la
 		for (size_t i = 0, n = m_data.size(); i < n; i++)
 		{
 			T& tmp = m_data.at(i);
-			const Rectangle3 esq = tmp.getArea();
+			const Rectangle3 esq = tmp->getArea();
 			uint16_t counter = 0u;
 			int num_target = 0;
 			for (int k = 0; k < 8; k++)
@@ -272,7 +272,7 @@ namespace la
 			{
 				for (const int& id_elem : new_chdata.at(i))
 				{
-					const bool rest = m_children.at(i)->_tryAdd_(tmp_data.at(id_elem), tmp_data.at(id_elem).getArea());
+					const bool rest = m_children.at(i)->_tryAdd_(tmp_data.at(id_elem), tmp_data.at(id_elem)->getArea());
 					assert(rest);
 				}
 			}
@@ -372,7 +372,7 @@ namespace la
 			for (size_t k = i + 1; k < _vec.size(); k++)
 			{
 				//std::cout << _vec.at(i).id << ' ' << _vec.at(k).id << std::endl;
-				if (_vec.at(i).intersec(_vec.at(k)))
+				if (_vec.at(i)->intersection(*_vec.at(k)))
 				{
 					res.push_back(std::make_pair(_vec.at(i), _vec.at(k)));
 				}
@@ -407,7 +407,7 @@ namespace la
 		for (size_t i = 0; i < _lhs.size(); i++) {
 			for (size_t k = 0; k < _rhs.size(); k++) {
 				//std::cout << _lhs.at(i).id << ' ' << _rhs.at(k).id << std::endl;
-				if (_lhs.at(i).intersec(_rhs.at(k)))
+				if (_lhs.at(i)->intersection(*_rhs.at(k)))
 				{
 					res.push_back(std::make_pair(_lhs.at(i), _rhs.at(k)));
 				}

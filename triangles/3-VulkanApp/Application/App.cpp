@@ -24,30 +24,12 @@ namespace ezg
      *
      ***/
 
-    void AppLVL3::Entity::update(float time)
-    {
-        m_liveTimeSec -= time;
-
-        if (m_liveTimeSec > 0.f) {
-            m_angle += m_speedRotation * std::min(time, m_liveTimeSec);
-        }
-    }
-
-    glm::mat4 AppLVL3::Entity::getModelMatrix() const
-    {
-        //todo scale
-        glm::mat4 translationMatrix = glm::translate(glm::mat4(1.f), m_position);
-        glm::mat4 res = glm::rotate(translationMatrix, glm::radians(m_angle), m_dirRotation);
-        return res;
-    }
-
-
     void AppLVL3::addTriangle(glm::vec3 pos_a, glm::vec3 pos_b, glm::vec3 pos_c, glm::vec3 position
                               , glm::vec3 direction_rotation, float rotation_speed, float live_time_sec)
     {
         const size_t entityId = m_entities.size();
 
-        Entity entity;
+        Triangle entity;
         vks::Vertex vertex[3];
 
         glm::vec3 normal = glm::normalize(glm::cross(pos_b - pos_a, pos_c - pos_a));
@@ -62,9 +44,9 @@ namespace ezg
         vertex[2].normal = normal;
         vertex[2].entityId = entityId;
 
-        entity.m_vertices.push_back(vertex[0]);
-        entity.m_vertices.push_back(vertex[1]);
-        entity.m_vertices.push_back(vertex[2]);
+        entity.m_vertices.at(0) = (vertex[0]);
+        entity.m_vertices.at(1) = (vertex[1]);
+        entity.m_vertices.at(2) = (vertex[2]);
 
         entity.m_position = position;
         entity.m_dirRotation = direction_rotation;
@@ -81,14 +63,6 @@ namespace ezg
         init_();
 
         m_time.reset();
-
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
-
-        glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
-        glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-        m_cameraView.setAspect(wHeight /(float) wWidth);
 
         Timer frameTimer;
         while(!glfwWindowShouldClose(m_pWindow))
@@ -161,23 +135,57 @@ namespace ezg
         //-----------------------------------------------
 
         m_driver.Init(m_pWindow);
-        //todo
-    }
 
+        int wHeight = 0, wWidth = 0;
+        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
+        glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
+        glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-    void AppLVL3::init_camera_()
-    {
-
+        m_cameraView.setAspect(wHeight /(float) wWidth);
     }
 
 
 
     void AppLVL3::update_entities_(float time)
     {
-        for(auto& ent : m_entities) {
-            ent.update(time);
+        la::Vector3f a, b;
+
+        for(size_t i = 0, mi = m_entities.size(); i < mi; ++i) {
+            Entity& curEntity = m_entities.at(i);
+            curEntity.update(time);
+
+            curEntity.m_coordsInWorld = m_driver.getWorldCoords(i);
+/*            std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
+                                         << curEntity.m_coordsInWorld[1].x << ", " << curEntity.m_coordsInWorld[1].y << ", " << curEntity.m_coordsInWorld[1].z << " | "
+                                         << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;*/
+
+            curEntity.updateArea();
+            if (curEntity.type() == Entity::Type::Triangle)
+            {
+                static_cast< Triangle& >(curEntity).updateLaTriangle();
+            }
+
+
+            a.x = std::min(a.x, curEntity.m_area.getA().x);
+            a.y = std::min(a.y, curEntity.m_area.getA().y);
+            a.z = std::min(a.z, curEntity.m_area.getA().z);
+
+            b.x = std::max(b.x, curEntity.m_area.getB().x);
+            b.y = std::max(b.y, curEntity.m_area.getB().y);
+            b.z = std::max(b.z, curEntity.m_area.getB().z);
         }
+        //todo
+        //m_entities[0].intersection(m_entities[1]);
+
+        la::Octree< Entity* > octTree({a, b});
+        for (auto& ent : m_entities) {
+            octTree.add(&ent);
+        }
+
+        octTree.msplit();
+
+        octTree.getIntersections();
     }
 
 

@@ -91,6 +91,9 @@ void main()
     vec4 worldPosition = model_matrix * vec4(inPosition, 1.0);
     // store the position of the vertex in the world.
     output_vert[ gl_VertexIndex ].world_coord = worldPosition.xyz;
+/*    output_vert[ gl_VertexIndex ].world_coord.x = 10;
+    output_vert[ gl_VertexIndex ].world_coord.y = gl_VertexIndex + 1;
+    output_vert[ gl_VertexIndex ].world_coord.z = gl_BaseInstance;*/
 
 
     gl_Position = ubo.proj * ubo.view * worldPosition;

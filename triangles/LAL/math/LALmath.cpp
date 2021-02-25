@@ -634,7 +634,8 @@ namespace la
 
         if (_lhs.valid() && _rhs.valid()) 
         {
-            res = product(_lhs.getN(), _rhs.getN()) == Vector3f(0.f);
+            res = product(_lhs.getN(), _rhs.getN()).modul() < std::sqrt(EPSILON);
+            auto prod = product(_lhs.getN(), _rhs.getN());
             res = res && std::abs(dot((_lhs.getP() - _rhs.getP()), _lhs.getN())) < EPSILON;
         }
 
@@ -833,11 +834,11 @@ namespace la
         bool result = false;
         COUNT_TT_INTERSEC++;
 
-        if (!intersec(_lhs.getArea(), _rhs.getArea())) {
-            /*nop*/
+/*        if (!intersec(_lhs.getArea(), _rhs.getArea())) {
+            *//*nop*//*
         }
         ////2D
-        else if (_lhs.getPlane() == _rhs.getPlane())
+        else */if (_lhs.getPlane() == _rhs.getPlane())
         {
             result = result || _lhs.contein(_rhs.getA());
             result = result || _lhs.contein(_rhs.getB());
@@ -854,6 +855,11 @@ namespace la
             assert(contein(_rhs.getPlane(), line_inters.first));
 
             const auto res1 = findIntersec(_lhs, line_inters.first);
+            auto lhsp = _lhs.getPlane();
+            auto rhsp = _rhs.getPlane();
+            if (res1.second == Intersec::quantity::Error) {
+                assert(lhsp == rhsp);
+            }
             assert(res1.second != Intersec::quantity::Error);
 
             if (res1.second != Intersec::quantity::Nop)

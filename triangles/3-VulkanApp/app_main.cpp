@@ -7,6 +7,7 @@
  *
  ***/
 
+#include "gen_tests.hpp"
 
 #include "Application/App.h"
 
@@ -18,7 +19,12 @@ int main()
 #ifdef NDEBUG
     std::istream& inPut = std::cin;
 #else
-    std::ifstream inPut("tests/1.txt");
+    std::ofstream test("../../../triangles/3-VulkanApp/tests/3.txt");
+    assert(test);
+    ezg::gen_tr3_test_rand(test, 10, 15);
+    //return 0;
+
+    std::ifstream inPut("tests/3.txt");
 #endif
 
     size_t num = 0;

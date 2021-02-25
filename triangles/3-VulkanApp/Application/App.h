@@ -11,8 +11,9 @@
 
 #include <vector>
 
-#include "Driver.h"
 #include <OtherLibs/timer.h>
+#include "../../LAL/include/LAL.h"
+#include "Entity.hpp"
 
 
 ///======================================================================================
@@ -30,35 +31,11 @@ namespace ezg
     class AppLVL3
     {
 
-        struct Entity
-        {
-            std::vector< vks::Vertex > m_vertices;
-
-            glm::vec3 m_color         = { 0.f, 1.f, 0.f };
-
-            glm::vec3 m_position;
-
-            glm::vec3 m_dirRotation   = { 0.f, 0.f, 1.f };
-            float     m_angle         = 0;
-            float     m_speedRotation = 0;
-
-            float     m_liveTimeSec   = 0;
-
-
-            /// updates the position of the triangle.
-            /// \param time - frame time
-            void update(float time);
-
-            glm::mat4 getModelMatrix() const;
-        };//struct Entity
-
-    private:
-
         vks::VulkanDriver m_driver;
         GLFWwindow*       m_pWindow = nullptr;
 
-
-        std::vector< Entity > m_entities;
+        //TODO go to the pointer on Entity
+        std::vector< Triangle > m_entities;
 
         CameraView m_cameraView;
         float      m_speed = 10.f;

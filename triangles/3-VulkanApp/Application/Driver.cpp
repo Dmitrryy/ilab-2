@@ -57,7 +57,9 @@ namespace vks
 			recordCommandBuffers_();
 
 			createSyncObjects_();
-		}
+
+            m_worldCoords.resize(vertices.size());
+        }
 		catch (std::exception& exc_)
 		{
 			std::cerr << "Fatal error in VulkanDriver::Init():\n";
@@ -94,7 +96,7 @@ namespace vks
     {
 	    //todo objects of different sizes
 	    const size_t num_vertices = 3;
-	    std::vector< glm::vec3 > res(3);
+	    std::vector< glm::vec3 > res(num_vertices);
 
 	    for(size_t i = 0; i < num_vertices; i++) {
 	        res.at(i) = m_worldCoords[num_vertices * objectID + i];
@@ -398,6 +400,7 @@ namespace vks
 
 		vkDestroyBuffer(device_, stagingBuffer, nullptr);
 		vkFreeMemory(device_, stagingBufferMemory, nullptr);
+
 	}
 
 
@@ -536,12 +539,11 @@ namespace vks
                 sizeof(OutputVertShader) * vertices.size(), 0, &data);
 
         auto* pOutData = static_cast< OutputVertShader* >(data);
-        for (size_t i = 0, mi = vertices.size(); i < mi; i++)
+        for (size_t i = 0, mi = vertices.size(); i < mi; ++i)
         {
-            m_worldCoords[i] = pOutData->world_coord;
+            m_worldCoords[i] = pOutData[i].world_coord;
         }
         vkUnmapMemory(device, m_storageBufferMemoryWorldCoords[currentImage_]);
-        //std::cout << m_worldCoords[0].x << ' ' << m_worldCoords[0].y << ' ' << m_worldCoords[0].z << std::endl;
     }
 
 
