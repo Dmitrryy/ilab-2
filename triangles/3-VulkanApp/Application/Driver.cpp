@@ -24,15 +24,7 @@ namespace vks
 	{
 		try
 		{
-/*			int res = glfwInit();
-			if (res != GLFW_TRUE) {
-				throw std::runtime_error(DEBUG_MSG("failed glfwInit!"));
-			}*/
-
-			//glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
             m_pWindow = window;
-
 
 			m_core.Init(m_pWindow);
 

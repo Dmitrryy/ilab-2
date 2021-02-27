@@ -26,7 +26,7 @@ add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/v
         Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp)
 
 if(NOT LAL_FOUND)
-    add_subdirectory(../LAL ../LAL/build)
+    add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
 endif()
 
 add_definitions(-DVK_USE_PLATFORM_XLIB_KHR)
