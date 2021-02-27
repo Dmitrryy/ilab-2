@@ -17,8 +17,8 @@
 int main()
 {
 #ifdef NDEBUG
-    //std::istream& inPut = std::cin;
-    std::ifstream inPut("tests/5.txt");
+    std::istream& inPut = std::cin;
+    //std::ifstream inPut("tests/5.txt");
 
 #else
     std::ofstream test("../../../triangles/3-VulkanApp/tests/5.txt");
