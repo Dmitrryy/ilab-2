@@ -7,6 +7,26 @@
  *
  ***/
 
+
+//
+///======================================================================================
+/// A program for calculating the optimal order of matrix multiplication.
+///
+/// There are two targets for assembly:
+/// 1. MatrixChain        - The output is only the optimal order of operations.
+/// 2. MatrixChainMeasure - At the output, measurements of time and the number of
+///                         operations for the usual and optimal orders.
+///
+/// assembly instruction(in cur directory):
+/// $: mkdir build
+/// $: cd build
+/// $: cmake ..
+/// $: make
+///======================================================================================
+///======================================================================================
+//
+
+
 #include <iostream>
 #include <fstream>
 
@@ -40,6 +60,7 @@ int main()
         chain.addMatrix(matrix::Matrix< int >::random(left, right, -5, 5));
     }
 
+
 #ifndef MEASUREMENTS
 
     chain.setOptimalOrder();
@@ -49,7 +70,7 @@ int main()
         std::cout << id << ' ';
     }
 
-#else
+#else // go tMatrixChainMeasure target.
     const size_t defOperations = chain.getNumReqOperations();
 
     Timer t;
@@ -95,7 +116,7 @@ int main()
     }
     std::cout << std::endl << std::endl;
 
-#endif
+#endif // MEASUREMENTS
 
     return 0;
 }

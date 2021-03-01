@@ -8,7 +8,7 @@ add_custom_target(${FB_TARGET}
         )
 
 # set the project name
-project(MatricChain)
+project(tMatrixChain)
 
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp)
@@ -34,7 +34,7 @@ add_dependencies(${PROJECT_NAME} ${FB_TARGET})
 ##################################################################
 
 
-project(MatrixChainMeasure)
+project(tMatrixChainMeasure)
 
 
 # add the executable
