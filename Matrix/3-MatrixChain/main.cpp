@@ -22,7 +22,7 @@ int main()
 {
 
 #ifndef NDEBUG
-    std::ifstream in("tests/5.txt");
+    std::ifstream in("tests/2.txt");
 #else
     auto& in = std::cin;
 #endif
@@ -40,6 +40,16 @@ int main()
         chain.addMatrix(matrix::Matrix< int >::random(left, right, -5, 5));
     }
 
+#ifndef MEASUREMENTS
+
+    chain.setOptimalOrder();
+    auto Order = chain.getCurrentOrder();
+
+    for (auto&& id : Order) {
+        std::cout << id << ' ';
+    }
+
+#else
     const size_t defOperations = chain.getNumReqOperations();
 
     Timer t;
@@ -49,8 +59,22 @@ int main()
     auto res1 = chain.multiplication();
     const double defTimeMul = t.elapsed();
 
+    std::cout << "default order takes:\n" << defTimeMul << " sec(mul)" << std::endl;
+    std::cout << "operations: " << defOperations << std::endl;
+
+    auto Order = chain.getCurrentOrder();
+    std::cout << "order: ";
+    for (auto&& id : Order) {
+        std::cout << id << ' ';
+    }
+    std::cout << std::endl << std::endl;
+
+
+
     t.reset();
     chain.setOptimalOrder();
+    Order = chain.getCurrentOrder();
+
     const double optTimeSetOrder = t.elapsed();
     t.reset();
     auto res2 = chain.multiplication();
@@ -58,14 +82,20 @@ int main()
 
     const size_t optOperations = chain.getNumReqOperations();
 
+
+
+
     std::cout << "optimal order takes:\n" << optTimeMul << " sec(mul) + "
                 << optTimeSetOrder << " sec(setOrder) = " << optTimeMul + optTimeSetOrder << " sec" << std::endl;
-    std::cout << "operations: " << optOperations << std::endl << std::endl;
+    std::cout << "operations: " << optOperations << std::endl;
 
-    std::cout << "default order takes:\n" << defTimeMul << " sec(mul)" << std::endl;
-    std::cout << "operations: " << defOperations << std::endl << std::endl;
+    std::cout << "order: ";
+    for (auto&& id : Order) {
+        std::cout << id << ' ';
+    }
+    std::cout << std::endl << std::endl;
 
-    assert(res1 == res2);
+#endif
 
     return 0;
 }

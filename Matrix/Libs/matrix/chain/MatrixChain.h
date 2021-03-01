@@ -53,6 +53,10 @@ namespace ezg
         std::vector< matrix_type > m_chain;
         /// the tree of the order of multiplication of matrices. (see MatrixChain.inl)
         tree< size_t >             m_curOrderTree;
+        /// order of matrix interleaving. Each element of this array is an operation number.
+        /// For example, multiplying matrices with indices 5 and 6 is operation number 5.
+        /// (perhaps in the future will completely replace the tree).
+        std::vector< size_t >      m_curOrderArr;
         /// the current order is optimal or not.
         bool                       m_isOptimal = false;
 
@@ -75,6 +79,8 @@ namespace ezg
         /// \return void
         void setOptimalOrder();
 
+        std::vector< size_t > getCurrentOrder() const;
+
         /// Sets the order to normal(default).
         /// And cancels the automatic calculation of the optimal order when calling addMatrix().
         /// \return void
@@ -87,9 +93,9 @@ namespace ezg
     private:
 
 
-        tree< size_t > buildOptimalOrderTree_() const;
+        void buildOptimalOrder_();
 
-        tree< size_t > buildDefaultOrderTree_() const;
+        void buildDefaultOrder_();
 
         matrix_tree buildMatrixTree_(const tree< size_t >& index_tree) const;
 

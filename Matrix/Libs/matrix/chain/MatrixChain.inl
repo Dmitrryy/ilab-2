@@ -47,6 +47,8 @@
 #pragma once
 
 
+#include "MatrixChain.h"
+
 namespace ezg
 {
 
@@ -60,11 +62,12 @@ namespace ezg
 
         //If the order was optimal, then recalculate the new one.
         if(m_isOptimal) {
-            m_isOptimal = false;
             m_chain.push_back(matrix);
+            m_isOptimal = false;
             setOptimalOrder();
         }
         else {
+            ///==---------------------begin_tree_code-----------------------------==
             if (m_chain.empty())
             {//the tree contains one node
                 const auto idRoot = m_curOrderTree.createNode(idMatrix);
@@ -87,6 +90,13 @@ namespace ezg
 
                 m_curOrderTree.setRootId(newIdRoot);
             }
+            ///==----------------------end_tree_code------------------------------==
+
+            ///==---------------------begin_array_code----------------------------==
+            if (!m_chain.empty()) {
+                m_curOrderArr.push_back(m_chain.size() - 1);
+            }
+            ///==----------------------end_array_code-----------------------------==
 
             m_chain.push_back(matrix);
         }
@@ -100,9 +110,16 @@ namespace ezg
     {
         if (!m_isOptimal)
         {
-            m_curOrderTree = buildOptimalOrderTree_();
+            buildOptimalOrder_();
             m_isOptimal = true;
         }
+    }
+
+
+    template< typename T >
+    std::vector< size_t > MatrixChain< T >::getCurrentOrder() const
+    {
+        return m_curOrderArr;
     }
 
 
@@ -111,7 +128,7 @@ namespace ezg
     {
         if (m_isOptimal)
         {
-            m_curOrderTree = buildDefaultOrderTree_();
+            buildDefaultOrder_();
             m_isOptimal = false;
         }
     }
@@ -139,11 +156,18 @@ namespace ezg
 
 
     template< typename T >
-    ezg::binary_tree_t< size_t > MatrixChain< T >::buildOptimalOrderTree_() const
+    void MatrixChain< T >::buildOptimalOrder_()
     {
-        if (m_chain.empty()) { return tree< size_t >(); }
+        /*
+         * at the moment, the function also builds the order of operations in the
+         * form of an array. In the future, the tree can be completely removed
+         * from the implementation!
+         *
+         * The tree building code is marked as begin/end_tree_code.
+         * The arr building code is marked as begin/end_array_code.
+         */
 
-
+        ///==---------------------begin_tree_code-----------------------------==
         tree< size_t > res_tree;
         //the matrix contains the indices of the nodes in the tree.
         //the node with coordinates i, j contains the optimal order
@@ -154,17 +178,26 @@ namespace ezg
                 indexTrees.at(l, c) = res_tree.createNode(std::numeric_limits< size_t >::max());
             }
         }
+        ///==----------------------end_tree_code------------------------------==
+
+
+        ///==---------------------begin_array_code----------------------------==
+        matrix::Matrix< std::vector< size_t > > arraysOperations(m_chain.size(), m_chain.size());
+        ///==----------------------end_array_code-----------------------------==
+
 
         //stores the results of calculations to avoid repeated.
         //O(n!) -> O(n^3)
-        matrix::Matrix< std::optional< size_t > > minActions(m_chain.size(), m_chain.size(), matrix::Order::Column);
+        matrix::Matrix< std::optional< size_t > > minActions(m_chain.size(), m_chain.size());
 
         //recursion stack.
         //  first - i
         //  second - j
         //      next step find minAction[i][j].
         std::stack< std::pair< size_t, size_t > > recursionStack;
-        recursionStack.push({ 0, m_chain.size() - 1 });
+        if (!m_chain.empty()) {
+            recursionStack.push({ 0, m_chain.size() - 1 });
+        }
 
         while(!recursionStack.empty())
         {
@@ -183,7 +216,10 @@ namespace ezg
             if (left == right)
             {//the range of length zero is the matrix. zero operations required.
                 minActions.at(left, left) = 0;
+
+                ///==---------------------begin_tree_code-----------------------------==
                 res_tree.at(indexTrees.at(left, left)) = left;
+                ///==----------------------end_tree_code------------------------------==
 
                 recursionStack.pop();
                 continue;
@@ -217,36 +253,71 @@ namespace ezg
                         sought_k = k;
                     }
                 }
+
+                ///==---------------------begin_tree_code-----------------------------==
                 const size_t idLR = indexTrees.at(left, right);
                 assert(resActions != std::numeric_limits< size_t >::max());
                 assert(!res_tree.getLeftOptional(idLR).has_value());
                 assert(!res_tree.getRightOptional(idLR).has_value());
 
-                minActions.at(left, right) = resActions;
                 res_tree.at(idLR) = resActions;
-
 
                 res_tree.setLeft(idLR, indexTrees.at(left, sought_k));
                 res_tree.setRight(idLR, indexTrees.at(sought_k + 1, right));
+                ///==----------------------end_tree_code------------------------------==
+
+
+                ///==---------------------begin_array_code----------------------------==
+                assert(resActions != std::numeric_limits< size_t >::max());
+
+                std::vector< size_t > curRes;
+                curRes.reserve(right - left);
+
+                const auto& leftOperations = arraysOperations.at(left, sought_k);
+                const auto& rightOperations = arraysOperations.at(sought_k + 1, right);
+
+                curRes.insert(curRes.end(), leftOperations.cbegin(), leftOperations.cend());
+                curRes.insert(curRes.end(), rightOperations.cbegin(), rightOperations.cend());
+                curRes.insert(curRes.end(), sought_k);
+
+                arraysOperations.at(left, right) = std::move(curRes);
+                ///==----------------------end_array_code-----------------------------==
+
+
+                minActions.at(left, right) = resActions;
             }
         }
 
-        assert(minActions.at(0, m_chain.size() - 1).has_value());
+        if (!m_chain.empty()) {
+            assert(minActions.at(0, m_chain.size() - 1).has_value());
 
-        res_tree.setRootId(indexTrees.at(0, m_chain.size() - 1));
+            ///==---------------------begin_tree_code-----------------------------==
+            res_tree.setRootId(indexTrees.at(0, m_chain.size() - 1));
+            m_curOrderTree = res_tree;
+            ///==----------------------end_tree_code------------------------------==
 
-        return res_tree;
+
+            ///==---------------------begin_array_code----------------------------==
+            m_curOrderArr  = std::move(arraysOperations.at(0, m_chain.size() - 1));
+            ///==----------------------end_array_code-----------------------------==
+        }
+        else
+        {
+            m_curOrderTree = tree< size_t >();
+            m_curOrderArr  = std::vector< size_t >();
+        }
     }
 
 
     template< typename T >
-    ezg::binary_tree_t< size_t > MatrixChain< T >::buildDefaultOrderTree_() const
+    void MatrixChain< T >::buildDefaultOrder_()
     {
+        ///==---------------------begin_tree_code-----------------------------==
         tree< size_t > result;
-        if (m_chain.size() == 0) { return result; }
+        if (m_chain.size() == 0) { m_curOrderTree = result; return; }
 
         result.createNode(0);
-        if (m_chain.size() == 1) { return result; }
+        if (m_chain.size() == 1) { m_curOrderTree = result; return; }
 
 
         result.setLeft(0, result.createNode(0));
@@ -264,7 +335,18 @@ namespace ezg
             result.setRootId(idNewNode);
         }
 
-        return result;
+        m_curOrderTree = result;
+        ///==----------------------end_tree_code------------------------------==
+
+
+        ///==---------------------begin_array_code----------------------------==
+        if (m_chain.size() > 1) {
+            m_curOrderArr.resize(m_chain.size());
+            for (size_t i = 0, mi = m_chain.size() - 1; i < mi; i++) {
+                m_curOrderArr[i] = i;
+            }
+        }
+        ///==----------------------end_array_code-----------------------------==
     }
 
 
