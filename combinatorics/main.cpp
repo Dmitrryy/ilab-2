@@ -1,10 +1,37 @@
-///=================================================================//
+/****************************************************************************************
+ *
+ * main.cpp
+ *
+ * Created by dmitry
+ * 22.02.2021
+ *
+ ***/
+
+
+//
+///======================================================================================
+/// The program checks the graph for bipartition.
+/// The input is a graph in the form:
+/// 1 - 2, 4
+/// 2 - 3, 5
+/// 3 - 4, 6
+/// 4 - 1, 1
+/// Output: 'vertex number' 'color' ... if the graph is bipartite
+/// or a message that the graph is not bipartite with an example of an odd-length cycle.
+/// Given the above, the output is:
+/// 1 b 2 r 3 b 4 r
 ///
-///  Created by Dmitryyy (https://github.com/Dmitrryy)
+/// assembly instruction(in cur directory):
+/// $: mkdir build
+/// $: cd build
+/// $: cmake ..
+/// $: make
 ///
-///  Allow you to write off it.
-///
-///=================================================================//
+/// launch:
+/// $: ./Graph < tests.1.txt
+///======================================================================================
+///======================================================================================
+//
 
 
 #include <iostream>
@@ -15,36 +42,43 @@
 #include "graph/graph.h"
 #include <gtest/gtest.h>
 
-#define GEN_TESTS
+//#define GEN_TESTS
 
 int main(int argc, char* argv[])
 {
 #ifdef GTESTS
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-#endif
+#endif //GTESTS
 
 #ifdef GEN_TESTS
-/*    std::ofstream outTest("tests/6.txt");
+    std::ofstream outTest("tests/6.txt");
     std::ofstream outAns ("tests/6a.txt");
-    genDoublyConnected(outTest, outAns, 10000, 30000);*/
+    genDoublyConnected(outTest, outAns, 10000, 30000);
+#endif //GEN_TESTS
 
-    freopen("tests/6.txt", "r", stdin);
-    //freopen("tests/ma.txt", "w", stdout);
-#endif
+
+#ifndef NDEBUG
+    auto&& in  = std::ifstream("tests/1.txt");
+    auto&& out = std::ofstream ("tests/my.txt");
+#else
+    auto&& in  = std::cin;
+    auto&& out = std::cout;
+#endif //NDEBUG
+
 
     std::unordered_map< size_t, size_t > uniqVertices;
     std::vector< size_t > idToVert;
     ezg::Graph_t< char > graph;
-    while(std::cin)
+    while(in)
     {
         size_t v1 = 0, v2 = 0, width = 0;
-        std::cin >> v1;
-        std::cin.ignore(3);
-        std::cin >> v2;
-        std::cin.ignore(1);
-        std::cin >> width;
-        if (!std::cin) { break; }
+        in >> v1;
+        in.ignore(3);
+        in >> v2;
+        in.ignore(1);
+        in >> width;
+        if (!in) { break; }
 
         if (uniqVertices.count(v1) == 0) {
             uniqVertices[v1] = graph.addVertex(0);
@@ -60,17 +94,17 @@ int main(int argc, char* argv[])
     auto res = graph.isBipartite();
 
     if(!res.first) {
-        std::cout << "graph is not doubly connected!" << '\n' << "Cycle of odd length:" << '\n';
+        out << "graph is not doubly connected!" << '\n' << "Cycle of odd length:" << '\n';
         for (const auto &v : res.second) {
-            std::cout << idToVert[v] << ' ';
+            out << idToVert[v] << ' ';
         }
-        std::cout << std::endl;
+        out << std::endl;
     }
     else
     {
         graph.paint({ 'b', 'r' }, uniqVertices[1]);
         for (size_t k = 0, mk = idToVert.size(); k < mk; k++) {
-            std::cout << idToVert[k] << ' ' << graph.atVertData(k) << ' ';
+            out << idToVert[k] << ' ' << graph.atVertData(k) << ' ';
         }
     }
 

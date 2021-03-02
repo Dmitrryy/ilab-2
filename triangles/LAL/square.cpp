@@ -12,6 +12,9 @@ namespace la
 
 	void Rectangle3::reup(const Vector3f& _a, const Vector3f& _b) noexcept
 	{
+	    if (!_a.valid() || !_b.valid()) {
+	        return ;
+	    }
 		m_a = _a;
 		m_b = _b;
 		if (_a.z <= _b.z) {

@@ -1,4 +1,4 @@
-/*************************************************************************
+/****************************************************************************************
  *
  *   app_main.cpp
  *
@@ -6,6 +6,33 @@
  *   01.11.2020
  *
  ***/
+
+
+//
+///======================================================================================
+/// Application for visualizing moving triangles.
+///
+/// The input file must have the following format:
+/// number of triangles
+/// time (integer number of seconds)
+/// triangle
+/// rotation axis rotation
+/// speed
+/// triangle rotation
+/// axis rotation
+/// speed
+/// ....
+///
+/// assembly instruction(in cur directory):
+/// $: mkdir build
+/// $: cd build
+/// $: cmake ..
+/// $: make
+/// $: ./VulkanApp < tests/6.txt
+///======================================================================================
+///======================================================================================
+//
+
 
 #include "gen_tests.hpp"
 
@@ -18,20 +45,21 @@ int main()
 {
 #ifdef NDEBUG
     std::istream& inPut = std::cin;
-    //std::ifstream inPut("tests/5.txt");
-
+    //std::ifstream inPut("tests/8.txt");
 #else
-    std::ofstream test("../../../triangles/3-VulkanApp/tests/5.txt");
+/*    std::ofstream test("../../../triangles/3-VulkanApp/tests/8.txt");
     assert(test);
-    ezg::gen_tr3_test_rand(test, 50, 100);
-    return 0;
+    ezg::gen_tr3_test_rand(test, 10000, la::Rectangle3{ la::Vector3f{-1000}, la::Vector3f{1000} }, 3.f, 20);
+    //ezg::gen_tr3_test_net(test, 1, 2, 1, 100);
+    return 0;*/
 
-    std::ifstream inPut("tests/4.txt");
+    std::ifstream inPut("tests/8.txt");
 #endif
 
     size_t num = 0;
     int time = 0;
     inPut >> num >> time;
+
 
     ezg::AppLVL3 app;
     for (size_t i = 0; i < num; ++i) {

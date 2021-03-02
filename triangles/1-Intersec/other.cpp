@@ -109,6 +109,7 @@ std::min(a, std::min(b, c))
 #define MAX(a, b, c) \
 std::max(a, std::max(b, c))
 
+/*
 void intersectionOctree(std::vector< la::Triangle > data)
 {
     using std::min;
@@ -178,4 +179,4 @@ void intersectionOctree(std::vector< la::Triangle > data)
         std::cout << std::endl;
     }
 
-}
+}*/

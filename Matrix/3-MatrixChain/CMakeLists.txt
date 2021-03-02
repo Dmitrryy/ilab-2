@@ -19,7 +19,7 @@ endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     #target_sources(${PROJECT_NAME} PRIVATE tests/gen_tests.cpp)
-    add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif()
@@ -40,7 +40,7 @@ project(tMatrixChainMeasure)
 # add the executable
 add_executable(${PROJECT_NAME} main.cpp ../Libs/matrix/Matrix_other.cpp)
 
-#add_compile_definitions(${PROJECT_NAME} PRIVATE MEASUREMENTS)
+target_compile_definitions(${PROJECT_NAME} PRIVATE MEASUREMENTS)
 
 
 if( NOT CMAKE_BUILD_TYPE )
@@ -49,12 +49,13 @@ endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     #target_sources(${PROJECT_NAME} PRIVATE tests/gen_tests.cpp)
-    add_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
     target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../Libs)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
 
 add_dependencies(${PROJECT_NAME} ${FB_TARGET})

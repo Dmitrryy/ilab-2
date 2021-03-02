@@ -149,6 +149,15 @@ namespace ezg
     template< typename VT_ , typename ET_ >
     std::pair<bool, std::vector<size_t> > Graph_t< VT_ , ET_>::isBipartite() const
     {
+        std::stack< size_t > recursionStack;
+
+
+
+
+
+
+
+
         //because it's so easy to follow the depth
         std::stack<std::stack<size_t> > nextVert;
         std::stack<size_t> trace;

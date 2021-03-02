@@ -686,10 +686,11 @@ namespace la
 //3D
     bool contein(const Plane& _pl, const Vector3f& _point) noexcept
     {
+        bool res = false;
         if (_pl.valid()) {
-            return std::abs(dot(_pl.getP() - _point, _pl.getN())) < EPSILON;
+            res = std::abs(dot(_pl.getP() - _point, _pl.getN())) < EPSILON;
         }
-        return false;
+        return res;
     }
 
     Vector3f projection(const Vector3f& _point, const Plane& _pl)
@@ -730,8 +731,11 @@ namespace la
             }
             else
             {
-                res = std::abs(dot(_pl.getN(), _ln.getV())) > EPSILON;
+                res = std::abs(dot(_pl.getN(), _ln.getV())) > std::sqrt(EPSILON);
             }
+        }
+        if (res) {
+            return  res;
         }
 
         return res;
@@ -834,29 +838,27 @@ namespace la
         bool result = false;
         COUNT_TT_INTERSEC++;
 
-/*        if (!intersec(_lhs.getArea(), _rhs.getArea())) {
-            *//*nop*//*
-        }
-        ////2D
-        else */if (_lhs.getPlane() == _rhs.getPlane())
+        const la::Plane lhsPlane = _lhs.getPlane();
+        const la::Plane rhsPlane = _rhs.getPlane();
+
+        if (lhsPlane == rhsPlane)
         {
             result = result || _lhs.contein(_rhs.getA());
             result = result || _lhs.contein(_rhs.getB());
             result = result || _lhs.contein(_rhs.getC());
         }
         //3D
-        else if (intersec(_lhs.getPlane(), _rhs.getPlane()))
+        else if (intersec(lhsPlane, rhsPlane))
         {
-            const auto line_inters = findIntersec(_lhs.getPlane(), _rhs.getPlane());
+            const auto line_inters = findIntersec(lhsPlane, rhsPlane);
             assert(line_inters.second != Intersec::quantity::Nop);
             assert(line_inters.second != Intersec::quantity::Same);
             assert(line_inters.second != Intersec::quantity::Error);
-            assert(contein(_lhs.getPlane(), line_inters.first));
-            assert(contein(_rhs.getPlane(), line_inters.first));
+            assert(contein(lhsPlane, line_inters.first));
+            assert(contein(rhsPlane, line_inters.first));
 
             const auto res1 = findIntersec(_lhs, line_inters.first);
-            auto lhsp = _lhs.getPlane();
-            auto rhsp = _rhs.getPlane();
+
             assert(res1.second != Intersec::quantity::Error);
 
             if (res1.second != Intersec::quantity::Nop)

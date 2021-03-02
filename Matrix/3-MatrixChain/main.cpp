@@ -13,8 +13,8 @@
 /// A program for calculating the optimal order of matrix multiplication.
 ///
 /// There are two targets for assembly:
-/// 1. MatrixChain        - The output is only the optimal order of operations.
-/// 2. MatrixChainMeasure - At the output, measurements of time and the number of
+/// 1. tMatrixChain        - The output is only the optimal order of operations.
+/// 2. tMatrixChainMeasure - At the output, measurements of time and the number of
 ///                         operations for the usual and optimal orders.
 ///
 /// assembly instruction(in cur directory):
@@ -42,7 +42,7 @@ int main()
 {
 
 #ifndef NDEBUG
-    std::ifstream in("tests/2.txt");
+    std::ifstream in("tests/5.txt");
 #else
     auto& in = std::cin;
 #endif

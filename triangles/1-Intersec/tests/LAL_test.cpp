@@ -29,10 +29,12 @@ test_class(Triangle);
 test_class(Rectangle3);
 
 
+/*
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+*/
 
 
 TEST_F(Vector3fTest, Construct)
@@ -572,6 +574,13 @@ TEST_F(PlaneTest, projection)
     //q1_.reup(3, 5, 6, 0);
     //EXPECT_EQ(projection(Vector3f(2, 0, -1), q1_), Vector3f(2, 0, -1));
 
+}
+
+
+TEST_F(PlaneTest, contein)
+{
+    q0_.reup({-8, -5, 0}, {8.9686479568481445, -7, -0.75057530403137207}, {-8.9686470031738281, -7, 0.75057530403137207});
+    // EXPECT_TRUE(la::contein(q0_, la::Line3({0, -5, 0}, {-8.9686479568481445, -7, 0.75057530403137207}, Line3::Type::PointAndVector)));
 }
 
 

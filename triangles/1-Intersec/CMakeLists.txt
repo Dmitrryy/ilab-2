@@ -4,10 +4,20 @@ cmake_minimum_required(VERSION 3.10)
 #see README for details
 project(Intersection)
 
-add_executable(${PROJECT_NAME} main.cpp other.cpp tests/test_gen.cpp)
+find_package(GTest REQUIRED)
+find_package(Threads REQUIRED)
+
+add_executable(${PROJECT_NAME} main.cpp other.cpp tests/test_gen.cpp tests/LAL_test.cpp)
 
 if(NOT LAL_FOUND)
-    add_subdirectory(../LAL ../LAL/build)
+    add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
 endif()
 
+target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} Threads::Threads)
+
 target_link_libraries(${PROJECT_NAME} LAL)
+
+#[[
+enable_testing()
+add_test(NAME    Intersec
+        COMMAND ${PROJECT_NAME})]]

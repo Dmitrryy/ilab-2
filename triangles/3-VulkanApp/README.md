@@ -1,4 +1,4 @@
-## LVL2 (in dev):
+## LVL3 (in dev):
 Render your triangles using the [Vulkan API](https://www.khronos.org/vulkan/).
 A 3D scene should consist of:
 * Fixed volume where all triangles are located
@@ -45,7 +45,7 @@ Updating my IDE vs2019. That was a bad idea ... Now intellisence is sooooo slow 
 (I'm waiting for 'softly' to release an update on win10 with blue screen support) \
 Replacement: vs2019 -> CLion. \
 I spend a lot of time trying to build a project through cmake, 
-but I didn’t come to success 
+but I didnï¿½t come to success 
 (I caught a couple more errors (yes, I got banned from Google)). \
 Replacement: Windows 10 -> Ubuntu. \
 Another hour to install the components.

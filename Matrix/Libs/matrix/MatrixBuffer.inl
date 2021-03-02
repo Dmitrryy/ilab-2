@@ -86,6 +86,7 @@ namespace matrix
 	{
 		swap(that);
 	}
+
 	template< typename T >
 	MatrixBuffer_t<T>& MatrixBuffer_t<T>::operator = (MatrixBuffer_t&& that) noexcept
 	{

@@ -60,6 +60,9 @@ namespace ezg
     void AppLVL3::addTriangle(glm::vec3 pos_a, glm::vec3 pos_b, glm::vec3 pos_c, glm::vec3 position
                               , glm::vec3 direction_rotation, float rotation_speed, float live_time_sec)
     {
+        if (direction_rotation == glm::vec3(0.f)) {
+            return ;
+        }
         const size_t entityId = m_entities.size();
 
         Triangle entity;
@@ -94,6 +97,16 @@ namespace ezg
     void AppLVL3::run()
     {
         init_();
+
+        //TODO
+        //===-------------------------------------------
+        // first initialization of buffers for each frame
+        m_driver.render();
+        m_driver.render();
+        m_driver.render();
+        m_driver.render();
+        m_driver.render();
+        //===-------------------------------------------
 
         m_time.reset();
 
@@ -175,8 +188,30 @@ namespace ezg
 
         m_driver.Init(m_pWindow);
 
+        //-----------------------------------------------
+        // init camera view
         m_cameraView.setAspect(wHeight /(float) wWidth);
         m_cameraView.setPosition(m_entities[0].m_vertices[0].pos);
+
+        glm::vec3 a(std::numeric_limits<double>::max()), b(std::numeric_limits<double>::min());
+        for (const auto& cur : m_entities)
+        {
+            for (const auto& vert : cur.m_vertices)
+            {
+                a.x = std::min(a.x, vert.pos.x);
+                a.y = std::min(a.y, vert.pos.y);
+                a.z = std::min(a.z, vert.pos.z);
+
+                b.x = std::max(b.x, vert.pos.x);
+                b.y = std::max(b.y, vert.pos.y);
+                b.z = std::max(b.z, vert.pos.z);
+            }
+        }
+
+        m_cameraView.setPosition(b * 1.3f);
+        m_cameraView.setDirection((a + b) / 2.f - m_cameraView.getPosition());
+        // end init camera view
+        //-----------------------------------------------
     }
 
 
@@ -190,9 +225,12 @@ namespace ezg
             curEntity.update(time);
 
             curEntity.m_coordsInWorld = m_driver.getWorldCoords(i);
-/*            std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
+
+/*
+            std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
                                          << curEntity.m_coordsInWorld[1].x << ", " << curEntity.m_coordsInWorld[1].y << ", " << curEntity.m_coordsInWorld[1].z << " | "
-                                         << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;*/
+                                         << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;
+*/
 
             curEntity.updateArea();
             if (curEntity.type() == Entity::Type::Triangle)
