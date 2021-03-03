@@ -191,25 +191,24 @@ namespace ezg
         //-----------------------------------------------
         // init camera view
         m_cameraView.setAspect(wHeight /(float) wWidth);
-        m_cameraView.setPosition(m_entities[0].m_vertices[0].pos);
 
         glm::vec3 a(std::numeric_limits<double>::max()), b(std::numeric_limits<double>::min());
         for (const auto& cur : m_entities)
         {
             for (const auto& vert : cur.m_vertices)
             {
-                a.x = std::min(a.x, vert.pos.x);
-                a.y = std::min(a.y, vert.pos.y);
-                a.z = std::min(a.z, vert.pos.z);
+                a.x = std::min(a.x, vert.pos.x + cur.m_position.x);
+                a.y = std::min(a.y, vert.pos.y + cur.m_position.y);
+                a.z = std::min(a.z, vert.pos.z + cur.m_position.z);
 
-                b.x = std::max(b.x, vert.pos.x);
-                b.y = std::max(b.y, vert.pos.y);
-                b.z = std::max(b.z, vert.pos.z);
+                b.x = std::max(b.x, vert.pos.x + cur.m_position.x);
+                b.y = std::max(b.y, vert.pos.y + cur.m_position.y);
+                b.z = std::max(b.z, vert.pos.z + cur.m_position.z);
             }
         }
 
-        m_cameraView.setPosition(b * 1.3f);
-        m_cameraView.setDirection((a + b) / 2.f - m_cameraView.getPosition());
+        m_cameraView.setPosition(b);
+        m_cameraView.setDirection(((a + b) / 2.f) - m_cameraView.getPosition());
         // end init camera view
         //-----------------------------------------------
     }

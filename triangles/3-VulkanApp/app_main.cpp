@@ -16,19 +16,19 @@
 /// number of triangles
 /// time (integer number of seconds)
 /// triangle
-/// rotation axis rotation
+/// axis rotation
 /// speed
-/// triangle rotation
+/// triangle
 /// axis rotation
 /// speed
 /// ....
 ///
 /// assembly instruction(in cur directory):
-/// $: mkdir build
-/// $: cd build
-/// $: cmake ..
-/// $: make
-/// $: ./VulkanApp < tests/6.txt
+/// $ mkdir build
+/// $ cd build
+/// $ cmake ..
+/// $ make
+/// $ ./VulkanApp < tests/6.txt
 ///======================================================================================
 ///======================================================================================
 //
@@ -44,8 +44,8 @@
 int main()
 {
 #ifdef NDEBUG
-    std::istream& inPut = std::cin;
-    //std::ifstream inPut("tests/8.txt");
+    //std::istream& inPut = std::cin;
+    std::ifstream inPut("tests/7.txt");
 #else
 /*    std::ofstream test("../../../triangles/3-VulkanApp/tests/8.txt");
     assert(test);

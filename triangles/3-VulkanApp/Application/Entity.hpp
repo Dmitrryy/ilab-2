@@ -23,6 +23,9 @@ namespace ezg
         };
 
 
+        virtual ~Entity() = default;
+
+
         std::vector< vks::Vertex > m_vertices;
         std::vector< glm::vec3 >   m_coordsInWorld;
         la::Rectangle3             m_area;
@@ -69,7 +72,7 @@ namespace ezg
 
 
         virtual bool intersection(Entity& that) = 0;
-        virtual Type type() const = 0;
+        virtual Type type() const noexcept = 0;
     };//struct Entity
 
 
@@ -109,7 +112,7 @@ namespace ezg
             };
         }
 
-        Type type() const override { return Type::Triangle; }
+        Type type() const noexcept override { return Type::Triangle; }
     };//struct Triangle
 
 }// namespace ezg

@@ -41,9 +41,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
+# adding third party libraries
 find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
 find_package(glfw3 REQUIRED)
+if(NOT LAL_FOUND)
+    add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
+endif()
 
 
 add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp
@@ -62,12 +66,6 @@ if(${CMAKE_BUILD_TYPE} MATCHES Debug)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif()
 ##############################
-
-
-# added the LAL library
-if(NOT LAL_FOUND)
-    add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
-endif()
 
 
 #add_definitions(-DVK_USE_PLATFORM_XLIB_KHR)
