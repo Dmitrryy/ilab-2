@@ -42,9 +42,12 @@ int main()
 {
 
 #ifndef NDEBUG
-    std::ifstream in("tests/5.txt");
+    std::ifstream in("tests/6.txt");
 #else
     auto& in = std::cin;
+    //std::ifstream in("tests/6.txt");
+    //freopen("tests/my.txt", "w", stdout);
+
 #endif
 
 

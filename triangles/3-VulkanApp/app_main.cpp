@@ -44,8 +44,8 @@
 int main()
 {
 #ifdef NDEBUG
-    //std::istream& inPut = std::cin;
-    std::ifstream inPut("tests/7.txt");
+    std::istream& inPut = std::cin;
+    //std::ifstream inPut("tests/7.txt");
 #else
 /*    std::ofstream test("../../../triangles/3-VulkanApp/tests/8.txt");
     assert(test);
@@ -53,7 +53,7 @@ int main()
     //ezg::gen_tr3_test_net(test, 1, 2, 1, 100);
     return 0;*/
 
-    std::ifstream inPut("tests/8.txt");
+    std::ifstream inPut("tests/1.txt");
 #endif
 
     size_t num = 0;
@@ -76,6 +76,10 @@ int main()
 
         app.addTriangle(a - rot_dir_v1, b - rot_dir_v1, c - rot_dir_v1
                         , rot_dir_v1, rot_dir_v2 - rot_dir_v1, speed, time);
+    }
+    if (num == 0) {
+        std::cout << "no triangles were received." << std::endl;
+        return 1;
     }
 
     app.run();

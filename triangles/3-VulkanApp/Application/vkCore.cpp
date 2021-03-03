@@ -36,6 +36,9 @@ namespace vks {
 
 
     void Core::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+        if (size <= 0) {
+            throw std::invalid_argument("invalid size of buffer");
+        }
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = size;
@@ -56,8 +59,10 @@ namespace vks {
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
 
-        if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-            throw std::runtime_error(DEBUG_MSG("failed to allocate buffer memory!"));
+        VkResult res = vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory);
+        if (res != VK_SUCCESS) {
+            throw std::runtime_error(DEBUG_MSG("failed to allocate buffer memory!")
+            + " error code: " + std::to_string(res) + " size buff: " + std::to_string(size));
         }
 
         vkBindBufferMemory(device, buffer, bufferMemory, 0);
@@ -203,6 +208,11 @@ namespace vks {
                 printf("Chawo?!? (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount)\n");
                 continue;
             }
+/*            if (!(SurfaceCaps.supportedUsageFlags & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT))
+            {
+                printf("storage buffer not supported\n");
+                continue;
+            }*/
 
             for (size_t k = 0, km = m_physDevices.m_qFamilyProps[i].size(); k < km; k++)
             {

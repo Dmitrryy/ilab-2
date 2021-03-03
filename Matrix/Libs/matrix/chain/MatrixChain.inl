@@ -285,6 +285,7 @@ namespace ezg
 
 
                 minActions.at(left, right) = resActions;
+                //std::cout << left << ' ' << sought_k << ' ' << right << '\n';
             }
         }
 
