@@ -5,7 +5,7 @@
 ### in developing
 |      project      | LVL |
 |:-----------------:|:---:|
-| LALib (triangles) |  3  |
+| triangles         |  4  |
 | Matrix            |  3  |
 | ParaCL            |  2  |
 | OpenCL            |  1  |
