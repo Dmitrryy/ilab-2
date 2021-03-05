@@ -149,72 +149,81 @@ namespace ezg
     template< typename VT_ , typename ET_ >
     std::pair<bool, std::vector<size_t> > Graph_t< VT_ , ET_>::isBipartite() const
     {
-        std::stack< size_t > recursionStack;
+        const size_t MaxVal = std::numeric_limits< size_t >::max();
+
+        std::vector< size_t > colors (m_endVertId, MaxVal);
+        //the [id] contains the index from which vertex we got to the id vertex.
+        std::vector< size_t > parents(m_endVertId, MaxVal);
+
+        //results
+        bool res = true;
+        std::vector< size_t > oddCycle;
 
 
-
-
-
-
-
-
-        //because it's so easy to follow the depth
-        std::stack<std::stack<size_t> > nextVert;
-        std::stack<size_t> trace;
-        std::vector<size_t> deeps(m_endVertId, 0);
-
-        nextVert.push({});
-        trace.push(0);
-        for (size_t k = m_endVertId; k != 0; k--) {
-            nextVert.top().push(k - 1);
-        }
-
-        //result
-        bool isDB = true;
-        std::vector<size_t> oddCycle;
-
-        while (!nextVert.empty() && isDB) {
-            if (nextVert.top().empty()) {
-                nextVert.pop();
-                trace.pop();
+        for (size_t i = 0; i < m_endVertId && res; ++i)
+        {
+            //B3 begin
+            //===================================
+            // i === w
+            if (colors[i] != MaxVal) {
                 continue;
             }
 
-            const size_t cur = nextVert.top().top();
-            nextVert.top().pop();
+            colors[i] = 0;
 
-            if (deeps[cur] == 0) {
-                //nextVert.size() and depth are equal
-                assert(trace.size() == nextVert.size());
-                deeps[cur] = trace.size();
-                trace.push(cur);
-            } else {
-                continue;
-            }
+            std::stack< size_t > recursionStack;
+            recursionStack.push(i);
+            //===================================
+            //B3 end
 
-            auto toVertices = getEdges(cur);
-            nextVert.push({});
-            for (size_t i = toVertices.size(); i != 0; i--) {
-                const size_t nVert = toVertices[i - 1];
-                if (deeps[nVert] == 0) {
-                    nextVert.top().push(nVert);
-                } else {
-                    if ((deeps[nVert] - deeps[cur]) % 2 == 0)
-                    {//cycle of odd length detected
-                        while (trace.top() != nVert) {
-                            oddCycle.push_back(trace.top());
-                            trace.pop();
-                        }
-                        oddCycle.push_back(trace.top());
-                        isDB = false;
+            while(!recursionStack.empty() && res)
+            {
+                size_t curVert = recursionStack.top();
+                recursionStack.pop();
+
+                size_t curEdge = m_graph[curVert].next;
+
+                while(curEdge != curVert && res)
+                {
+                    size_t nextVert = m_graph[curEdge ^ 1].vert;
+                    if (curVert == nextVert) {
+                        res = false;
+                        oddCycle.push_back(curVert);
                         break;
                     }
+
+                    if (colors[nextVert] == MaxVal)
+                    {
+                        // if the neighbor is not colored, then we paint and put it on the stack.
+                        colors[nextVert] = 1 - colors[curVert];
+                        parents[nextVert] = curVert;
+
+                        recursionStack.push(nextVert);
+                    }
+                    else if (colors[nextVert] == colors[curVert])
+                    {
+                        // terminate unsuccessfully;
+                        // to get a cycle of odd length, we go through the array of
+                        // parents until we meet the next vertex.
+                        res = false;
+                        size_t pVec = parents[curVert];
+                        oddCycle.push_back(curVert);
+                        while(pVec != parents[nextVert])
+                        {
+                            oddCycle.push_back(pVec);
+                            pVec = parents[pVec];
+                        }
+                        oddCycle.push_back(pVec);
+                        oddCycle.push_back(nextVert);
+                    }
+
+                    curEdge = m_graph[curEdge].next;
                 }
+
             }
+        }
 
-        }//while(!nextVert.empty() && isDB)
-
-        return {isDB, oddCycle};
+        return { res, oddCycle };
     }
 
     template< typename VT_ , typename ET_ >
@@ -224,54 +233,57 @@ namespace ezg
             return *this;
         }
 
-        assert(startVert < m_endVertId);
+        const size_t MaxVal = std::numeric_limits< size_t >::max();
 
-        //TODO come up with a suitable workaround function to avoid copy-paste
+        std::vector< size_t > VecColors (m_endVertId, MaxVal);
 
-        //because it's so easy to follow the depth
-        std::stack< std::stack<size_t> > nextVert;
-        std::stack< size_t > trace;
-        std::vector< size_t > deeps(m_endVertId, 0);
 
-        nextVert.push({});
-        trace.push(0);
-        for (size_t k = m_endVertId; k != 0; k--) {
-            nextVert.top().push(k - 1);
-        }
-        nextVert.top().push(startVert);
+        size_t curColorId = 0;
+        const size_t colorsNum = colors.size();
 
-        const size_t colorsSize = colors.size();
-
-        while (!nextVert.empty())
+        for (size_t i = 0; i < m_endVertId; ++i)
         {
-            if (nextVert.top().empty()) {
-                nextVert.pop();
-                trace.pop();
+            //B3 begin
+            //===================================
+            // i === w
+            if (VecColors[i] != MaxVal) {
                 continue;
             }
 
-            const size_t cur = nextVert.top().top();
-            nextVert.top().pop();
+            std::stack< size_t > recursionStack;
+            recursionStack.push(i);
+            //===================================
+            //B3 end
 
-            if (deeps[cur] == 0) {
-                //nextVert.size() and depth are equal
-                const size_t depth = nextVert.size();
-                deeps[cur] = depth;
-                atVertData(cur) = colors.at((depth - 1) % colorsSize);
-                trace.push(cur);
-            } else {
-                continue;
-            }
+            while(!recursionStack.empty())
+            {
+                size_t curVert = recursionStack.top();
+                recursionStack.pop();
 
-            auto toVertices = getEdges(cur);
-            nextVert.push({});
-            for (size_t i = toVertices.size(); i != 0; i--) {
-                const size_t nVert = toVertices[i - 1];
-                if (deeps[nVert] == 0) {
-                    nextVert.top().push(nVert);
+                if (VecColors[curVert] != MaxVal) {
+                    continue;
                 }
-            }
+                atVertData(curVert) = colors.at(curColorId);
+                VecColors[curVert] = 1;
 
+
+                size_t curEdge = m_graph[curVert].next;
+
+                while(curEdge != curVert)
+                {
+                    size_t nextVert = m_graph[curEdge ^ 1].vert;
+
+                    if (VecColors[nextVert] == MaxVal)
+                    {
+                        recursionStack.push(nextVert);
+                    }
+
+                    curEdge = m_graph[curEdge].next;
+                }
+
+                curColorId = (curColorId + 1) % colorsNum;
+            }
+            curColorId = 0;
         }
 
         return *this;

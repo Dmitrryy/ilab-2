@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
 
 
 #ifndef NDEBUG
-    auto&& in  = std::ifstream("tests/1.txt");
+    auto&& in  = std::ifstream("tests/5.txt");
     auto&& out = std::ofstream ("tests/my.txt");
 #else
     auto&& in  = std::cin;
