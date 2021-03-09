@@ -9,7 +9,7 @@
 | Matrix            |  3  |
 | ParaCL            |  2  |
 | OpenCL            |  1  |
-| Combinatorics     |  1  |
+| Combinatorics     |  2  |
   
 ### done
 
