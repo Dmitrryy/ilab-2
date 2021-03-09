@@ -17,7 +17,7 @@ cmake_minimum_required(VERSION 3.10)
 ## An additional target is created to execute preparatory commands before building
 ## the main project. In this case, this is copying the directories with tests and
 ## resources to the folder with the binary. And compilation of shaders.
-set(FB_TARGET bs_pre_vulkan3)
+set(FB_TARGET bs_pre_vulkan4)
 add_custom_target(${FB_TARGET}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/tests ${CMAKE_CURRENT_BINARY_DIR}/tests
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resource ${CMAKE_CURRENT_BINARY_DIR}/resource
@@ -32,9 +32,9 @@ add_custom_target(${FB_TARGET}
 
 
 #
-## VulkanApp
+## 2.4-Meshes
 ##=======================================================================================
-project(2.3-RotateTriangles)
+project(2.4-Meshes)
 
 
 set(CMAKE_CXX_STANDARD 17)
