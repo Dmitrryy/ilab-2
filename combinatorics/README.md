@@ -3,7 +3,7 @@
 
 ## Levels
 
-### LVL1 Graph:
+### LVL1 Graph (done):
 You have a graph at the input in the usual representation
 
 v1 - v2, edge_weight
@@ -31,7 +31,7 @@ it is needed so that you have something to parameterize your class for experimen
 
 
 
-### LVL1 Graph: Spanning trees:
+### LVL2 Spanning trees:
 
 You can see that in the constructed representation of the graph, it is very easy 
 to "remove" an edge, leaving it in place, but excluding it from the list of edges
