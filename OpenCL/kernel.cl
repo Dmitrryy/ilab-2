@@ -8,8 +8,8 @@
 #endif //DEBUG
 
 
-/*
-__kernel void bitonic_sort_kernel(__global DATA_TYPE *input_ptr, const uint stage, const uint passOfStage)
+
+__kernel void bitonic_sort_kernel_default(__global DATA_TYPE *input_ptr, const uint stage, const uint passOfStage)
 {
     const uint threadId = get_global_id(0);
 
@@ -20,6 +20,9 @@ __kernel void bitonic_sort_kernel(__global DATA_TYPE *input_ptr, const uint stag
     const uint leftId  = blockId * blockWidth + threadId % (blockWidth / 2);
     const uint rightId = leftId + pairDistance;
 
+    const uint left_elem = input_ptr[leftId];
+    const uint right_elem = input_ptr[rightId];
+
     const uint sameDirectionBlockWidth = blockId >> passOfStage;
     const uint sameDirection = sameDirectionBlockWidth % 2;
 
@@ -27,13 +30,13 @@ __kernel void bitonic_sort_kernel(__global DATA_TYPE *input_ptr, const uint stag
     DEBUG_ACTION(printf("id %d, blockId %d, pDist %d, width %d, dir %d, blockDir %d, leftId %d, rightId %d\n", threadId, blockId,
            pairDistance, blockWidth, sameDirection, sameDirectionBlockWidth, leftId, rightId););
 
-    const DATA_TYPE greater = max(input_ptr[rightId], input_ptr[leftId]);
-    const DATA_TYPE lesser = min(input_ptr[rightId], input_ptr[leftId]);
+    const DATA_TYPE greater = max(right_elem, left_elem);
+    const DATA_TYPE lesser  = min(right_elem, left_elem);
 
-    input_ptr[leftId] = sameDirection ? greater : lesser;
+    input_ptr[leftId]  = sameDirection ? greater : lesser;
     input_ptr[rightId] = sameDirection ? lesser : greater;
 }
-*/
+
 
 
 

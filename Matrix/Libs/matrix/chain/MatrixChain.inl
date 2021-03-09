@@ -311,7 +311,6 @@ namespace ezg
             //       cur_id--; (this way we fill in the array of the order of operations
             //       from the end).
             //  2.4  we put two ranges at the end of the deque, into which the current
-            //       partition divides.
             m_curOrderArr.resize(m_chain.size() - 1);
 
             std::deque< std::pair< size_t, size_t > > deque;

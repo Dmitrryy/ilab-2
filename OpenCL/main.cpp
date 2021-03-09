@@ -109,6 +109,7 @@ int main() {
         return 1;
     }
 
+    cl::Kernel kernel_default(program, "bitonic_sort_kernel_default");
     cl::Kernel kernel_cmp(program, "bitonic_sort_compare_kernel");
     cl::Kernel kernel_swap(program, "bitonac_sort_swap_kernel");
 
@@ -120,7 +121,6 @@ int main() {
     for (temp = extended_size; temp > 1; temp >>= 1)
         ++numStages;
 
-    global_size = extended_size / 2;
     for (stage = 0; stage < numStages; ++stage) {
 
         for (passOfStage = 0; passOfStage < stage + 1; ++passOfStage)
@@ -129,7 +129,7 @@ int main() {
             << ": global size " << global_size << ", local size " << local_size <<  std::endl;
             );*/
 
-            kernel_cmp.setArg(0, a_buff);
+/*            kernel_cmp.setArg(0, a_buff);
             kernel_cmp.setArg(1, cmp_buff);
             kernel_cmp.setArg(2, stage);
             kernel_cmp.setArg(3, passOfStage);
@@ -146,14 +146,19 @@ int main() {
             kernel_swap.setArg(3, passOfStage);
 
             commandQueue.enqueueNDRangeKernel(kernel_swap, 0, global_size, local_size, nullptr, &event2);
-            event2.wait();
+            event2.wait();*/
     /*            DEBUG_ACTION(auto map_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
                     for(size_t i = 0; i < extended_size; i++)
                         std::cout << map_data[i] << ' ';
                     std::cout << std::endl << std::endl;
                     commandQueue.enqueueUnmapMemObject(a_buff, map_data);*/
     //            );
-
+            kernel_default.setArg(0, a_buff);
+            kernel_default.setArg(1, stage);
+            kernel_default.setArg(2, passOfStage);
+            cl::Event event;
+            commandQueue.enqueueNDRangeKernel(kernel_default, 0, global_size, local_size, nullptr, &event);
+            event.wait();
         }//end of for passStage = 0:stage-1
     }//end of for stage = 0:numStage-1*/
 
