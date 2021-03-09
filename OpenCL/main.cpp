@@ -62,7 +62,7 @@ int main() {
     return 1;
 #endif
 
-    freopen("tests/1.txt", "r", stdin);
+    freopen("tests/2.txt", "r", stdin);
     freopen("tests/my.txt", "w", stdout);
 
     size_t size_vec = 0;
@@ -99,7 +99,7 @@ int main() {
     try {
         std::string options(" -D DATA_TYPE=int ");
 
-        //DEBUG_ACTION(options += " -D DEBUG ";);
+        DEBUG_ACTION(options += " -D DEBUG ";);
 
         program.build(options.data());
     }
@@ -112,6 +112,7 @@ int main() {
     cl::Kernel kernel_default(program, "bitonic_sort_kernel_default");
     cl::Kernel kernel_cmp(program, "bitonic_sort_compare_kernel");
     cl::Kernel kernel_swap(program, "bitonac_sort_swap_kernel");
+    cl::Kernel kernel_loop(program, "bitonic_sort_kernel_loop");
 
     size_t global_size = extended_size / 2;
     size_t local_size = std::min(global_size, devices[0].getInfo< CL_DEVICE_MAX_WORK_GROUP_SIZE >());
@@ -120,6 +121,20 @@ int main() {
     unsigned int stage = 0, passOfStage = 0, numStages = 0, temp = 0;
     for (temp = extended_size; temp > 1; temp >>= 1)
         ++numStages;
+
+    kernel_loop.setArg(0, a_buff);
+    kernel_loop.setArg(1, numStages);
+
+/*    cl::Event event;
+    commandQueue.enqueueNDRangeKernel(kernel_loop, 0, global_size, local_size, nullptr, &event);
+    event.wait();
+    int* res_data = (int*)commandQueue.enqueueMapBuffer(a_buff, CL_TRUE, CL_MAP_READ, 0, extended_size * sizeof(int));
+    for(size_t i = 0; i < size_vec; i++)
+        std::cout << res_data[i] << ' ';
+    std::cout << std::endl;
+    commandQueue.enqueueUnmapMemObject(a_buff, res_data);
+    return 0;*/
+
 
     for (stage = 0; stage < numStages; ++stage) {
 

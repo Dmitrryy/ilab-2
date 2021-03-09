@@ -47,7 +47,6 @@ int main()
     auto& in = std::cin;
     //std::ifstream in("tests/1.txt");
     //freopen("tests/my.txt", "w", stdout);
-
 #endif
 
 
