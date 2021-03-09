@@ -182,7 +182,14 @@ namespace ezg
 
 
         ///==---------------------begin_array_code----------------------------==
-        matrix::Matrix< std::vector< size_t > > arraysOperations(m_chain.size(), m_chain.size());
+        // This matrix stores partitions at which multiplication is optimal.
+        // For example, if for the interval from i to j the most advantageous
+        // partition is k (i <= k < j), then
+        // partitionMatrix[i][j] = k;
+        //
+        // This allows you to restore the full order of operations, which is done
+        // at the end of this function.
+        matrix::Matrix< size_t > partitionMatrix(m_chain.size(), m_chain.size());
         ///==----------------------end_array_code-----------------------------==
 
 
@@ -270,24 +277,15 @@ namespace ezg
                 ///==---------------------begin_array_code----------------------------==
                 assert(resActions != std::numeric_limits< size_t >::max());
 
-                std::vector< size_t > curRes;
-                curRes.reserve(right - left);
-
-                const auto& leftOperations = arraysOperations.at(left, sought_k);
-                const auto& rightOperations = arraysOperations.at(sought_k + 1, right);
-
-                curRes.insert(curRes.end(), leftOperations.cbegin(), leftOperations.cend());
-                curRes.insert(curRes.end(), rightOperations.cbegin(), rightOperations.cend());
-                curRes.insert(curRes.end(), sought_k);
-
-                arraysOperations.at(left, right) = std::move(curRes);
+                partitionMatrix.at(left, right) = sought_k;
                 ///==----------------------end_array_code-----------------------------==
 
 
                 minActions.at(left, right) = resActions;
-                //std::cout << left << ' ' << sought_k << ' ' << right << '\n';
             }
         }
+
+        //std::cout << partitionMatrix << std::endl;
 
         if (!m_chain.empty()) {
             assert(minActions.at(0, m_chain.size() - 1).has_value());
@@ -299,7 +297,43 @@ namespace ezg
 
 
             ///==---------------------begin_array_code----------------------------==
-            m_curOrderArr  = std::move(arraysOperations.at(0, m_chain.size() - 1));
+            // This code restores the order of operations on the partition matrix.
+            // The algorithm is as follows:
+            // 1. put a pair of 0, n - 1 in the deque. In these coordinates lies the
+            //    optimal partition for the entire range
+            //      (respectively, the last operation).
+            // 2. in the loop, until the deck is empty, we perform the following:
+            //  2.1. we take out a pair from the front of the deque.
+            //  2.2. if the elements of the pair are the same, then we move on to the
+            //       next iteration(a range of one element does not require recording any
+            //       operation, there is already one matrix).
+            //  2.3  we write the partition number in the 'cur_id' cell of the array;
+            //       cur_id--; (this way we fill in the array of the order of operations
+            //       from the end).
+            //  2.4  we put two ranges at the end of the deque, into which the current
+            //       partition divides.
+            m_curOrderArr.resize(m_chain.size() - 1);
+
+            std::deque< std::pair< size_t, size_t > > deque;
+            deque.push_back({ 0, m_chain.size() - 1 });
+
+            size_t cur_id = m_chain.size() - 2;
+            while (!deque.empty())
+            {
+                auto cur = deque.front();
+                deque.pop_front();
+                if (cur.first == cur.second) {
+                    continue;
+                }
+
+                size_t idOperation = partitionMatrix.at(cur.first, cur.second);
+
+                m_curOrderArr.at(cur_id) = idOperation;
+                cur_id--;
+
+                deque.emplace_back( cur.first, idOperation );
+                deque.emplace_back( idOperation + 1, cur.second);
+            }
             ///==----------------------end_array_code-----------------------------==
         }
         else
