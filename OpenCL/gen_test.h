@@ -1,3 +1,13 @@
+/*************************************************************************************************
+ *
+ *   gen_test.h
+ *
+ *   Created by dmitry
+ *   10.03.2021
+ *
+ ***/
+
+
 #pragma once
 
 #include <functional>
@@ -28,3 +38,24 @@ private:
 
     std::uniform_int_distribution<> m_dist;
 };
+
+
+template< typename T, typename U >
+static void gen_test(std::basic_ostream< T >& outTest, std::basic_ostream< U >& outAns, size_t size)
+{
+    std::vector< int > test;
+    test.reserve(size);
+
+    Random rand;
+    outTest << size << std::endl;
+    for (size_t k = 0; k < size; k++) {
+        test.push_back(rand());
+        outTest << test.back() << ' ';
+    }
+
+    std::sort(test.begin(), test.end());
+
+    for (size_t k = 0; k < size; k++) {
+        outAns << test[k] << ' ';
+    }
+}
