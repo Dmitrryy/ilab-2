@@ -55,6 +55,8 @@ namespace ezg
 
         m_program = cl::Program(m_context, source_kernel);
 
+        // workgroup size information is needed at compile(build) time
+        // to allocate local memory of the desired size.
         m_maxWorkGroupSize = device.getInfo< CL_DEVICE_MAX_WORK_GROUP_SIZE >();
         try {
             std::string options(std::string(" -D DATA_TYPE=int ")
