@@ -34,10 +34,10 @@
 
 int main() {
 #ifdef GEN_TESTS_
-    std::ofstream test("../../OpenCL/tests/5.txt");
-    std::ofstream ans("../../OpenCL/tests/5a.txt");
+    std::ofstream test("../../OpenCL/tests/6.txt");
+    std::ofstream ans("../../OpenCL/tests/6a.txt");
 
-    gen_test(test, ans, 10000000);
+    gen_test(test, ans, 200000);
     return 1;
 #endif
 
@@ -45,7 +45,7 @@ int main() {
     auto&& in = std::cin;
     auto&& out = std::cout;
 #else
-    auto&& in = std::ifstream("tests/4.txt");
+    auto&& in = std::ifstream("tests/6.txt");
     auto&& out = std::ofstream("tests/my.txt");
     //auto&& out = std::cout;
 

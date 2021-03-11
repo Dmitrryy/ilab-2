@@ -101,66 +101,64 @@ namespace ezg
         cl::Kernel kernel_local  (m_program, "bitonic_sort_kernel_local");
 
 
-        unsigned int stage = 0, passOfStage = 0, numStages = 0, temp = 0;
+        uint32_t stage = 0, passOfStage = 0, numStages = 0, temp = 0;
         for (temp = extended_size; temp > 1; temp >>= 1)
             ++numStages;
 
-        size_t maxDifferenceStageAndPass = 0;
+        uint32_t maxDifferenceStageAndPass = 0;
         for( ; 1u << maxDifferenceStageAndPass < local_size; maxDifferenceStageAndPass++) {}
 
 
+        const uint32_t do_stages_in_local = std::min(maxDifferenceStageAndPass + 1, numStages);
+        // the size of the array is less than the size of the workgroup * 2
+        // and can be processed by the kernel running on local memory
+        kernel_local.setArg(0, cl_buff);
+        kernel_local.setArg(1, 0);
+        kernel_local.setArg(2, do_stages_in_local);
+        kernel_local.setArg(3, 0);
 
-        if(numStages <= maxDifferenceStageAndPass)
-        {
-            // the size of the array is less than the size of the workgroup * 2
-            // and can be processed by the kernel running on local memory
-            kernel_local.setArg(0, cl_buff);
-            kernel_local.setArg(1, 0);
-            kernel_local.setArg(2, numStages);
-            kernel_local.setArg(3, 0);
 
-            cl::Event event;
-            m_commandQueue.enqueueNDRangeKernel(kernel_local, 0,
-                                                global_size, local_size,
-                                                nullptr, &event);
-            event.wait();
-        }
-        else
-        {
-            for (stage = 0; stage < numStages; ++stage) {
+        cl::Event event;
+        m_commandQueue.enqueueNDRangeKernel(kernel_local, 0,
+                global_size, local_size,
+                nullptr, &event);
+        event.wait();
 
-                for (passOfStage = 0; passOfStage < stage + 1; ++passOfStage)
+
+        for (stage = do_stages_in_local; stage < numStages; ++stage) {
+
+            for (passOfStage = 0; passOfStage < stage + 1; ++passOfStage)
+            {
+                if (stage - passOfStage <= maxDifferenceStageAndPass)
                 {
-                    if (stage - passOfStage <= maxDifferenceStageAndPass)
-                    {
-                        // several sub-passes can be processed on a kernel with local memory,
-                        // since the distance between compared objects fits into the local
-                        // memory of the kernel. (optimization)
-                        kernel_local.setArg(0, cl_buff);
-                        kernel_local.setArg(1, stage);
-                        kernel_local.setArg(2, stage + 1);
-                        kernel_local.setArg(3, passOfStage);
-
-                        cl::Event event;
-                        m_commandQueue.enqueueNDRangeKernel(kernel_local, 0,
-                                                            global_size, local_size,
-                                                            nullptr, &event);
-                        event.wait();
-                        break;
-                    }
-
-                    kernel_default.setArg(0, cl_buff);
-                    kernel_default.setArg(1, stage);
-                    kernel_default.setArg(2, passOfStage);
+                    // several sub-passes can be processed on a kernel with local memory,
+                    // since the distance between compared objects fits into the local
+                    // memory of the kernel. (optimization)
+                    kernel_local.setArg(0, cl_buff);
+                    kernel_local.setArg(1, stage);
+                    kernel_local.setArg(2, stage + 1);
+                    kernel_local.setArg(3, passOfStage);
 
                     cl::Event event;
-                    m_commandQueue.enqueueNDRangeKernel(kernel_default, 0,
-                                                      global_size, local_size,
-                                                      nullptr, &event);
+                    m_commandQueue.enqueueNDRangeKernel(kernel_local, 0,
+                            global_size, local_size,
+                            nullptr, &event);
                     event.wait();
-                }//end of for passStage = 0:stage-1
-            }//end of for stage = 0:numStage-1*/
-        }
+                    break;
+                }
+
+                kernel_default.setArg(0, cl_buff);
+                kernel_default.setArg(1, stage);
+                kernel_default.setArg(2, passOfStage);
+
+                cl::Event event;
+                m_commandQueue.enqueueNDRangeKernel(kernel_default, 0,
+                        global_size, local_size,
+                        nullptr, &event);
+                event.wait();
+            }//end of for passStage = 0:stage-1
+        }//end of for stage = 0:numStage-1*/
+
 
         int* res_data = (int*)m_commandQueue.enqueueMapBuffer(cl_buff,
                                                               CL_TRUE, CL_MAP_READ, 0,

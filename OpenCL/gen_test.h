@@ -46,7 +46,7 @@ static void gen_test(std::basic_ostream< T >& outTest, std::basic_ostream< U >& 
     std::vector< int > test;
     test.reserve(size);
 
-    Random rand;
+    Random rand(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
     outTest << size << std::endl;
     for (size_t k = 0; k < size; k++) {
         test.push_back(rand());
