@@ -82,7 +82,7 @@ int main() {
                 }
             }
         }
-        catch (std::exception& ex) {
+        catch (cl::Error& ex) {
             ex.what();
         }
         if (res_device != cl::Device{}) {

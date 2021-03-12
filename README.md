@@ -6,7 +6,7 @@
 |      project      | LVL |
 |:-----------------:|:---:|
 | triangles         |  4  |
-| Matrix            |  3  |
+| Matrix            |  4  |
 | ParaCL            |  2  |
 | OpenCL            |  1  |
 | Combinatorics     |  2  |
