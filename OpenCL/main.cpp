@@ -45,7 +45,7 @@ int main() {
     auto&& in = std::cin;
     auto&& out = std::cout;
 #else
-    auto&& in = std::ifstream("tests/6.txt");
+    auto&& in = std::ifstream("tests/4.txt");
     auto&& out = std::ofstream("tests/my.txt");
     //auto&& out = std::cout;
 
@@ -63,11 +63,38 @@ int main() {
     auto data1 = data;
     auto data2 = data;
 
-    cl::Platform platform;
-    std::vector< cl::Device > devices;
-    platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
+    std::vector< cl::Platform > platforms;
+    cl::Platform::get(&platforms);
+    if(platforms.empty()) {
+        throw std::runtime_error("cant find any platform!");
+    }
 
-    ezg::BitonicSort_t driver(devices.at(0));
+    cl::Device res_device;
+    for(auto&& pl : platforms) {
+        try {
+            std::vector< cl::Device > devices;
+            pl.getDevices(CL_DEVICE_TYPE_ALL, &devices);
+
+            for (auto&& dev : devices) {
+                if (dev.getInfo< CL_DEVICE_COMPILER_AVAILABLE >()) {
+                    res_device = dev;
+                    break;
+                }
+            }
+        }
+        catch (std::exception& ex) {
+            ex.what();
+        }
+        if (res_device != cl::Device{}) {
+            break;
+        }
+    }
+
+    if (res_device == cl::Device{}) {
+        throw std::runtime_error("cant find any device");
+    }
+
+    ezg::BitonicSort_t driver(res_device);
 
     ezg::Timer timer;
     timer.reset();

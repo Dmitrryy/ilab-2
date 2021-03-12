@@ -68,13 +68,14 @@ __kernel void bitonic_sort_kernel_local(__global DATA_TYPE *input_ptr,
                                         const uint stage_end,
                                         const uint pass_start)
 {
-    const uint threadId = get_global_id(0);
-    uint local_id      = get_local_id(0);
-    uint groupSize     = get_local_size(0);
-    uint bankOffset    = get_group_id(0) * groupSize * 2;
+    const uint threadId   = get_global_id(0);
+    const uint local_id   = get_local_id(0);
+    const uint groupSize  = get_local_size(0);
+    const uint bankOffset = get_group_id(0) * groupSize * 2;
 
 
     // local memory array initialization
+    // GROUP_SIZE is defined as a macro at kernel compile time using the -D flag
     __local int local_data[GROUP_SIZE * 2];
 
     local_data[local_id] = input_ptr[bankOffset + local_id];

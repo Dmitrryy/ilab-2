@@ -117,12 +117,10 @@ namespace ezg
         kernel_local.setArg(2, do_stages_in_local);
         kernel_local.setArg(3, 0);
 
-
         cl::Event event;
         m_commandQueue.enqueueNDRangeKernel(kernel_local, 0,
                 global_size, local_size,
                 nullptr, &event);
-        event.wait();
 
 
         for (stage = do_stages_in_local; stage < numStages; ++stage) {
@@ -139,11 +137,10 @@ namespace ezg
                     kernel_local.setArg(2, stage + 1);
                     kernel_local.setArg(3, passOfStage);
 
-                    cl::Event event;
+                    event.wait();
                     m_commandQueue.enqueueNDRangeKernel(kernel_local, 0,
                             global_size, local_size,
                             nullptr, &event);
-                    event.wait();
                     break;
                 }
 
@@ -151,15 +148,14 @@ namespace ezg
                 kernel_default.setArg(1, stage);
                 kernel_default.setArg(2, passOfStage);
 
-                cl::Event event;
+                event.wait();
                 m_commandQueue.enqueueNDRangeKernel(kernel_default, 0,
                         global_size, local_size,
                         nullptr, &event);
-                event.wait();
             }//end of for passStage = 0:stage-1
         }//end of for stage = 0:numStage-1*/
 
-
+        event.wait();
         int* res_data = (int*)m_commandQueue.enqueueMapBuffer(cl_buff,
                                                               CL_TRUE, CL_MAP_READ, 0,
                                                               size_vec * sizeof(int));
