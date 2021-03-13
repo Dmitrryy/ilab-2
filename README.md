@@ -8,7 +8,7 @@
 | triangles         |  4  |
 | Matrix            |  4  |
 | ParaCL            |  2  |
-| OpenCL            |  1  |
+| OpenCL            |  2  |
 | Combinatorics     |  2  |
   
 ### done

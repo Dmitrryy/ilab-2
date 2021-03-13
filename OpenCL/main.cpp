@@ -114,12 +114,12 @@ int main() {
     for (size_t i = 0; i < size_vec; ++i) {
         assert(data1[i] == data2[i]);
     }
-#endif
-
+#else
     for(size_t i = 0; i < size_vec; ++i) {
         out << data1[i] << ' ';
     }
     out << std::endl;
+#endif
 
     return 0;
 

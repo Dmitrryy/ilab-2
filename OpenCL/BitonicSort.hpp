@@ -37,7 +37,7 @@ namespace ezg
         /// The constructor fully prepares the library for sorting
         /// (compiling kernels, creating a command queue, and so on).
         /// \param device - the device on which the sorting will be performed.
-        explicit BitonicSort_t(const cl::Device& device);
+        BitonicSort_t(const cl::Device& device);
 
     public:
 

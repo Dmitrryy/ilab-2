@@ -28,6 +28,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <cmath>
 
 #ifdef DEBUG
 #define DEBUG_ACTION(act) { act }
@@ -105,8 +107,8 @@ namespace ezg
         for (temp = extended_size; temp > 1; temp >>= 1)
             ++numStages;
 
-        uint32_t maxDifferenceStageAndPass = 0;
-        for( ; 1u << maxDifferenceStageAndPass < local_size; maxDifferenceStageAndPass++) {}
+
+        uint32_t maxDifferenceStageAndPass = std::log(local_size) / std::log(2);
 
 
         const uint32_t do_stages_in_local = std::min(maxDifferenceStageAndPass + 1, numStages);
@@ -156,13 +158,7 @@ namespace ezg
         }//end of for stage = 0:numStage-1*/
 
         event.wait();
-        int* res_data = (int*)m_commandQueue.enqueueMapBuffer(cl_buff,
-                                                              CL_TRUE, CL_MAP_READ, 0,
-                                                              size_vec * sizeof(int));
-        for(size_t i = 0; i < size_vec; i++)
-            source[i] = res_data[i];
-        m_commandQueue.enqueueUnmapMemObject(cl_buff, res_data);
-
+        cl::copy(m_commandQueue, cl_buff, source.begin(), source.end());
     }
 
 }//namespace ezg
