@@ -10,7 +10,7 @@
 //
 /// BitonicSort
 ///======================================================================================
-/// This is the first level for working with API OpenCL.
+/// This is the first level for working with API GPU.
 /// Challenge: sort the array using the bitonic sort algorithm and compare the results
 /// with the standard library sort.
 ///======================================================================================
@@ -27,15 +27,16 @@
 
 #include "gen_test.h"
 #include "BitonicSort.hpp"
-#include "../OtherLibs/timer.h"
+#include "../../OtherLibs/timer.h"
 
 
 //#define GEN_TESTS_
 
 int main() {
+
 #ifdef GEN_TESTS_
-    std::ofstream test("../../OpenCL/tests/6.txt");
-    std::ofstream ans("../../OpenCL/tests/6a.txt");
+    std::ofstream test("../../GPU/tests/6.txt");
+    std::ofstream ans("../../GPU/tests/6a.txt");
 
     gen_test(test, ans, 200000);
     return 1;

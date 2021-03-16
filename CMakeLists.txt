@@ -20,7 +20,7 @@ add_subdirectory(Matrix)
 add_subdirectory(ParaCL)
 
 
-add_subdirectory(OpenCL)
+add_subdirectory(GPU)
 
 
 add_subdirectory(combinatorics)
