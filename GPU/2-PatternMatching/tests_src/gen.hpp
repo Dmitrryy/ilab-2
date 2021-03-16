@@ -81,7 +81,7 @@ namespace ezg
 
 
         for (size_t i = 0; i < num_patterns; ++i) {
-            outAns << i << ' ' << result.at(i) << std::endl;
+            outAns << i + 1 << ' ' << result.at(i) << std::endl;
         }
     }
     

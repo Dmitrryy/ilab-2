@@ -7,25 +7,72 @@
  *
  ***/
 
+
+
+
 #include <fstream>
 
 #include "native_cpu/native_cpy.hpp"
-#include "tests/gen.hpp"
 
-//#define GEN_TEST
 
-int main()
+
+
+#ifdef GEN_TEST
+#include "tests_src/gen.hpp"
+#endif //GEN_TEST
+
+#ifdef GTESTS
+#include <gtest/gtest.h>
+#endif //GTEST
+
+
+
+
+
+template< typename T >
+std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream< T >& inStream);
+
+
+
+
+
+int main(int argc, char* argv[])
 {
 #ifdef GEN_TEST
-    auto&& outTest = std::ofstream("tests/2.txt");
-    auto&& outAns = std::ofstream("tests/2a.txt");
-    ezg::gen_test_pattern_matching(outTest, outAns, 1000, 10, 7);
+    auto&& outTest = std::ofstream("../../../GPU/2-PatternMatching/tests/3.txt");
+    auto&& outAns = std::ofstream("../../../GPU/2-PatternMatching/tests/3a.txt");
+    ezg::gen_test_pattern_matching(outTest, outAns, 100000, 4000, 30);
     return 1;
-#endif
+#endif //GEN_TEST
+
+
+#ifdef GTESTS
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+#endif //GTEST
+
+
     auto&& inStream = std::cin;
     auto&& outStream = std::cout;
 
 
+    auto&& data = getData2(inStream);
+
+    auto&& result = ezg::countPatternMatches(data.first, data.second);
+
+    for (size_t i = 0, mi = data.second.size(); i < mi; i++) {
+        outStream << i << ' ' << result.at(i) << std::endl;
+    }
+
+    return 0;
+}
+
+
+
+
+template< typename T >
+std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream< T >& inStream)
+{
     std::string str;
     std::vector< std::string > patterns;
 
@@ -50,11 +97,5 @@ int main()
         patterns.emplace_back(std::move(cur_pat));
     }
 
-    auto&& result = ezg::countPatternMatches(str, patterns);
-
-    for (size_t i = 0; i < num_patterns; i++) {
-        outStream << i << ' ' << result.at(i) << std::endl;
-    }
-
-    return 0;
+    return { str, patterns };
 }
