@@ -13,6 +13,14 @@
 #include <sstream>
 #include <gtest/gtest.h>
 
+
+int main(int argc, char* argv[])
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+
+
 template< typename T >
 std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream< T >& inStream)
 {
@@ -44,7 +52,7 @@ std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream
 }
 
 
-TEST(fileInput, test1)
+TEST(nativeCPU, test1)
 {
     auto&& inStream    = std::ifstream("tests/1.txt");
     auto&& checkStream = std::ifstream("tests/1a.txt");
@@ -64,7 +72,7 @@ TEST(fileInput, test1)
 }
 
 
-TEST(fileInput, test2)
+TEST(nativeCPU, test2)
 {
     auto&& inStream    = std::ifstream("tests/2.txt");
     auto&& checkStream = std::ifstream("tests/2a.txt");
@@ -84,10 +92,30 @@ TEST(fileInput, test2)
 }
 
 
-TEST(fileInput, test3)
+TEST(nativeCPU, test3)
 {
     auto&& inStream    = std::ifstream("tests/3.txt");
     auto&& checkStream = std::ifstream("tests/3a.txt");
+    auto&& outStream   = std::ostringstream();
+    if (!inStream.is_open() || !checkStream.is_open()) { throw std::runtime_error("cant open files."); }
+
+    auto&& data = getData2(inStream);
+    auto&& result = ezg::countPatternMatches(data.first, data.second);
+    for (size_t i = 0, mi = data.second.size(); i < mi; i++) {
+        outStream << i + 1 << ' ' << result.at(i) << std::endl;
+    }
+
+    std::ostringstream checkData;
+    checkData << checkStream.rdbuf();
+
+    EXPECT_EQ(checkData.str(), outStream.str());
+}
+
+
+TEST(nativeCPU, test4)
+{
+    auto&& inStream    = std::ifstream("tests/4.txt");
+    auto&& checkStream = std::ifstream("tests/4a.txt");
     auto&& outStream   = std::ostringstream();
     if (!inStream.is_open() || !checkStream.is_open()) { throw std::runtime_error("cant open files."); }
 

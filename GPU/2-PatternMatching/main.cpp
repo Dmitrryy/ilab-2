@@ -9,23 +9,9 @@
 
 
 
-
 #include <fstream>
 
 #include "native_cpu/native_cpy.hpp"
-
-
-
-
-#ifdef GEN_TEST
-#include "tests_src/gen.hpp"
-#endif //GEN_TEST
-
-#ifdef GTESTS
-#include <gtest/gtest.h>
-#endif //GTEST
-
-
 
 
 
@@ -34,24 +20,8 @@ std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream
 
 
 
-
-
 int main(int argc, char* argv[])
 {
-#ifdef GEN_TEST
-    auto&& outTest = std::ofstream("../../../GPU/2-PatternMatching/tests/3.txt");
-    auto&& outAns = std::ofstream("../../../GPU/2-PatternMatching/tests/3a.txt");
-    ezg::gen_test_pattern_matching(outTest, outAns, 100000, 4000, 30);
-    return 1;
-#endif //GEN_TEST
-
-
-#ifdef GTESTS
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-#endif //GTEST
-
-
     auto&& inStream = std::cin;
     auto&& outStream = std::cout;
 

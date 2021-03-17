@@ -11,15 +11,16 @@
 
 cmake_minimum_required(VERSION 3.10)
 
+
 #
 ## pm_pre
 ##=======================================================================================
 ## An additional target is created to execute preparatory commands before building
 ## the main project. In this case, this is copying the directories with tests.
-set(FB_TARGET pm_pre)
+set(FB_TARGET pm_test_pre)
 add_custom_target(${FB_TARGET}
         #COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/kernel.cl ${CMAKE_CURRENT_BINARY_DIR}/kernel.cl
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/tests ${CMAKE_CURRENT_BINARY_DIR}/tests
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/../tests ${CMAKE_CURRENT_BINARY_DIR}/tests
         )
 ##=======================================================================================
 ##=======================================================================================
@@ -27,13 +28,13 @@ add_custom_target(${FB_TARGET}
 
 
 #
-## PatternMatching
+## PatternMatchingGtest
 ##=======================================================================================
-project(PatternMatching)
+project(PatternMatchingGtest)
 
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp native_cpu/native_cpu.cpp)
+add_executable(${PROJECT_NAME} gtests.cpp ../native_cpu/native_cpu.cpp)
 
 
 # before each assembly, commands from this dependency will be executed
@@ -59,13 +60,45 @@ endif()
 #
 
 
+# link Gtest library
+##-----------------------------------------------------------------------------
+find_package(GTest REQUIRED)
+find_package(Threads REQUIRED)
+
+target_sources(${PROJECT_NAME} PRIVATE gtests.cpp)
+
+target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} Threads::Threads)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE GTESTS)
+##-----------------------------------------------------------------------------
+##-----------------------------------------------------------------------------
+# end functional defines
+
+
 # connecting the openCl library
 find_package(OpenCL REQUIRED)
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCL_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
+
 ##=======================================================================================
 ##=======================================================================================
 #
 
 
-add_subdirectory(tests_src)
+
+
+#
+## PatternMatchingGenTest
+##=======================================================================================
+project(PatternMatchingGenTest)
+
+
+# add the executable
+add_executable(${PROJECT_NAME} gen_test.cpp)
+
+
+# before each assembly, commands from this dependency will be executed
+add_dependencies(${PROJECT_NAME} ${FB_TARGET})
+##=======================================================================================
+##=======================================================================================
+#

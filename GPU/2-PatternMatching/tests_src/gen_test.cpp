@@ -7,11 +7,12 @@
  *
  ***/
 
-#pragma once
 
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+
 
 #include "../../../OtherLibs/random.h"
 
@@ -83,6 +84,33 @@ namespace ezg
         for (size_t i = 0; i < num_patterns; ++i) {
             outAns << i + 1 << ' ' << result.at(i) << std::endl;
         }
-    }
+    }//gen_test_pattern_matching
+
+
+    template< typename T >
+    static void gen_test_pattern_matching(std::basic_ostream< T >& outTest
+                                          , size_t length_str
+                                          , size_t num_patterns
+                                          , size_t max_length_pattern);
     
 }//namespace ezg
+
+
+
+int main(int argc, char* argv[])
+{
+    size_t num_test = 0;
+    if (argc != 3) {
+        std::cerr << "argc != 3" << std::endl;
+        return 1;
+    }
+    std::string fName_1(argv[1]);
+    std::string fName_2(argv[2]);
+    auto &&outTest = std::ofstream(fName_1);
+    if (!outTest.is_open()) { throw std::runtime_error("can open file: " + fName_1); }
+    auto &&outAns  = std::ofstream(fName_2);
+    if (!outAns.is_open()) { throw std::runtime_error("can open file: " + fName_2); }
+
+    ezg::gen_test_pattern_matching(outTest, outAns, 100000, 4000, 30);
+    return 0;
+}
