@@ -77,6 +77,10 @@ namespace matrix
         template <typename U>
         bool   equal(const MatrixBuffer_t<U>& that_) const;
 
+
+		T* data() const { return m_data; }
+
+
 		bool empty() const noexcept { return m_lines == 0; }
 
         virtual const T& at(size_t line, size_t column) const& { return atDefault_(line, column); }

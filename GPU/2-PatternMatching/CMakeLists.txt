@@ -33,7 +33,7 @@ project(PatternMatching)
 
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp native_cpu/native_cpu.cpp)
+add_executable(${PROJECT_NAME} main.cpp native_cpu/native_cpu.cpp filter_GPU/PatternMatching.cpp filter_GPU/PatternMatching.hpp)
 
 
 # before each assembly, commands from this dependency will be executed

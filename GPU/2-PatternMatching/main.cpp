@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "native_cpu/native_cpy.hpp"
+#include "filter_GPU/PatternMatching.hpp"
 
 
 
@@ -28,11 +29,14 @@ int main(int argc, char* argv[])
 
     auto&& data = getData2(inStream);
 
-    auto&& result = ezg::countPatternMatches(data.first, data.second);
+/*    auto&& result = ezg::countPatternMatches(data.first, data.second);
 
     for (size_t i = 0, mi = data.second.size(); i < mi; i++) {
         outStream << i << ' ' << result.at(i) << std::endl;
-    }
+    }*/
+
+
+
 
     return 0;
 }
