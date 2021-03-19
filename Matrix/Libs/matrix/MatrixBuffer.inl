@@ -251,12 +251,12 @@ namespace matrix
 	}
 
 	template< typename T >
-	std::string MatrixBuffer_t<T>::dumpStr() const
+	template< typename U >
+	void MatrixBuffer_t<T>::dump(std::basic_ostream< U >& out) const
 	{
-		std::ostringstream out;
 
 		out << "size: " << m_lines << " x " << m_columns << '\n'
-			<< "order " << toString(m_order) << '\n'
+			//<< "order " << toString(m_order) << '\n'
 			<< "Data:" << '\n';
 
 		for (size_t y = 0; y < m_lines; y++)
@@ -268,8 +268,6 @@ namespace matrix
 			}
 			out << "|\n";
 		}
-
-		return out.str();
 	}
 
 

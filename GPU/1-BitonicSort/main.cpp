@@ -90,7 +90,6 @@ int main() {
             break;
         }
     }
-
     if (res_device == cl::Device{}) {
         throw std::runtime_error("cant find any device");
     }

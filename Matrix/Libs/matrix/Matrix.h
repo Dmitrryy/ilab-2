@@ -149,7 +149,8 @@ namespace matrix
 		bool operator != (const Matrix<U>& that_) const;
 
 		friend std::ostream& operator << (std::ostream& stream_, const Matrix<T>& mtr_) {
-			return stream_ << mtr_.dumpStr();
+            mtr_.dump(stream_);
+            return stream_;
 		}
 
 	private:

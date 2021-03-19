@@ -109,6 +109,9 @@ namespace matrix
 
 		void resize(size_t lines, size_t columns);
 
+        template< typename U >
+        void dump(std::basic_ostream< U >& stream) const;
+
 	//private:
     protected:
 
@@ -116,10 +119,9 @@ namespace matrix
         T& atDefault_(size_t lines, size_t column)& { return const_cast< T& >(static_cast< const MatrixBuffer_t * >(this)->atDefault_(
                     lines, column)); }
 
-		std::string dumpStr() const;
-
         friend std::ostream& operator << (std::ostream& stream_, const MatrixBuffer_t<T>& mtr_) {
-            return stream_ << mtr_.dumpStr();
+            mtr_.dump(stream_);
+            return stream_;
         }
 		
 	};//class MatrixBuffer_t

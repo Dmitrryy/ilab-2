@@ -23,9 +23,13 @@ std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream
 
 int main(int argc, char* argv[])
 {
+#ifndef NDEBUG
+    auto&& inStream = std::ifstream("tests/2.txt");
+    auto&& outStream = std::cout;
+#else
     auto&& inStream = std::cin;
     auto&& outStream = std::cout;
-
+#endif
 
     auto&& data = getData2(inStream);
 
@@ -36,7 +40,40 @@ int main(int argc, char* argv[])
     }*/
 
 
+    std::vector< cl::Platform > platforms;
+    cl::Platform::get(&platforms);
+    if(platforms.empty()) {
+        throw std::runtime_error("cant find any platform!");
+    }
+    cl::Device res_device;
+    for(auto&& pl : platforms) {
+        try {
+            std::vector< cl::Device > devices;
+            pl.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
+            for (auto&& dev : devices) {
+                if (dev.getInfo< CL_DEVICE_COMPILER_AVAILABLE >()) {
+                    res_device = dev;
+                    break;
+                }
+            }
+        }
+        catch (cl::Error& ex) {
+            ex.what();
+        }
+        if (res_device != cl::Device{}) {
+            break;
+        }
+    }
+    if (res_device == cl::Device{}) {
+        throw std::runtime_error("cant find any device");
+    }
+
+
+
+    ezg::PatternMatchingGPU pmg(res_device);
+
+    auto&& res = pmg.match(data.first, data.second);
 
     return 0;
 }

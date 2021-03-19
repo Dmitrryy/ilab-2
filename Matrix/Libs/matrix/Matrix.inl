@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <set>
 
-#include <other/random.h>
+#include "../../../OtherLibs/random.h"
 
 namespace matrix
 {

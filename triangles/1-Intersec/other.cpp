@@ -160,7 +160,7 @@ void intersectionOctree(std::vector< la::Triangle > data)
 #ifdef DEBUGG
 
         std::cout << '\n';
-        std::cout << tree.dumpStr() << std::endl;
+        std::cout << tree.dump() << std::endl;
         std::cout << "num cmp       = " << COUNT_TT_INTERSEC << std::endl;
 
         for (const auto& r : res)

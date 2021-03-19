@@ -17,7 +17,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <glm/glm.hpp>
+
 
 #include "../../../Matrix/Libs/matrix/Matrix.h"
 
@@ -26,6 +26,33 @@ namespace ezg
 {
     class PatternMatchingGPU
     {
+        struct vec4
+        {
+            cl_float x = 0, y = 0, z = 0, w = 0;
+
+            vec4() = default;
+            vec4(cl_float e)
+                : x(e)
+                , y(e)
+                , z(e)
+                , w(e)
+            {}
+            vec4(cl_float nx, cl_float ny, cl_float nz, cl_float nw)
+                : x(nx)
+                , y(ny)
+                , z(nz)
+                , w(nw)
+            {}
+
+            template< class U >
+            friend std::basic_ostream< U >& operator<<(std::basic_ostream< U >& stream, const vec4& vec)
+            {
+                return stream << vec.x << ' ' << vec.y << ' ' << vec.z << ' ' << vec.w;
+            }
+        };
+
+        static cl_float nons;
+
         cl::Context m_context;
         cl::CommandQueue m_commandQueue;
 
@@ -51,8 +78,9 @@ namespace ezg
         matrix::Matrix< std::vector< std::string > >
         buildPatternsTable(const std::vector< std::string > &patterns);
 
-        matrix::Matrix< glm::vec4 > buildSignatureTable(const matrix::Matrix< std::vector< std::string > > &patTable);
+        matrix::Matrix< vec4 > buildSignatureTable(const matrix::Matrix< std::vector< std::string > > &patTable);
 
     };
+
 
 }//namespace ezg
