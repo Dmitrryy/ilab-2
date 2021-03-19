@@ -11,6 +11,7 @@
 
 #include <fstream>
 
+#include "../../OtherLibs/timer.h"
 #include "native_cpu/native_cpy.hpp"
 #include "filter_GPU/PatternMatching.hpp"
 
@@ -24,7 +25,8 @@ std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream
 int main(int argc, char* argv[])
 {
 #ifndef NDEBUG
-    auto&& inStream = std::ifstream("tests/2.txt");
+    auto&& inStream = std::ifstream("tests/4.txt");
+    assert(inStream.is_open());
     auto&& outStream = std::cout;
 #else
     auto&& inStream = std::cin;
@@ -69,12 +71,37 @@ int main(int argc, char* argv[])
         throw std::runtime_error("cant find any device");
     }
 
-
-
+#define MEASUREMENT
+#ifndef MEASUREMENT
     ezg::PatternMatchingGPU pmg(res_device);
 
     auto&& res = pmg.match(data.first, data.second);
 
+    for (size_t i = 0, mi = data.second.size(); i < mi; ++i)
+    {
+        std::cout << i + 1 << ' ' << res[i].size() << std::endl;
+    }
+#else
+    ezg::PatternMatchingGPU pmg(res_device);
+
+    ezg::Timer timer;
+    auto&& res1 = pmg.match(data.first, data.second);
+    double timeGPU = timer.elapsed();
+
+    timer.reset();
+    auto&& res2 = ezg::countPatternMatches(data.first, data.second);
+    double timeCPU = timer.elapsed();
+
+    std::cout << "GPU: " << timeGPU << "sec\n";
+    std::cout << "CPU :" << timeCPU << "sec\n";
+
+    for(size_t i = 1, mi = data.second.size(); i < mi; ++i) {
+        if(res1[i].size() != res2[i]) {
+            std::cerr << "hmmmmmmmmmmmmmmmm\n";
+            std::cerr << '[' << i << ']' << res1[i].size() << ' ' << res2[i] << std::endl;
+        }
+    }
+#endif // MEASUREMENT
     return 0;
 }
 
@@ -90,20 +117,26 @@ std::pair< std::string, std::vector< std::string > > getData2(std::basic_istream
 
     size_t size_str = 0;
     inStream >> size_str;
-    str.reserve(size_str);
-    inStream >> str;
+    inStream.ignore();
+    str.resize(size_str);
+    inStream.read(str.data(), size_str);
+    assert(inStream.gcount() == size_str);
+    inStream.ignore();
 
     size_t num_patterns = 0;
     inStream >> num_patterns;
+    inStream.ignore();
     patterns.reserve(num_patterns);
     for (size_t i = 0; i < num_patterns; ++i)
     {
         size_t size_pat = 0;
         inStream >> size_pat;
+        inStream.ignore(1);
         std::string cur_pat;
-        cur_pat.reserve(size_pat);
+        cur_pat.resize(size_pat);
 
-        inStream >> cur_pat;
+        inStream.read(cur_pat.data(), size_pat);
+        inStream.ignore(1);
 
         patterns.emplace_back(std::move(cur_pat));
     }

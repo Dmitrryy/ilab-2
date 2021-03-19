@@ -61,8 +61,10 @@ __kernel void image_test(__global char*      pkt_buffer
     get_words(pkt_buffer, buffer_size, index0, &word0, &word1, &tag0, &tag1);
 
 
-    float4 h0 = read_imagef(g_table, (int2)(word0.y, word0.x));
-    float4 h1 = read_imagef(g_table, (int2)(word1.y, word1.x));
+    float4 h0 = read_imagef(g_table, (int2)(word0.y + 128, word0.x + 128));
+    float4 h1 = read_imagef(g_table, (int2)(word1.y + 128, word1.x + 128));
+
+    //if(word0.y < 0) printf("%f || %d\n", word0.y, (int)(word0.y));
 
     //int4 mask0 = (tag0 == (float4)(nons)) * -1.f;
     //int4 mask1 = (tag1 == (float4)(nons)) * -1.f;
@@ -70,16 +72,15 @@ __kernel void image_test(__global char*      pkt_buffer
     bool res1 = all(h1 == tag1);
 
 
-    printf("word0: x = %d[%c], y = %d[%c]\n"
+/*    printf("word0: x = %d[%c], y = %d[%c]\n"
             , (int)(word0.x), (char)(word0.x), (int)(word0.y), (char)(word0.y));
     printf("h0: x = %d[%c], y = %d[%c]\n, z = %d[%c], w = %d[%c]\n"
             , (int)(h0.x), (char)(h0.x), (int)(h0.y), (char)(h0.y)
             , (int)(h0.z), (char)(h0.z), (int)(h0.w), (char)(h0.w));
-
     if (res0) printf("detected\n");
-    if (res1) printf("detected\n");
+    if (res1) printf("detected\n");*/
 
 
-    res_buffer[index0] = res0 * word0;
-    res_buffer[index1] = res1 * word1;
+    res_buffer[index0] = (res0) ? word0 : (float2)(nons);
+    res_buffer[index1] = (res1) ? word1 : (float2)(nons);
 }

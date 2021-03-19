@@ -25,8 +25,8 @@ namespace ezg
             result++;
             cur_pos = str.find(pattern, cur_pos + 1);
         }
-
         return result;
+
     }
 
 

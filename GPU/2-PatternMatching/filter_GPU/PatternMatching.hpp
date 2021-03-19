@@ -75,11 +75,13 @@ namespace ezg
 
     private:
 
-        matrix::Matrix< std::vector< std::string > >
+        matrix::Matrix< std::vector< std::pair< size_t, std::string > > >
         buildPatternsTable(const std::vector< std::string > &patterns);
 
-        matrix::Matrix< vec4 > buildSignatureTable(const matrix::Matrix< std::vector< std::string > > &patTable);
+        matrix::Matrix< vec4 > buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
+                                                    , size_t step);
 
+        bool checkMatch(const std::string& str, size_t pos, const std::string& pattern);
     };
 
 
