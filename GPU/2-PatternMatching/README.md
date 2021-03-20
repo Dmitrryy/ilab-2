@@ -2,6 +2,27 @@
 
 # LVL2 Pattern matching:
 
+### cmake
+
+* get program which check patter matches (stdin and stdout): \
+````  
+    $: cmake
+    $: ./PatternMatching < someInFile.txt > someOutFile.txt
+````
+* test generating program: \
+````  
+    $: cmake
+    $: ./gen_tests
+````
+* program for comparing work efficiency: \
+  it is advisable to generate additional tests before calling (program above)
+````  
+    $: cmake
+    $: ./measure
+````
+
+#Level description
+
 You get a long string (in the format size, then string) and then a few substrings (in the format number of substrings, then for each length and the substring itself)
 
 For example:    \
