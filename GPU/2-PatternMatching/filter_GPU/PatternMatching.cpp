@@ -7,8 +7,46 @@
  *
  ***/
 
+
+//
+/// PatternMatching on GPU
+///======================================================================================
+/// this file implements an algorithm for searching for patterns in a line on a GPU.
+///
+/// briefly about the data structures used:
+/// 1.pettern table
+/// In fact, it is a three-dimensional array with height and width = 256 (max char value)
+/// and depth = maximum number of patterns with the same prefix.
+///
+/// 2. Signature table
+/// Corresponds to the current level (depth) in the signature table.
+/// under the coordinates (first character, second) are stored the following 4
+/// characters. If there is no pattern with such a prefix, then nons are there.
+///
+/// What's happening:
+///  Having received a string and patterns as input, we build a table of patterns (see
+/// the buildPatternsTable function). Then we build the first signature table (see the
+/// buildSignatureTable function).
+/// This table is used by the GPU to filter matches.
+/// That is, each video card thread takes 6 characters from the base string (in fact,
+/// 7 because it checks two matches at once), the first two are used for indexing in the
+/// signature table. The next four characters are compared with the contents of the
+/// table.
+/// If the contents match, then the coordinates in the signature table where the match
+/// occurred are written to the output buffer, under the index corresponding to the
+/// character being checked in the main line.
+/// (here, while the video card is busy checking, the CPU starts building a new signature
+/// table)
+/// Further, all possible matches are checked on the central processor and the result is
+/// written into a hash table.
+///
+/// These actions are repeated in a loop until we pass all the levels of the pattern
+/// table.
+///======================================================================================
+///======================================================================================
+//
+
 #include "PatternMatching.hpp"
-#include "../native_cpu/native_cpy.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -70,6 +108,13 @@ namespace ezg
     PatternMatchingGPU::match(const std::string& string
           , const std::vector< std::string >& patterns)
     {
+        if (string.empty() || patterns.empty()) {
+            return {};
+        }
+
+        std::unordered_map< size_t, std::vector< size_t > > result_of_func;
+        result_of_func = checkSmallPatterns(string, patterns);
+
         auto&& table = buildPatternsTable(patterns);
         const size_t length = string.size();
 
@@ -96,7 +141,6 @@ namespace ezg
 
         struct res_float2 { float x= 0, y = 0; };
         std::vector< res_float2 > res(length);
-        std::unordered_map< size_t, std::vector< size_t > > result_of_func;
         auto&& signature_table = buildSignatureTable(table, 0);
         for(size_t step = 0; !signature_table.empty(); ++step)
         {
@@ -122,7 +166,7 @@ namespace ezg
                 auto&& cur_res = res.at(i);
                 if(cur_res.x != nons && cur_res.y != nons)
                 {
-                    auto&& pat = table.at(static_cast<u_char>(cur_res.x), static_cast<u_char>(cur_res.y)).at(step);
+                    auto&& pat = table.at(cur_res.x + 128, cur_res.y + 128).at(step);
                     if (checkMatch(string, i, pat.second))
                     {
                         result_of_func[pat.first].push_back(i);
@@ -146,7 +190,7 @@ namespace ezg
         {
             auto&& p = patterns.at(i);
             if (p.size() >= 2) {
-                res.at(static_cast<u_char>(p[0]), static_cast<uint8_t>(p[1])).emplace_back(i, p);
+                res.at(p[0] + 128, p[1] + 128).emplace_back(i, p);
             }
         }
 
@@ -157,25 +201,26 @@ namespace ezg
             PatternMatchingGPU::buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
                                                     , size_t step)
     {
-        matrix::Matrix< vec4 > res(256, 256);
+        const size_t res_lines = 256, res_columns = 256;
+        matrix::Matrix< vec4 > res(res_lines, res_columns);
 
         size_t count = 0;
-        for(size_t l = 0; l < res.getLines(); l++) {
-            for (size_t c = 0; c < res.getColumns(); c++) {
+        for(size_t l = 0; l < res_lines; ++l) {
+            for (size_t c = 0; c < res_columns; ++c) {
                 auto&& cPatterns = patTable.at(l, c);
                 auto &&cVec = res.at(l, c);
 
                 if (cPatterns.size() > step)
                 {
                     auto &&cur_pat = cPatterns.at(step).second;
-                    const size_t pat_size = cur_pat.size();
-
-                    cVec = vec4(nons);
-                    cVec.x = cur_pat.at(2);
-                    cVec.y = cur_pat.at(3);
-                    cVec.z = cur_pat.at(4);
-                    cVec.w = cur_pat.at(5);
-                    count++;
+                    if (cur_pat.size() > 5) {
+                        cVec = vec4(nons);
+                        cVec.x = cur_pat.at(2);
+                        cVec.y = cur_pat.at(3);
+                        cVec.z = cur_pat.at(4);
+                        cVec.w = cur_pat.at(5);
+                        count++;
+                    }
                 }
             }
         }
@@ -208,6 +253,31 @@ namespace ezg
         }
 
         return res;
+    }
+
+
+
+    std::unordered_map< size_t, std::vector< size_t > >
+            PatternMatchingGPU::checkSmallPatterns(const std::string& str, const std::vector< std::string >& patterns)
+    {
+        std::unordered_map< size_t, std::vector< size_t > > result;
+
+        const size_t num_patterns = patterns.size();
+        result.reserve(num_patterns);
+        for (size_t i = 0; i < num_patterns; ++i) {
+            auto&& pattern = patterns.at(i);
+            if (pattern.size() > 5)
+                continue;
+
+            size_t cur_pos = str.find(pattern);
+            while(cur_pos != std::string::npos)
+            {
+                result[i].push_back(cur_pos);
+                cur_pos = str.find(pattern, cur_pos + 1);
+            }
+
+        }
+        return result;
     }
 
 
