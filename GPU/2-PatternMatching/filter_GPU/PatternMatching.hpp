@@ -27,26 +27,6 @@ namespace ezg
 {
     class PatternMatchingGPU
     {
-        /// structure of 4 floating point values. Used to store RGBA pixel
-        struct vec4
-        {
-            cl_float x = 0, y = 0, z = 0, w = 0;
-
-            vec4() = default;
-            vec4(cl_float e)
-                : x(e), y(e), z(e), w(e)
-            {}
-            vec4(cl_float nx, cl_float ny, cl_float nz, cl_float nw)
-                : x(nx), y(ny), z(nz), w(nw)
-            {}
-
-            template< class U >
-            friend std::basic_ostream< U >& operator<<(std::basic_ostream< U >& stream, const vec4& vec)
-            {
-                return stream << vec.x << ' ' << vec.y << ' ' << vec.z << ' ' << vec.w;
-            }
-        };
-
         //denotes not a symbol
         //for example, there is no pattern with such coordinates in the signature table
         static cl_float nons;
@@ -86,11 +66,9 @@ namespace ezg
         /// sorts patterns by prefix (first two letters)
         /// \param patterns - sortable patterns
         /// \return matrix, where the patterns with the prefix "s1s2" lie under
-        /// the coordinates ('s1' + 128, 's2' + 128). Offset 128 is used to work
-        /// properly with negative values
+        /// the coordinates ('s1', 's2').
         /// \note To save the pattern number in the general array, the lines
         /// are wrapped in a pair containing the corresponding pattern number
-        /// \TODO convert to type conversion to uchar instead 128
         matrix::Matrix< std::vector< std::pair< size_t, std::string > > >
         buildPatternsTable(const std::vector< std::string > &patterns);
 
@@ -100,7 +78,7 @@ namespace ezg
         /// \param step     - depth ... at stage == 4, patterns with index 4
         /// will be taken from the table (the table contains vectors of patterns)
         /// \return pixel matrix (signature table)
-        matrix::Matrix< vec4 > buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
+        matrix::Matrix< cl_float4 > buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
                                                     , size_t step);
 
         /// the filtering algorithm does not work for patterns less than 6 characters in size.

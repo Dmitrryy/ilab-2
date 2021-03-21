@@ -139,8 +139,7 @@ namespace ezg
 
 
 
-        struct res_float2 { float x= 0, y = 0; };
-        std::vector< res_float2 > res(length);
+        std::vector< cl_float2 > res(length);
         auto&& signature_table = buildSignatureTable(table, 0);
         for(size_t step = 0; !signature_table.empty(); ++step)
         {
@@ -148,7 +147,8 @@ namespace ezg
                                              , {0, 0, 0}, {im_weight, im_height, 1}
                                              , 0, 0, signature_table.data());
 
-            cl::Kernel kernel(m_program, "image_test");
+            //TODO make custom
+            cl::Kernel kernel(m_program, "signature_match");
             kernel.setArg(0, cl_buff_string);
             kernel.setArg(1, cl_buff_res);
             kernel.setArg(2, static_cast<cl_uint>(length));
@@ -166,7 +166,8 @@ namespace ezg
                 auto&& cur_res = res.at(i);
                 if(cur_res.x != nons && cur_res.y != nons)
                 {
-                    auto&& pat = table.at(cur_res.x + 128, cur_res.y + 128).at(step);
+                    auto&& pat = table.at(static_cast<u_char>(static_cast<char>(cur_res.x))
+                            , static_cast<u_char>(static_cast<char>(cur_res.y))).at(step);
                     if (checkMatch(string, i, pat.second))
                     {
                         result_of_func[pat.first].push_back(i);
@@ -190,19 +191,19 @@ namespace ezg
         {
             auto&& p = patterns.at(i);
             if (p.size() >= 2) {
-                res.at(p[0] + 128, p[1] + 128).emplace_back(i, p);
+                res.at(static_cast<u_char>(p[0]), static_cast<u_char>(p[1])).emplace_back(i, p);
             }
         }
 
         return res;
     }
 
-    matrix::Matrix< PatternMatchingGPU::vec4 >
+    matrix::Matrix< cl_float4 >
             PatternMatchingGPU::buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
                                                     , size_t step)
     {
         const size_t res_lines = 256, res_columns = 256;
-        matrix::Matrix< vec4 > res(res_lines, res_columns);
+        matrix::Matrix< cl_float4 > res(res_lines, res_columns);
 
         size_t count = 0;
         for(size_t l = 0; l < res_lines; ++l) {
@@ -214,7 +215,6 @@ namespace ezg
                 {
                     auto &&cur_pat = cPatterns.at(step).second;
                     if (cur_pat.size() > 5) {
-                        cVec = vec4(nons);
                         cVec.x = cur_pat.at(2);
                         cVec.y = cur_pat.at(3);
                         cVec.z = cur_pat.at(4);
