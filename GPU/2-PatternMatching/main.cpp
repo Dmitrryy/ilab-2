@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
     for (size_t i = 0, mi = data.second.size(); i < mi; ++i)
     {
-        outStream << i << ' ' << res[i].size() << std::endl;
+        outStream << i + 1 << ' ' << res[i].size() << std::endl;
     }
 #endif
     return 0;
