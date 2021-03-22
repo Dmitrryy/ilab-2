@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 
 namespace ezg
@@ -42,6 +43,9 @@ namespace ezg
                 test_files.emplace_back(tests_dir_name + '/' + name);
             }
         }
+
+        std::sort(test_files.begin(), test_files.end());
+
 
 
         for(auto&& test : test_files)

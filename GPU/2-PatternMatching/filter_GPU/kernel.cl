@@ -28,7 +28,10 @@ void get_words(__global char* pkt_buffer
                 , float4 *tag1)
 {
     float8 source = NON_SYMBOL_CODE;
-    size_t permissible = min(7lu, buffer_size - pos);
+
+    // determine the possible number of bytes to read
+    // (in case of the end of the buffer)
+    const size_t permissible = min(7lu, buffer_size - pos);
 
     switch(permissible) {
         case 7:  source.s6 = pkt_buffer[pos + 6];
@@ -69,15 +72,18 @@ __kernel void signature_match(__global char*      pkt_buffer
     float2 word0 = nons, word1 = nons;
     float4  tag0 = nons,  tag1 = nons;
 
+    // Read 2 words from the packet buffer and create tag.
     get_words(pkt_buffer, buffer_size, index0, &word0, &word1, &tag0, &tag1);
 
     // to get the desired effect, you first need to convert float to char.
     // Direct conversion from float to unsigned char will give zero
     const int2 coord0 = convert_int2(convert_uchar2(convert_char2(word0)));
     const int2 coord1 = convert_int2(convert_uchar2(convert_char2(word1)));
+    // Use the word values to index the virus pattern table.
     const float4 h0 = read_imagef(g_table, coord0.yx);
     const float4 h1 = read_imagef(g_table, coord1.yx);
 
+    // Check if all 4 of the bytes match.
     const bool res0 = all(h0 == tag0);
     const bool res1 = all(h1 == tag1);
 
