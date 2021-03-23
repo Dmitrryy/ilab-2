@@ -71,8 +71,8 @@ namespace ezg
 		}
 		void turnInVerticalPlane(float angle)
 		{
-			if (angle > 0 && m_direction.z >= m_max_z_direction_component ||
-				angle < 0 && m_direction.z <= -m_max_z_direction_component)
+			if ((angle > 0 && m_direction.z >= m_max_z_direction_component) ||
+                    (angle < 0 && m_direction.z <= -m_max_z_direction_component))
 			{
 				return;
 			}

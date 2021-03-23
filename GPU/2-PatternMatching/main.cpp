@@ -66,7 +66,9 @@ int main(int argc, char* argv[])
 
 #if defined(MEASUREMENT)
     ezg::measure_main(res_device);
-#elif defined(GEN_TESTS)
+#endif
+
+#if defined(GEN_TESTS)
     for(size_t i = 4; i < 8; i++)
     {
         std::ofstream out("tests/" + std::to_string(i) + ".txt");
@@ -87,7 +89,9 @@ int main(int argc, char* argv[])
         std::ofstream out("tests/" + std::to_string(i) + ".txt");
         ezg::gen_test_pattern_matching(out, i * i * 10000, 6000, 6, 4);
     }
-#else
+#endif
+
+#if !defined(GEN_TESTS) && !defined(MEASUREMENT)
     auto &&data = ezg::getData2(inStream);
 
     ezg::PatternMatchingGPU pmg(res_device);

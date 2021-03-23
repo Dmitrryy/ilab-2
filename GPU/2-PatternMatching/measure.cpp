@@ -25,6 +25,7 @@ namespace ezg
 
     void measure_main(const cl::Device& device)
     {
+
         std::string tests_dir_name = "tests";
         std::string extension = ".txt";
 
@@ -34,13 +35,13 @@ namespace ezg
             if (!std::filesystem::is_regular_file(p.status()))
                 continue;
 
-            std::string name(p.path().filename());
+            std::string name(p.path().string());
 
             bool match = !name.compare(name.size() - extension.size(), extension.size(), extension);
 
             if(match)
             {
-                test_files.emplace_back(tests_dir_name + '/' + name);
+                test_files.emplace_back(name);
             }
         }
 

@@ -72,13 +72,10 @@ namespace ezg
 
         vertex[0].pos = pos_a;
         vertex[0].normal = normal;
-        vertex[0].entityId = entityId;
         vertex[1].pos = pos_b;
         vertex[1].normal = normal;
-        vertex[1].entityId = entityId;
         vertex[2].pos = pos_c;
         vertex[2].normal = normal;
-        vertex[2].entityId = entityId;
 
         entity.m_vertices.at(0) = (vertex[0]);
         entity.m_vertices.at(1) = (vertex[1]);
@@ -123,6 +120,8 @@ namespace ezg
 
             update_camera_(dTime);
             m_driver.setCameraView(m_cameraView);
+
+            //std::cout << m_cameraView.m_position.x << " | " << m_cameraView.m_position.y << " | " << m_cameraView.m_position.z << std::endl;
 
             m_driver.render();
         }
@@ -225,11 +224,15 @@ namespace ezg
 
             curEntity.m_coordsInWorld = m_driver.getWorldCoords(i);
 
+
+
 /*
             std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
                                          << curEntity.m_coordsInWorld[1].x << ", " << curEntity.m_coordsInWorld[1].y << ", " << curEntity.m_coordsInWorld[1].z << " | "
                                          << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;
 */
+
+
 
             curEntity.updateArea();
             if (curEntity.type() == Entity::Type::Triangle)

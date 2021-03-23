@@ -48,7 +48,6 @@ layout(set = 0, binding = 2) writeonly buffer out_vert_shader
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inColor;
 layout(location = 2) in vec3 inNormal;
-layout(location = 3) in uint inEntityId;
 //=======================================================================================
 //=======================================================================================
 

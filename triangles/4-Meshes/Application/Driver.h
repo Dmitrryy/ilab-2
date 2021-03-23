@@ -33,7 +33,7 @@ namespace vks
 		glm::vec3 color = { 255.f, 0.f, 0.f };
 		glm::vec3 normal;
 
-        alignas(8) uint64_t entityId;
+        //alignas(8) uint64_t entityId;
 
 
 		static VkVertexInputBindingDescription getBindingDescription()
@@ -46,9 +46,9 @@ namespace vks
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescription()
+		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescription()
 		{
-			std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
 
 			attributeDescriptions[0].binding = 0;
 			attributeDescriptions[0].location = 0;
@@ -64,11 +64,6 @@ namespace vks
 			attributeDescriptions[2].location = 2;
 			attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[2].offset = offsetof(Vertex, normal);
-
-            attributeDescriptions[3].binding = 0;
-            attributeDescriptions[3].location = 3;
-            attributeDescriptions[3].format = VK_FORMAT_R64_UINT;
-            attributeDescriptions[3].offset = offsetof(Vertex, entityId);
 
 			return attributeDescriptions;
 		}
@@ -147,18 +142,27 @@ namespace vks
 		///
 		std::vector< VkBuffer >        m_storageBufferWorldCoords;
 		std::vector< VkDeviceMemory >  m_storageBufferMemoryWorldCoords;
-		//todo: access to the vertices of a specific element by offset in a shared array
-		std::vector< glm::vec3 >       m_worldCoords;
 		/// end OIS
         ////////////////////////////////////////
 
-
         ezg::CameraView     m_cameraView;
 
+        std::vector< std::vector< uint32_t > > m_indices;
+        VkBuffer  m_indexBuffer;
+        VkDeviceMemory m_indexBufferMemory;
+        size_t m_numAllIndices = 0;
+        std::vector< size_t > m_indexBufferOffsets;
+
         //todo: different buffer for each object
-		std::vector<Vertex> vertices;
-        VkBuffer                       m_vertexBuffer = nullptr;;
-        VkDeviceMemory                 m_vertexBufferMemory = nullptr;
+		std::vector< std::vector < Vertex > >  m_vertices;
+        VkBuffer                               m_vertexBuffer;
+
+        VkDeviceMemory                         m_vertexBufferMemory;
+        size_t                                 m_numAllVertices = 0;
+        std::vector< size_t >                  m_vertexBufferOffsets;
+
+        //todo: access to the vertices of a specific element by offset in a shared array
+        std::vector< glm::vec3 >               m_worldCoords;
 
 	public:
 
@@ -214,6 +218,7 @@ namespace vks
 
 
 		void createVertexBuffer_();
+		void createIndexBuffer_();
 
 		void createUniformBuffers_();
 		void updateUniformBuffer_(uint32_t currentImage_);
