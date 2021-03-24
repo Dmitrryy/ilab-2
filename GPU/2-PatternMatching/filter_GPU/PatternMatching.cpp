@@ -120,14 +120,17 @@ namespace ezg
 
 
 
-        cl::Buffer cl_buff_string(m_context, CL_MEM_READ_ONLY,
-                                  length * sizeof(std::string::value_type));
+        cl::Buffer cl_buff_string(m_context, CL_MEM_READ_ONLY, length * sizeof(std::string::value_type));
+
         m_commandQueue.enqueueWriteBuffer(cl_buff_string, CL_TRUE, 0
                                           , length * sizeof(std::string::value_type)
                                           , string.data());
 
+        //what happens next is very similar to working with frame buffers in graphics.
+        //The frame buffer is played by the buffer with the results of comparisons with the kernel.
+        //The basic idea is that there can be several teams in flight.
 
-
+        // creating signature tables for each frame
         size_t im_weight = 1 << sizeof(char) * 8;
         size_t im_height = 1 << sizeof(char) * 8;
         cl::ImageFormat iFormat(CL_RGBA, CL_FLOAT);
@@ -137,6 +140,7 @@ namespace ezg
             cl_signature_tables.emplace_back(m_context, CL_MEM_READ_ONLY, iFormat, im_weight, im_height);
         }
 
+        // creating output buffers for each frame
         std::vector< cl::Buffer > cl_res_buffers;
         cl_res_buffers.reserve(numFrames);
         for (size_t i = 0; i < numFrames; ++i) {
@@ -147,12 +151,16 @@ namespace ezg
         const size_t global_size = length / 2 + length % 2;
         m_lastTime = 0;
 
-        std::vector< cl_float2 > result(length);
         std::vector< cl::Event > events(numFrames);
         std::vector< size_t >    depths(numFrames, 0);
 
+        //for better readability of the code, one loop section in three stages
+        //They are:
 
-        // first launch
+        cl::Kernel kernel(m_program, "signature_match");
+
+        // first launch.
+        // do the first launch for each frame.
         for (size_t st = 0; st < numFrames; ++st)
         {
             auto&& signature_table = buildSignatureTable(table, st);
@@ -163,7 +171,6 @@ namespace ezg
                                              , {0, 0, 0}, {im_weight, im_height, 1}
                                              , 0, 0, signature_table.data());
 
-            cl::Kernel kernel(m_program, "signature_match");
             kernel.setArg(0, cl_buff_string);
             kernel.setArg(1, cl_res_buffers.at(st));
             kernel.setArg(2, static_cast<cl_uint>(length));
@@ -172,7 +179,11 @@ namespace ezg
         }
 
 
+        std::vector< cl_float2 > result(length);
+
         // midl stage
+        // at each iteration, in addition to starting the kernel, the results of
+        // the already completed kernel are checked.
         for(size_t st = numFrames; st < maxDepthTable; ++st)
         {
             const size_t curFrame = st % numFrames;
@@ -194,7 +205,6 @@ namespace ezg
                                              , {0, 0, 0}, {im_weight, im_height, 1}
                                              , 0, 0, signature_table.data());
 
-            cl::Kernel kernel(m_program, "signature_match");
             kernel.setArg(0, cl_buff_string);
             kernel.setArg(1, cl_res_buffers.at(curFrame));
             kernel.setArg(2, static_cast<cl_uint>(length));
@@ -219,6 +229,7 @@ namespace ezg
 
 
         // closing circle
+        // when you no longer need to start new kernels, but you need to check the remaining results
         for(size_t st = maxDepthTable; st < maxDepthTable + numFrames; ++st)
         {
             const size_t curFrame = st % numFrames;
