@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
     for(size_t i = 8; i < 12; i++)
     {
         std::ofstream out("tests/" + std::to_string(i) + ".txt");
-        ezg::gen_test_pattern_matching(out, 1000000, 1000, i * i, 2);
+        ezg::gen_test_pattern_matching(out, 1000000, 1000, 50 * i * i, 2);
     }
     for(size_t i = 12; i < 16; i++)
     {
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     for(size_t i = 16; i < 20; i++)
     {
         std::ofstream out("tests/" + std::to_string(i) + ".txt");
-        ezg::gen_test_pattern_matching(out, i * i * 10000, 6000, 6, 4);
+        ezg::gen_test_pattern_matching(out, i * i * 50000, 6000, 6, 4);
     }
 #endif
 

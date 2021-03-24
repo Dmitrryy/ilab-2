@@ -19,8 +19,7 @@
 #include <unordered_map>
 
 
-
-#include "../../../Matrix/Libs/matrix/Matrix.h"
+#include <matrix/Matrix.h>
 
 
 namespace ezg
@@ -39,6 +38,9 @@ namespace ezg
 
         //TODO settings
         std::string m_kernelSourceName = "kernel.cl";
+
+        double m_lastTime = 0;
+        size_t m_maxFramesInFly = 4;
 
 
     public:
@@ -59,6 +61,11 @@ namespace ezg
         std::unordered_map< size_t, std::vector< size_t > >
         match(const std::string &string
               , const std::vector< std::string > &patterns);
+
+
+        ///
+        /// \return
+        double getLastTime() const { return m_lastTime; }
 
     private:
         //what scary types ...
@@ -95,6 +102,9 @@ namespace ezg
         /// \param pattern - what to look for
         /// \return is there a match or not
         bool checkMatch(const std::string& str, size_t pos, const std::string& pattern);
+
+
+        size_t getMaxDepthPatternTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > >& table) const;
     };
 
 

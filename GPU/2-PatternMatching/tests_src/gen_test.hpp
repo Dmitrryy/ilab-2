@@ -100,7 +100,10 @@ namespace ezg
             size_t hints = rand_hits();
             for (size_t k = 0; k < hints; ++k)
             {
-                const size_t pos = rand_pos();
+                size_t pos = rand_pos();
+                while(str.end() - (str.begin() + pos) < length)
+                    pos = rand_pos();
+
                 std::copy(cur_pat.cbegin(), cur_pat.cend(), str.begin() + pos);
             }
         }

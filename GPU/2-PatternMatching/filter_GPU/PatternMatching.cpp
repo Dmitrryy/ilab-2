@@ -87,13 +87,11 @@ namespace ezg
         // to allocate local memory of the desired size.
         m_maxWorkGroupSize = device.getInfo< CL_DEVICE_MAX_WORK_GROUP_SIZE >();
         try {
-            std::string options(std::string(" -D DATA_TYPE=int ")
-                                + "-D MAX_GROUP_SIZE=" + std::to_string(m_maxWorkGroupSize)
-                                + " -D NON_SYMBOL_CODE=" + std::to_string(static_cast<int>(nons)));
+            std::ostringstream options;
+            options << " -D MAX_GROUP_SIZE=" << m_maxWorkGroupSize;
+            options << " -D NON_SYMBOL_CODE=" << nons;
 
-            //DEBUG_ACTION(options += " -D DEBUG ";);
-
-            m_program.build(options.c_str());
+            m_program.build(options.str().c_str());
         }
         catch (const std::exception& ex) {
             std::cerr << ex.what() << std::endl;
@@ -116,15 +114,11 @@ namespace ezg
         result_of_func = checkSmallPatterns(string, patterns);
 
         auto&& table = buildPatternsTable(patterns);
+        const size_t maxDepthTable = getMaxDepthPatternTable(table);
+        const size_t numFrames = std::min(m_maxFramesInFly, maxDepthTable);
         const size_t length = string.size();
 
 
-        size_t im_weight = 1 << sizeof(char) * 8;
-        size_t im_height = 1 << sizeof(char) * 8;
-        cl::ImageFormat iFormat(CL_RGBA, CL_FLOAT);
-
-        cl::Image2D cl_signature_table(m_context, CL_MEM_READ_ONLY
-                                    , iFormat, im_weight, im_height);
 
         cl::Buffer cl_buff_string(m_context, CL_MEM_READ_ONLY,
                                   length * sizeof(std::string::value_type));
@@ -132,42 +126,116 @@ namespace ezg
                                           , length * sizeof(std::string::value_type)
                                           , string.data());
 
-        cl::Buffer cl_buff_res(m_context, CL_MEM_WRITE_ONLY,
-                                 length * 2 * sizeof(cl_float));
-
-        size_t global_size = length / 2 + length % 2;
 
 
+        size_t im_weight = 1 << sizeof(char) * 8;
+        size_t im_height = 1 << sizeof(char) * 8;
+        cl::ImageFormat iFormat(CL_RGBA, CL_FLOAT);
+        std::vector< cl::Image2D > cl_signature_tables;
+        cl_signature_tables.reserve(numFrames);
+        for (size_t i = 0; i < numFrames; ++i) {
+            cl_signature_tables.emplace_back(m_context, CL_MEM_READ_ONLY, iFormat, im_weight, im_height);
+        }
 
-        std::vector< cl_float2 > res(length);
-        auto&& signature_table = buildSignatureTable(table, 0);
-        for(size_t step = 0; !signature_table.empty(); ++step)
+        std::vector< cl::Buffer > cl_res_buffers;
+        cl_res_buffers.reserve(numFrames);
+        for (size_t i = 0; i < numFrames; ++i) {
+            cl_res_buffers.emplace_back(m_context, CL_MEM_WRITE_ONLY, length * 2 * sizeof(cl_float));
+        }
+
+
+        const size_t global_size = length / 2 + length % 2;
+        m_lastTime = 0;
+
+        std::vector< cl_float2 > result(length);
+        std::vector< cl::Event > events(numFrames);
+        std::vector< size_t >    depths(numFrames, 0);
+
+
+        // first launch
+        for (size_t st = 0; st < numFrames; ++st)
         {
-            m_commandQueue.enqueueWriteImage(cl_signature_table, CL_TRUE
+            auto&& signature_table = buildSignatureTable(table, st);
+            depths.at(st) = st;
+            assert(!signature_table.empty());
+
+            m_commandQueue.enqueueWriteImage(cl_signature_tables.at(st), CL_TRUE
                                              , {0, 0, 0}, {im_weight, im_height, 1}
                                              , 0, 0, signature_table.data());
 
-            //TODO make custom
             cl::Kernel kernel(m_program, "signature_match");
             kernel.setArg(0, cl_buff_string);
-            kernel.setArg(1, cl_buff_res);
+            kernel.setArg(1, cl_res_buffers.at(st));
             kernel.setArg(2, static_cast<cl_uint>(length));
-            kernel.setArg(3, cl_signature_table);
+            kernel.setArg(3, cl_signature_tables.at(st));
+            m_commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, cl::NullRange, nullptr, &events.at(st));
+        }
 
-            cl::Event event;
-            m_commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, cl::NullRange, nullptr, &event);
 
-            signature_table = buildSignatureTable(table, step + 1);
+        // midl stage
+        for(size_t st = numFrames; st < maxDepthTable; ++st)
+        {
+            const size_t curFrame = st % numFrames;
 
-            event.wait();
-            cl::copy(m_commandQueue, cl_buff_res, res.begin(), res.end());
+            auto&& signature_table = buildSignatureTable(table, st);
+            assert(!signature_table.empty());
+
+
+            events.at(curFrame).wait();
+            cl_ulong start_time = events.at(curFrame).getProfilingInfo<CL_PROFILING_COMMAND_START>();
+            cl_ulong end_time = events.at(curFrame).getProfilingInfo<CL_PROFILING_COMMAND_END>();
+            m_lastTime += (end_time - start_time) / 1000000000.0;
+
+
+            cl::copy(m_commandQueue, cl_res_buffers.at(curFrame), result.begin(), result.end());
+
+
+            m_commandQueue.enqueueWriteImage(cl_signature_tables.at(curFrame), CL_TRUE
+                                             , {0, 0, 0}, {im_weight, im_height, 1}
+                                             , 0, 0, signature_table.data());
+
+            cl::Kernel kernel(m_program, "signature_match");
+            kernel.setArg(0, cl_buff_string);
+            kernel.setArg(1, cl_res_buffers.at(curFrame));
+            kernel.setArg(2, static_cast<cl_uint>(length));
+            kernel.setArg(3, cl_signature_tables.at(curFrame));
+            m_commandQueue.enqueueNDRangeKernel(kernel, 0, global_size, cl::NullRange, nullptr, &events.at(curFrame));
+
 
             for (size_t i = 0; i < length; ++i) {
-                auto&& cur_res = res.at(i);
-                if(cur_res.x != nons && cur_res.y != nons)
+                auto&& cur_item = result.at(i);
+                if(cur_item.x != nons && cur_item.y != nons)
                 {
-                    auto&& pat = table.at(static_cast<u_char>(static_cast<char>(cur_res.x))
-                            , static_cast<u_char>(static_cast<char>(cur_res.y))).at(step);
+                    auto&& pat = table.at(static_cast<u_char>(static_cast<char>(cur_item.x))
+                                          , static_cast<u_char>(static_cast<char>(cur_item.y))).at(depths.at(curFrame));
+                    if (checkMatch(string, i, pat.second))
+                    {
+                        result_of_func[pat.first].push_back(i);
+                    }
+                }
+            }
+            depths.at(curFrame) = st;
+        }
+
+
+        // closing circle
+        for(size_t st = maxDepthTable; st < maxDepthTable + numFrames; ++st)
+        {
+            const size_t curFrame = st % numFrames;
+
+            events.at(curFrame).wait();
+            cl_ulong start_time = events.at(curFrame).getProfilingInfo<CL_PROFILING_COMMAND_START>();
+            cl_ulong end_time = events.at(curFrame).getProfilingInfo<CL_PROFILING_COMMAND_END>();
+            m_lastTime += (end_time - start_time) / 1000000000.0;
+
+            cl::copy(m_commandQueue, cl_res_buffers.at(curFrame), result.begin(), result.end());
+
+            for (size_t i = 0; i < length; ++i) {
+                auto&& cur_item = result.at(i);
+                if(cur_item.x != nons && cur_item.y != nons)
+                {
+                    auto&& pat = table.at(static_cast<u_char>(static_cast<char>(cur_item.x))
+                                          , static_cast<u_char>(static_cast<char>(cur_item.y))).at(depths.at(curFrame));
                     if (checkMatch(string, i, pat.second))
                     {
                         result_of_func[pat.first].push_back(i);
@@ -190,13 +258,31 @@ namespace ezg
         for (size_t i = 0, mi = patterns.size(); i < mi; ++i)
         {
             auto&& p = patterns.at(i);
-            if (p.size() >= 2) {
+            if (p.size() >= 6) {
                 res.at(static_cast<u_char>(p[0]), static_cast<u_char>(p[1])).emplace_back(i, p);
             }
         }
 
         return res;
     }
+
+
+    size_t PatternMatchingGPU::getMaxDepthPatternTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > >& table) const
+    {
+        const size_t lines = table.getLines();
+        const size_t columns = table.getColumns();
+
+        size_t result = 0;
+        for (size_t l = 0; l < lines; ++l)
+        {
+            for (size_t c = 0; c < columns; ++c)
+            {
+                result = std::max(result, table.at(l, c).size());
+            }
+        }
+        return result;
+    }
+
 
     matrix::Matrix< cl_float4 >
             PatternMatchingGPU::buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
@@ -239,7 +325,7 @@ namespace ezg
         bool res = true;
         if (pos + length_pat <= length_str)
         {
-            for (size_t i = 0; i < length_pat; ++i)
+            for (size_t i = 6; i < length_pat; ++i)
             {
                 if (str[pos + i] != pattern[i]) {
                     res = false;

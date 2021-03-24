@@ -44,6 +44,8 @@ add_dependencies(${PROJECT_NAME} ${FB_TARGET})
 target_compile_options(${PROJECT_NAME} PRIVATE ${MY_COMPILE_FLAGS})
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
+target_include_directories(${PROJECT_NAME} PRIVATE ../../Matrix/Libs)
+
 
 # Build mode dependent actions
 ##-----------------------------------------------------------------------------
@@ -74,6 +76,8 @@ if(MEASURE)
     find_package(OpenCL REQUIRED)
     target_include_directories(${MEASURE_TARGET_NAME} PRIVATE ${OpenCL_INCLUDE_DIRS})
     target_link_libraries(${MEASURE_TARGET_NAME} ${OpenCL_LIBRARIES})
+
+    target_include_directories(${MEASURE_TARGET_NAME} PRIVATE ../../Matrix/Libs)
 endif()
 
 
@@ -92,6 +96,8 @@ if(GEN_TESTS)
     find_package(OpenCL REQUIRED)
     target_include_directories(${GEN_TESTS_TARGET_NAME} PRIVATE ${OpenCL_INCLUDE_DIRS})
     target_link_libraries(${GEN_TESTS_TARGET_NAME} ${OpenCL_LIBRARIES})
+
+    target_include_directories(${GEN_TESTS_TARGET_NAME} PRIVATE ../../Matrix/Libs)
 endif()
 
 

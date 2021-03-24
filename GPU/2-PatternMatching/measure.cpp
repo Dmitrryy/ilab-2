@@ -80,7 +80,7 @@ namespace ezg
                 double timeCPU = timer.elapsed();
 
                 std::cout << "Time results: " << std::endl;
-                std::cout << "with GPU filter = " << timeGPU << "sec\n";
+                std::cout << "with GPU filter = " << timeGPU << "sec" << " where " << pmg.getLastTime() << " sec is kernels\n";
                 std::cout << "native CPU      = " << timeCPU << "sec\n";
 
                 for(size_t i = 1, mi = data.second.size(); i < mi; ++i) {
