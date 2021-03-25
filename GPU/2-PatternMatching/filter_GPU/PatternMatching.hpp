@@ -69,6 +69,7 @@ namespace ezg
 
     private:
         //what scary types ...
+        using PatternTable = matrix::Matrix< std::vector< std::pair< size_t, std::string > > >;
 
         /// sorts patterns by prefix (first two letters)
         /// \param patterns - sortable patterns
@@ -76,7 +77,7 @@ namespace ezg
         /// the coordinates ('s1', 's2').
         /// \note To save the pattern number in the general array, the lines
         /// are wrapped in a pair containing the corresponding pattern number
-        matrix::Matrix< std::vector< std::pair< size_t, std::string > > >
+        PatternTable
         buildPatternsTable(const std::vector< std::string > &patterns);
 
 
@@ -85,7 +86,7 @@ namespace ezg
         /// \param step     - depth ... at stage == 4, patterns with index 4
         /// will be taken from the table (the table contains vectors of patterns)
         /// \return pixel matrix (signature table)
-        matrix::Matrix< cl_float4 > buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
+        matrix::Matrix< cl_float4 > buildSignatureTable(const PatternTable &patTable
                                                     , size_t step);
 
         /// the filtering algorithm does not work for patterns less than 6 characters in size.
@@ -104,7 +105,7 @@ namespace ezg
         bool checkMatch(const std::string& str, size_t pos, const std::string& pattern);
 
 
-        size_t getMaxDepthPatternTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > >& table) const;
+        size_t getMaxDepthPatternTable(const PatternTable& table) const;
     };
 
 

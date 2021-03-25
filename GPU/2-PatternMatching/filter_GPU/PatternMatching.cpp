@@ -119,16 +119,15 @@ namespace ezg
         const size_t length = string.size();
 
 
-
         cl::Buffer cl_buff_string(m_context, CL_MEM_READ_ONLY, length * sizeof(std::string::value_type));
 
         m_commandQueue.enqueueWriteBuffer(cl_buff_string, CL_TRUE, 0
                                           , length * sizeof(std::string::value_type)
                                           , string.data());
 
-        //what happens next is very similar to working with frame buffers in graphics.
-        //The frame buffer is played by the buffer with the results of comparisons with the kernel.
-        //The basic idea is that there can be several teams in flight.
+        // what happens next is very similar to working with frame buffers in graphics.
+        // The frame buffer is played by the buffer with the results of comparisons with the kernel.
+        // The basic idea is that there can be several teams in flight.
 
         // creating signature tables for each frame
         size_t im_weight = 1 << sizeof(char) * 8;
@@ -154,8 +153,8 @@ namespace ezg
         std::vector< cl::Event > events(numFrames);
         std::vector< size_t >    depths(numFrames, 0);
 
-        //for better readability of the code, one loop section in three stages
-        //They are:
+        // for better readability of the code, one loop section in three stages
+        // They are:
 
         cl::Kernel kernel(m_program, "signature_match");
 
@@ -216,6 +215,8 @@ namespace ezg
                 auto&& cur_item = result.at(i);
                 if(cur_item.x != nons && cur_item.y != nons)
                 {
+                    // to get the desired effect, you first need to convert float to char.
+                    // Direct conversion from float to unsigned char will give zero
                     auto&& pat = table.at(static_cast<u_char>(static_cast<char>(cur_item.x))
                                           , static_cast<u_char>(static_cast<char>(cur_item.y))).at(depths.at(curFrame));
                     if (checkMatch(string, i, pat.second))
@@ -245,6 +246,8 @@ namespace ezg
                 auto&& cur_item = result.at(i);
                 if(cur_item.x != nons && cur_item.y != nons)
                 {
+                    // to get the desired effect, you first need to convert float to char.
+                    // Direct conversion from float to unsigned char will give zero
                     auto&& pat = table.at(static_cast<u_char>(static_cast<char>(cur_item.x))
                                           , static_cast<u_char>(static_cast<char>(cur_item.y))).at(depths.at(curFrame));
                     if (checkMatch(string, i, pat.second))
@@ -278,7 +281,7 @@ namespace ezg
     }
 
 
-    size_t PatternMatchingGPU::getMaxDepthPatternTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > >& table) const
+    size_t PatternMatchingGPU::getMaxDepthPatternTable(const PatternTable& table) const
     {
         const size_t lines = table.getLines();
         const size_t columns = table.getColumns();
@@ -296,7 +299,7 @@ namespace ezg
 
 
     matrix::Matrix< cl_float4 >
-            PatternMatchingGPU::buildSignatureTable(const matrix::Matrix< std::vector< std::pair< size_t, std::string > > > &patTable
+            PatternMatchingGPU::buildSignatureTable(const PatternTable &patTable
                                                     , size_t step)
     {
         const size_t res_lines = 256, res_columns = 256;
