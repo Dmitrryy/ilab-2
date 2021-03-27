@@ -6,3 +6,4 @@
 
 1. Bitonic Sort
 2. Pattern Matching
+3. The Dirichlet problem

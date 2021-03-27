@@ -46,11 +46,11 @@ int main(int argc, char* argv[])
             std::vector< cl::Device > devices;
             pl.getDevices(CL_DEVICE_TYPE_ALL, &devices);
 
-            for (auto&& dev : devices) {
-                if (dev.getInfo< CL_DEVICE_COMPILER_AVAILABLE >()) {
-                    res_device = dev;
-                    break;
-                }
+            auto&& it_dev = std::find_if(devices.begin(), devices.end(), [](const cl::Device& d) {
+                return d.getInfo< CL_DEVICE_COMPILER_AVAILABLE >();
+            });
+            if (it_dev != devices.end()) {
+                res_device = *it_dev;
             }
         }
         catch (cl::Error& ex) {

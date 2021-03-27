@@ -21,7 +21,7 @@
     $: ./measure
 ````
 
-#Level description
+# Level description
 
 You get a long string (in the format size, then string) and then a few substrings (in the format number of substrings, then for each length and the substring itself)
 

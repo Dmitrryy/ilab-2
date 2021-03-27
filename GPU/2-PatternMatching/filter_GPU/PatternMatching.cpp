@@ -130,8 +130,8 @@ namespace ezg
         // The basic idea is that there can be several teams in flight.
 
         // creating signature tables for each frame
-        size_t im_weight = 1 << sizeof(char) * 8;
-        size_t im_height = 1 << sizeof(char) * 8;
+        size_t im_weight = 1 << CL_CHAR_BIT;
+        size_t im_height = 1 << CL_CHAR_BIT;
         cl::ImageFormat iFormat(CL_RGBA, CL_FLOAT);
         std::vector< cl::Image2D > cl_signature_tables;
         cl_signature_tables.reserve(numFrames);

@@ -24,7 +24,7 @@
 
 namespace ezg
 {
-    class PatternMatchingGPU
+    class PatternMatchingGPU final
     {
         //denotes not a symbol
         //for example, there is no pattern with such coordinates in the signature table
