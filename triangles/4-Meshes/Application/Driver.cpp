@@ -699,7 +699,7 @@ Mesh* VulkanDriver::get_mesh(const std::string& name)
 
         auto* pModelData = static_cast< GPUObjectData* >(data);
         for (size_t i = 0, mi = m_renderables.size(); i < mi; i++) {
-            pModelData[i] = { m_renderables.at(i).transformMatrix, {} };
+            pModelData[i] = { m_renderables.at(i).transformMatrix, { 1.f, 0.f, 0.f } };
         }
 
         vmaUnmapMemory(m_allocator, curFrame.objectBuffer._allocation);
@@ -822,6 +822,56 @@ Mesh* VulkanDriver::get_mesh(const std::string& name)
         vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         //TODO draw objects
+        updateUniformBuffer_(m_currentFrame % m_maxFramesInFlight);
+
+        Mesh* lastMesh = nullptr;
+        RenderMaterial* lastMaterial = nullptr;
+        size_t num = 0;
+        for (auto&& object : m_renderables)
+        {
+            //only bind the pipeline if it doesnt match with the already bound one
+            if (object.material != lastMaterial) {
+
+                vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipeline);
+                lastMaterial = object.material;
+
+                uint32_t dynamicOffsets[] = {
+                        0,
+                        0
+                };
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipelineLayout, 0, 1, &getCurFrame().globalDescriptor, 2, dynamicOffsets);
+
+                //uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frameIndex;
+                //vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipelineLayout, 0, 1, &getCurFrame().globalDescriptor, 1, &uniform_offset);
+
+                //object data descriptor
+                //vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipelineLayout, 1, 1, &getCurFrame().objectDescriptor, 0, nullptr);
+            }
+
+            glm::mat4 model = object.transformMatrix;
+            //final render matrix, that we are calculating on the cpu
+            glm::mat4 mesh_matrix = model;
+
+/*
+            MeshPushConstants constants;
+            constants.render_matrix = mesh_matrix;
+
+            //upload the mesh to the gpu via pushconstants
+            vkCmdPushConstants(cmd, object.material->pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(MeshPushConstants), &constants);
+*/
+
+            //only bind the mesh if its a different one from last bind
+            if (object.mesh != lastMesh) {
+                //bind the mesh vertex buffer with offset 0
+                VkDeviceSize offset = 0;
+                vkCmdBindVertexBuffers(cmd, 0, 1, &object.mesh->_vertexBuffer._buffer, &offset);
+                lastMesh = object.mesh;
+            }
+            //we can now draw
+            vkCmdDraw(cmd, object.mesh->_vertices.size(), 1,0 , num);
+            num++;
+        }
+        //TODO
 
         vkCmdEndRenderPass(cmd);
 
@@ -835,7 +885,6 @@ Mesh* VulkanDriver::get_mesh(const std::string& name)
 		m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];*/
 
 		//todo
-		//updateUniformBuffer_(m_currentFrame);
 		//todo
 
 		VkSubmitInfo submitInfo = {};

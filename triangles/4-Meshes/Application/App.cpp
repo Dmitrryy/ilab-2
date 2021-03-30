@@ -105,6 +105,9 @@ namespace ezg
         m_driver.render();
         //===-------------------------------------------
 
+        m_cameraView.setPosition({1.f, 1.f, 1.f});
+        m_cameraView.setDirection({-1.f, -1.f, -1.f});
+
         m_time.reset();
 
         Timer frameTimer;
