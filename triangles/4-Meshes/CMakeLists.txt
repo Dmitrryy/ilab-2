@@ -51,7 +51,7 @@ endif()
 
 
 add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp
-        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp)
+        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp #[[Engine/engine.cpp Engine/engine.hpp Engine/mesh.cpp Engine/mesh.hpp Engine/types.hpp Engine/initializer.cpp Engine/initializer.hpp]])
 
 
 ##############################
@@ -79,6 +79,7 @@ target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/etc/explicit_l
 
 # To connect other libraries (only OtherLibs)
 target_include_directories(${PROJECT_NAME} PRIVATE ../../)
+target_include_directories(${PROJECT_NAME} PRIVATE ../path)
 
 # Link dependencies
 target_link_libraries(${PROJECT_NAME} LAL)

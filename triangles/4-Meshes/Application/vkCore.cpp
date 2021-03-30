@@ -35,7 +35,7 @@ namespace vks {
     }
 
 
-    void Core::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
+   /* void Core::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
         if (size <= 0) {
             throw std::invalid_argument("invalid size of buffer");
         }
@@ -104,7 +104,7 @@ namespace vks {
         }
 
         vkBindImageMemory(device, image, imageMemory, 0);
-    }
+    }*/
 
 
     VkImageView Core::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {

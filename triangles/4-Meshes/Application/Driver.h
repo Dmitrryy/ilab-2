@@ -12,7 +12,8 @@
 #include "Helpa/helpa.h"
 #include "CameraView.h"
 
-#define GLFW_INCLUDE_VULKAN
+#include <vk_mem_alloc.h>
+
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
@@ -21,7 +22,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <fstream>
+#include <functional>
+#include <deque>
 #include <array>
+
+
+
+#define EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM 10000
+#define EZG_ENGINE_DEFAULT_MAX_VERTICES_IN_OBJECT 10000
+
 
 
 namespace vks
@@ -70,6 +79,63 @@ namespace vks
 	};
 
 
+    struct AllocatedBuffer
+    {
+        VkBuffer _buffer;
+        VmaAllocation _allocation;
+    };
+
+    struct AllocatedImage
+    {
+        VkImage _image;
+        VmaAllocation _allocation;
+    };
+
+
+    struct DeletionQueue
+    {
+        std::deque< std::function< void() > > deletors;
+
+        void push_function(std::function< void() > &&function)
+        {
+            deletors.push_front(function);
+        }
+
+        void flush()
+        {
+            // reverse iterate the deletion queue to execute all the functions
+            for (auto&& f : deletors) {
+                f(); //call functors
+            }
+
+            deletors.clear();
+        }
+    };
+
+
+    struct FrameData
+    {
+        VkSemaphore presentSemaphore = nullptr;
+        VkSemaphore renderSemaphore  = nullptr;
+        VkFence     renderFence      = nullptr;
+
+        DeletionQueue   frameDeletionQueue;
+
+        VkCommandPool   commandPool       = nullptr;
+        VkCommandBuffer mainCommandBuffer = nullptr;
+
+        VkFramebuffer   frameBuffer;
+
+        AllocatedBuffer cameraBuffer;
+        VkDescriptorSet globalDescriptor = nullptr;
+
+        AllocatedBuffer objectBuffer;
+        VkDescriptorSet objectDescriptor = nullptr;
+
+        AllocatedBuffer storageBufferWorldCoords;
+    };
+
+
 	struct ObjectInfo
     {
 	    std::vector< Vertex > vertices;
@@ -78,12 +144,12 @@ namespace vks
     };
 
 
-	struct UniformView {
+	struct GPUCameraData {
 		glm::mat4 view;
 		glm::mat4 proj;
 	};
 
-	struct UniformModel {
+	struct GPUObjectData {
         alignas(16) glm::mat4 model;
         alignas(16) glm::vec3 color;
 	};
@@ -92,6 +158,8 @@ namespace vks
         alignas(16) glm::vec3 world_coord;
 	};
 
+
+
 	class VulkanDriver
 	{
 		std::string                    m_appName;
@@ -99,67 +167,56 @@ namespace vks
 		bool                           m_framebufferResized = false;
 
 		Core                           m_core;
-		std::vector< VkImage >         m_images;
-		VkSwapchainKHR                 m_swapChainKHR   = nullptr;
-		VkQueue                        m_queue          = nullptr;
-		std::vector< VkCommandBuffer > m_cmdBufs;
-		VkCommandPool                  m_cmdBufPool     = nullptr;
 
-		std::vector< VkImageView >     m_views;
+		std::vector< FrameData >       m_frames;
+
+        DeletionQueue                  m_deletionQueue;
+
+        VmaAllocator                   m_allocator;
+
+		std::vector< VkImage >         m_images;
+        std::vector< VkImageView >     m_views;
+
+        VkSwapchainKHR                 m_swapChainKHR   = nullptr;
+		VkQueue                        m_queue          = nullptr;
+
 		VkRenderPass                   m_renderPass     = nullptr;
-		std::vector< VkFramebuffer >   m_fbs;
 		VkPipeline                     m_pipeline       = nullptr;
 
-		VkImage                        m_depthImage = nullptr;
-		VkDeviceMemory                 m_depthImageMemory = nullptr;
-		VkImageView                    m_depthImageView = nullptr;
+        VkImageView                    m_depthImageView;
+        AllocatedImage                 m_depthImage;
 
-		VkDescriptorSetLayout          m_descriptorSetLayout = nullptr;
+
 		VkDescriptorPool               m_descriptorPool = nullptr;
-		std::vector< VkDescriptorSet > m_descriptorSets;
+
+        VkDescriptorSetLayout          m_globalSetLayout;
+        // todo VkDescriptorSetLayout          m_objectSetLayout;
+
 		VkPipelineLayout               m_pipelineLayout = nullptr;
 
-		std::vector< VkSemaphore >     m_imageAvailableSem;
-		std::vector< VkSemaphore >     m_renderFinishedSem;
-		std::vector< VkFence >         m_inFlightFences;
-		std::vector< VkFence >         m_imagesInFlight;
-		size_t                         m_currentFrame   = 0;
 
+		size_t                         m_currentFrame      = 0;
 		size_t                         m_maxFramesInFlight = 2;
+		size_t                         m_curNumFrameInFlight = 0;
+
+		size_t                         m_numObjects = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
+		size_t                         m_numVerticesInObject = EZG_ENGINE_DEFAULT_MAX_VERTICES_IN_OBJECT;
 
 
-        ////////////////////////////////////////
-        /// Scene info from shader(view matrix, projection matrix etc)
-        std::vector< VkBuffer >        m_uniformBuffersFromUbo;
-		std::vector< VkDeviceMemory >  m_uniformBuffersMemoryFromUbo;
-        ////////////////////////////////////////
-
-        ////////////////////////////////////////
-		/// Object info from shader(model matrix, color etc)
-		std::vector< VkBuffer >        m_uniformBuffersFromModel;
-		std::vector< VkDeviceMemory >  m_uniformBuffersMemoryFromModel;
-		std::vector< UniformModel >    m_modelData;
-		///
-		std::vector< VkBuffer >        m_storageBufferWorldCoords;
-		std::vector< VkDeviceMemory >  m_storageBufferMemoryWorldCoords;
-		/// end OIS
-        ////////////////////////////////////////
+		std::vector< GPUObjectData >    m_modelData;
 
         ezg::CameraView     m_cameraView;
 
         std::vector< std::vector< uint32_t > > m_indices;
-        VkBuffer  m_indexBuffer;
-        VkDeviceMemory m_indexBufferMemory;
-        size_t m_numAllIndices = 0;
-        std::vector< size_t > m_indexBufferOffsets;
+        size_t                                 m_numAllIndices = 0;
+        std::vector< size_t >                  m_indexBufferOffsets;
+        AllocatedBuffer                        m_indexBuffer;
 
         //todo: different buffer for each object
 		std::vector< std::vector < Vertex > >  m_vertices;
-        VkBuffer                               m_vertexBuffer;
-
-        VkDeviceMemory                         m_vertexBufferMemory;
         size_t                                 m_numAllVertices = 0;
         std::vector< size_t >                  m_vertexBufferOffsets;
+        AllocatedBuffer                        m_vertexBuffer;
 
         //todo: access to the vertices of a specific element by offset in a shared array
         std::vector< glm::vec3 >               m_worldCoords;
@@ -209,38 +266,33 @@ namespace vks
 
 	private:
 
-		VkShaderModule createShaderModule_(const std::vector< char >& source_);
+        AllocatedBuffer create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+
+
+        VkShaderModule createShaderModule_(const std::vector< char >& source_);
 
 		void createSwapChain_();
-		void recreateSwapChain_();
+		//void recreateSwapChain_();
 
-		void cleanupSwapChain();
+		//void cleanupSwapChain();
+
+		void initDescriptors();
 
 
 		void createVertexBuffer_();
 		void createIndexBuffer_();
 
-		void createUniformBuffers_();
 		void updateUniformBuffer_(uint32_t currentImage_);
 
 		void copyBuffer_(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-		VkCommandBuffer beginSingleTimeCommands();
-		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-
 		void createCommandBuffer_();
 		void recordCommandBuffers_();
-
-		//void renderScene_();
 
 		void createFramebuffer_();
 
 		void createDepthResources_();
 
 		void createRenderPass_();
-
-		void createDescriptorSetLayout_();
-		void createDescriptorPool_();
-		void createDescriptorSets_();
 
 		void createPipeline_();
 

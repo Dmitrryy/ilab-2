@@ -14,6 +14,10 @@
 #include <chrono>
 
 
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
+
+
 const std::string vert_shader_fname = "resource/shaders/vert.spv";
 const std::string frag_shader_fname = "resource/shaders/frag.spv";
 
@@ -28,12 +32,21 @@ namespace vks
 
 			m_core.Init(m_pWindow);
 
+			VmaAllocatorCreateInfo allocatorInfo = {};
+	        allocatorInfo.physicalDevice = m_core.getPhysDevice();
+	        allocatorInfo.device = m_core.getDevice();
+	        allocatorInfo.instance = m_core.getInstance();
+	        vmaCreateAllocator(&allocatorInfo, &m_allocator);
+
+	        m_deletionQueue.push_function([&]() {
+		        vmaDestroyAllocator(m_allocator);
+		    });
+
 			vkGetDeviceQueue(m_core.getDevice(), m_core.getQueueFamily(), 0, &m_queue);
 
 			createSwapChain_();
 
 			createRenderPass_();
-            createDescriptorSetLayout_();
 
 			createCommandBuffer_();
 			createDepthResources_();
@@ -41,11 +54,9 @@ namespace vks
 			createVertexBuffer_();
             createIndexBuffer_();
 
-			createPipeline_();
+            initDescriptors();
 
-			createUniformBuffers_();
-			createDescriptorPool_();
-			createDescriptorSets_();
+			createPipeline_();
 
 			recordCommandBuffers_();
 
@@ -64,7 +75,7 @@ namespace vks
 
     void VulkanDriver::addObject(const ObjectInfo& info)
     {
-	    UniformModel cur {};
+	    GPUObjectData cur {};
 	    cur.model = info.model_matrix;
 	    cur.color = info.color;
         const size_t id = m_vertices.size();
@@ -143,6 +154,10 @@ namespace vks
 		if (vkCreateSwapchainKHR(m_core.getDevice(), &swapChainCreateInfo, nullptr, &m_swapChainKHR) != VK_SUCCESS) {
 			throw std::runtime_error(DEBUG_MSG("failed to create swap chain!"));
 		}
+		m_deletionQueue.push_function([=]() {
+		    vkDestroySwapchainKHR(m_core.getDevice(), m_swapChainKHR, nullptr);
+		});
+
 
 		uint32_t numSwapChainImages = 0;
 		if (VK_SUCCESS != vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, nullptr)) {
@@ -150,7 +165,7 @@ namespace vks
         }
 
 		m_images.resize(numSwapChainImages);
-		m_cmdBufs.resize(numSwapChainImages);
+		m_frames.resize(numSwapChainImages);
 		m_views.resize(numSwapChainImages);
 
         if (VK_SUCCESS != vkGetSwapchainImagesKHR(m_core.getDevice(), m_swapChainKHR, &numSwapChainImages, m_images.data())) {
@@ -159,122 +174,12 @@ namespace vks
 	}
 
 
-	void VulkanDriver::recreateSwapChain_()
-	{
-		int width = 0, height = 0;
-		glfwGetFramebufferSize(m_pWindow, &width, &height);
-		while (width == 0 || height == 0) {
-			glfwGetFramebufferSize(m_pWindow, &width, &height);
-			glfwWaitEvents();
-		}
-
-		vkDeviceWaitIdle(m_core.getDevice());
-
-		cleanupSwapChain();
-
-		m_core.updataPhysDivicesProp();
-		createSwapChain_();
-
-		createRenderPass_();
-		createPipeline_();
-		createDepthResources_();
-
-		createFramebuffer_();
-
-		createUniformBuffers_();
-		createDescriptorPool_();
-		createDescriptorSets_();
-
-		VkCommandBufferAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = m_cmdBufPool;
-		allocInfo.commandBufferCount = m_cmdBufs.size();
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-		if (vkAllocateCommandBuffers(m_core.getDevice(), &allocInfo, m_cmdBufs.data()) != VK_SUCCESS) {
-			throw std::runtime_error(DEBUG_MSG("failed to allocate command buffers!"));
-		}
-		recordCommandBuffers_();
-	}
-
-
-	void VulkanDriver::cleanupSwapChain()
-	{
-		const auto device_ = m_core.getDevice();
-		if (device_ == nullptr) { return; }
-
-		vkDestroyImageView(device_, m_depthImageView, nullptr);
-		vkDestroyImage(device_, m_depthImage, nullptr);
-		vkFreeMemory(device_, m_depthImageMemory, nullptr);
-
-		for (size_t i = 0, mi = m_fbs.size(); i < mi; i++) {
-			vkDestroyFramebuffer(device_, m_fbs[i], nullptr);
-		}
-		m_fbs.clear();
-
-		vkFreeCommandBuffers(device_, m_cmdBufPool, static_cast<uint32_t>(m_cmdBufs.size()), m_cmdBufs.data());
-
-		vkDestroyPipeline(device_, m_pipeline, nullptr);
-		vkDestroyPipelineLayout(device_, m_pipelineLayout, nullptr);
-		vkDestroyRenderPass(device_, m_renderPass, nullptr);
-
-		for (size_t i = 0, mi = m_views.size(); i < mi; i++) {
-			vkDestroyImageView(device_, m_views[i], nullptr);
-		}
-		m_views.clear();
-
-		vkDestroySwapchainKHR(device_, m_swapChainKHR, nullptr);
-
-		for (size_t i = 0, mi = m_uniformBuffersFromUbo.size(); i < mi; i++)
-		{
-			vkDestroyBuffer(device_, m_uniformBuffersFromUbo[i], nullptr);
-			vkFreeMemory(device_, m_uniformBuffersMemoryFromUbo[i], nullptr);
-		}
-		m_uniformBuffersFromUbo.clear();
-		m_uniformBuffersMemoryFromUbo.clear();
-		m_images.clear();
-
-		vkDestroyDescriptorPool(device_, m_descriptorPool, nullptr);
-	}
-
-
 	void VulkanDriver::cleanup()
 	{
-		cleanupSwapChain();
+	    vkDeviceWaitIdle(m_core.getDevice());
 
-		const auto device_ = m_core.getDevice();
-		if (device_ == nullptr) { return; }
+	    m_deletionQueue.flush();
 
-		vkDestroyDescriptorSetLayout(device_, m_descriptorSetLayout, nullptr);
-		m_descriptorSetLayout = nullptr;
-
-/*		for (auto&& buff : m_vertexBuffer) {
-            vkDestroyBuffer(device_, buff, nullptr);
-        }
-		m_vertexBuffer.clear();*/
-
-/*		for (auto&& buffMem : m_vertexBufferMemory) {
-            vkFreeMemory(device_, buffMem, nullptr);
-        }
-		m_vertexBufferMemory.clear();*/
-
-		for (size_t i = 0, mi = std::min(m_renderFinishedSem.size(), m_maxFramesInFlight); i < mi; i++)
-		{
-			vkDestroySemaphore(device_, m_renderFinishedSem[i], nullptr);
-			vkDestroySemaphore(device_, m_imageAvailableSem[i], nullptr);
-			vkDestroyFence(device_, m_inFlightFences[i], nullptr);
-		}
-		m_renderFinishedSem.clear();
-		m_imageAvailableSem.clear();
-		m_inFlightFences.clear();
-
-		vkDestroyCommandPool(device_, m_cmdBufPool, nullptr);
-		m_cmdBufPool = nullptr;
-
-		//glfwDestroyWindow(m_pWindow);
-		m_pWindow = nullptr;
-
-		m_core.cleanup();
 	}
 
 	
@@ -284,21 +189,32 @@ namespace vks
 		cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		cmdPoolCreateInfo.queueFamilyIndex = m_core.getQueueFamily();
 
-		if (vkCreateCommandPool(m_core.getDevice(), &cmdPoolCreateInfo, nullptr, &m_cmdBufPool) != VK_SUCCESS) {
-			throw std::runtime_error(DEBUG_MSG("failed to create graphics command pool!"));
+		auto&& device = m_core.getDevice();
+
+		for(auto&& frame : m_frames)
+		{
+		    if (vkCreateCommandPool(device, &cmdPoolCreateInfo, nullptr, &(frame.commandPool)) != VK_SUCCESS) {
+			    throw std::runtime_error(DEBUG_MSG("failed to create graphics command pool!"));
+		    }
+
+		    VkCommandBufferAllocateInfo allocInfo = {};
+		    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		    allocInfo.commandPool = frame.commandPool;
+		    allocInfo.commandBufferCount = 1;
+		    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+
+		    if (vkAllocateCommandBuffers(device, &allocInfo, &frame.mainCommandBuffer) != VK_SUCCESS) {
+			    throw std::runtime_error(DEBUG_MSG("failed to allocate command buffers!"));
+		    }
+
+		    m_deletionQueue.push_function([=]() {
+		        vkDestroyCommandPool(device, frame.commandPool, nullptr);
+		    });
 		}
 
-		VkCommandBufferAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.commandPool = m_cmdBufPool;
-		allocInfo.commandBufferCount = m_cmdBufs.size();
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-		if (vkAllocateCommandBuffers(m_core.getDevice(), &allocInfo, m_cmdBufs.data()) != VK_SUCCESS) {
-			throw std::runtime_error(DEBUG_MSG("failed to allocate command buffers!"));
-		}
 	}
 
+#include "../../../OtherLibs/timer.h"
 
 	void VulkanDriver::recordCommandBuffers_()
 	{
@@ -320,25 +236,27 @@ namespace vks
 		int wHeight = 0, wWidth = 0;
 		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
-		for (size_t k = 0, mk = m_cmdBufs.size(); k < mk; k++)
+		for (auto&& frame : m_frames)
 		{
-			if (vkBeginCommandBuffer(m_cmdBufs[k], &beginInfo) != VK_SUCCESS) {
+		    auto&& curBuff = frame.mainCommandBuffer;
+		    ezg::Timer timer;
+			if (vkBeginCommandBuffer(curBuff, &beginInfo) != VK_SUCCESS) {
 				throw std::runtime_error(DEBUG_MSG("failed to begin recording command buffer!"));
 			}
 
 			VkRenderPassBeginInfo renderPassInfo = {};
 			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			renderPassInfo.renderPass = m_renderPass;
-			renderPassInfo.framebuffer = m_fbs[k];
+			renderPassInfo.framebuffer = frame.frameBuffer;
 			renderPassInfo.renderArea.offset = { 0, 0 };
 			renderPassInfo.renderArea.extent.height = wHeight;
 			renderPassInfo.renderArea.extent.width = wWidth;
 			renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 			renderPassInfo.pClearValues = clearValues.data();
 
-			vkCmdBeginRenderPass(m_cmdBufs[k], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+			vkCmdBeginRenderPass(curBuff, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-			vkCmdBindPipeline(m_cmdBufs[k], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+			vkCmdBindPipeline(curBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
 
 /*			VkBuffer vertexBuffers[] = {
 				m_vertexBuffer
@@ -353,29 +271,30 @@ namespace vks
                     0,
                     0
             };
-			vkCmdBindDescriptorSets(m_cmdBufs[k], VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[k], 2, dynamicOffsets);
+			vkCmdBindDescriptorSets(curBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &frame.globalDescriptor, 2, dynamicOffsets);
 
 
             VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(m_cmdBufs[k], 0, 1, &m_vertexBuffer, &offset);
+            vkCmdBindVertexBuffers(curBuff, 0, 1, &m_vertexBuffer._buffer, &offset);
 
 
-            vkCmdBindIndexBuffer(m_cmdBufs[k], m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(curBuff, m_indexBuffer._buffer, 0, VK_INDEX_TYPE_UINT32);
 
 
 			size_t numInstance = m_vertices.size();
             for (size_t cur = 0; cur < numInstance; cur++) {
                 // curT - 1 == gl_BaseInstance in vert shader
                 //vkCmdDraw(m_cmdBufs[k], m_vertices.at(cur).size(), 1, m_vertexBufferOffsets.at(cur), cur);
-                vkCmdDrawIndexed(m_cmdBufs[k], m_indices.at(cur).size(), 1
+                vkCmdDrawIndexed(curBuff, m_indices.at(cur).size(), 1
                                  , m_indexBufferOffsets.at(cur), m_vertexBufferOffsets.at(cur), cur);
             }
 
-			vkCmdEndRenderPass(m_cmdBufs[k]);
+			vkCmdEndRenderPass(curBuff);
 
-			if (vkEndCommandBuffer(m_cmdBufs[k]) != VK_SUCCESS) {
+			if (vkEndCommandBuffer(curBuff) != VK_SUCCESS) {
 				throw std::runtime_error(DEBUG_MSG("failed to record command buffer!"));
 			}
+			std::cout << timer.elapsed() << std::endl;
 		}
 	}
 
@@ -390,16 +309,32 @@ namespace vks
 		int wHeight = 0, wWidth = 0;
 		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
-		m_core.createImage(wWidth, wHeight,
-			depthFormat, 
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_depthImage,
-			m_depthImageMemory
-			);
+		VkImageCreateInfo dimg_imfo = {};
+        dimg_imfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        dimg_imfo.pNext = nullptr;
+        dimg_imfo.imageType = VK_IMAGE_TYPE_2D;
+        dimg_imfo.format = depthFormat;
+        dimg_imfo.extent = VkExtent3D{ static_cast<uint32_t>(wWidth), static_cast<uint32_t>(wHeight), 1 };
+        dimg_imfo.mipLevels = 1;
+        dimg_imfo.arrayLayers = 1;
+        dimg_imfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        dimg_imfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+        dimg_imfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 
-		m_depthImageView = m_core.createImageView(m_depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+        VmaAllocationCreateInfo dimg_allocinfo = {};
+        dimg_allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
+        dimg_allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+
+        vmaCreateImage(m_allocator, &dimg_imfo, &dimg_allocinfo, &m_depthImage._image, &m_depthImage._allocation, nullptr);
+
+		m_depthImageView = m_core.createImageView(m_depthImage._image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+		m_deletionQueue.push_function([=](){
+            vkDestroyImageView(m_core.getDevice(), m_depthImageView, nullptr);
+            vmaDestroyImage(m_allocator, m_depthImage._image, m_depthImage._allocation);
+		});
 	}
 
 
@@ -409,8 +344,23 @@ namespace vks
 
         auto&& device = m_core.getDevice();
 
-        m_core.createBuffer(m_numAllVertices * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_vertexBuffer, m_vertexBufferMemory);
+        VkBufferCreateInfo  bufferInfo = {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.pNext = nullptr;
+        bufferInfo.size = m_numAllVertices * sizeof(Vertex);
+        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+        VmaAllocationCreateInfo vmaallocInfo = {};
+        vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+        vmaCreateBuffer(m_allocator, &bufferInfo, &vmaallocInfo,
+                &m_vertexBuffer._buffer,
+                &m_vertexBuffer._allocation,
+                nullptr);
+
+
+        void *data = nullptr;
+        vmaMapMemory(m_allocator, m_vertexBuffer._allocation, &data);
 
 	    for (size_t i = 0; i < num_buffers; ++i)
 	    {
@@ -418,22 +368,38 @@ namespace vks
 	        const auto curOffset = sizeof(Vertex) * m_vertexBufferOffsets.at(i);
 	        const auto curSize = cur_vertices.size() * sizeof(Vertex);
 
-            void *data = nullptr;
-            vkMapMemory(device, m_vertexBufferMemory, curOffset
-                        , curSize, 0, &data);
-            memcpy(data, cur_vertices.data(), curSize);
-            vkUnmapMemory(device, m_vertexBufferMemory);
+            memcpy(static_cast<char*>(data) + curOffset, cur_vertices.data(), curSize);
         }
-	}
+        vmaUnmapMemory(m_allocator, m_vertexBuffer._allocation);
+
+	    m_deletionQueue.push_function([=](){
+	        vmaDestroyBuffer(m_allocator, m_vertexBuffer._buffer, m_vertexBuffer._allocation);
+	    });
+
+    }
 
     void VulkanDriver::createIndexBuffer_()
     {
         auto&& device = m_core.getDevice();
         const size_t num_buffers = m_indices.size();
 
-        m_core.createBuffer(m_numAllIndices * sizeof(m_indices.at(0).at(0)), VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                m_indexBuffer, m_indexBufferMemory);
+        VkBufferCreateInfo  bufferInfo = {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.pNext = nullptr;
+        bufferInfo.size = m_numAllIndices * sizeof(m_indices.at(0).at(0));
+        bufferInfo.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+        VmaAllocationCreateInfo vmaallocInfo = {};
+        vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+        vmaCreateBuffer(m_allocator, &bufferInfo, &vmaallocInfo,
+                &m_indexBuffer._buffer,
+                &m_indexBuffer._allocation,
+                nullptr);
+
+
+        void *data = nullptr;
+        vmaMapMemory(m_allocator, m_indexBuffer._allocation, &data);
 
         for(size_t i = 0; i < num_buffers; ++i)
         {
@@ -441,162 +407,41 @@ namespace vks
             auto curOffset = sizeof(cur_buff.at(0)) * m_indexBufferOffsets.at(i);
             auto curSize = sizeof(cur_buff.at(0)) * cur_buff.size();
 
-            void *data = nullptr;
-            vkMapMemory(device, m_indexBufferMemory, curOffset
-                        , curSize, 0, &data);
-            memcpy(data, cur_buff.data(), curSize);
-            vkUnmapMemory(device, m_indexBufferMemory);
+            memcpy(static_cast<char*>(data) + curOffset, cur_buff.data(), curSize);
         }
+
+        vmaUnmapMemory(m_allocator, m_indexBuffer._allocation);
+
+
+        m_deletionQueue.push_function([=](){
+            vmaDestroyBuffer(m_allocator, m_indexBuffer._buffer, m_indexBuffer._allocation);
+        });
     }
 
 
-    void VulkanDriver::copyBuffer_(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
-	{
-		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
-		VkBufferCopy copyRegion{};
-		copyRegion.size = size;
-		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-		endSingleTimeCommands(commandBuffer);
-	}
-
-
-	VkCommandBuffer VulkanDriver::beginSingleTimeCommands() {
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_cmdBufPool;
-		allocInfo.commandBufferCount = 1;
-
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(m_core.getDevice(), &allocInfo, &commandBuffer);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-		return commandBuffer;
-	}
-
-	void VulkanDriver::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
-		vkEndCommandBuffer(commandBuffer);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-
-		vkQueueSubmit(m_queue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(m_queue);
-
-		vkFreeCommandBuffers(m_core.getDevice(), m_cmdBufPool, 1, &commandBuffer);
-	}
-
-
-	void VulkanDriver::createUniformBuffers_()
-	{
-	    ////////////////////////////////////////////
-	    //create buffers from ubo
-		VkDeviceSize bufferSize1 = sizeof(UniformView);
-		m_uniformBuffersFromUbo.resize(m_images.size());
-		m_uniformBuffersMemoryFromUbo.resize(m_images.size());
-
-		for (size_t i = 0, mi = m_images.size(); i < mi; i++)
-		{
-			m_core.createBuffer(bufferSize1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                m_uniformBuffersFromUbo[i], m_uniformBuffersMemoryFromUbo[i]);
-		}
-        ////////////////////////////////////////////
-
-        ////////////////////////////////////////////
-        //create buffers from model info
-        VkDeviceSize bufferSize2 = sizeof(UniformModel) * m_vertices.size();
-        m_uniformBuffersFromModel.resize(m_images.size());
-        m_uniformBuffersMemoryFromModel.resize(m_images.size());
-
-        for (size_t i = 0, mi = m_images.size(); i < mi; i++)
-        {
-            m_core.createBuffer(bufferSize2, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                m_uniformBuffersFromModel[i], m_uniformBuffersMemoryFromModel[i]);
-        }
-        ////////////////////////////////////////////
-
-        ////////////////////////////////////////////
-        // create buffers from world coords
-        VkDeviceSize bufferSize3 = sizeof(OutputVertShader) * m_worldCoords.size();
-        m_storageBufferWorldCoords.resize(m_images.size());
-        m_storageBufferMemoryWorldCoords.resize(m_images.size());
-
-        for (size_t i = 0, mi = m_images.size(); i < mi; i++)
-        {
-            m_core.createBuffer(bufferSize3, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                m_storageBufferWorldCoords[i], m_storageBufferMemoryWorldCoords[i]);
-        }
-        ////////////////////////////////////////////
-    }
-
-
-	void VulkanDriver::updateUniformBuffer_(uint32_t currentImage_)
-	{
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration< float, std::chrono::seconds::period >(currentTime - startTime).count();
-	
-		UniformView ubo = {};
-		ubo.view = m_cameraView.getViewMatrix();
-		ubo.proj = m_cameraView.getProjectionMatrix();
-
-		void* data = nullptr;
-		auto device = m_core.getDevice();
-		vkMapMemory(device, m_uniformBuffersMemoryFromUbo[currentImage_], 0, sizeof(ubo), 0, &data);
-		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(device, m_uniformBuffersMemoryFromUbo[currentImage_]);
-        data = nullptr;
-
-
-        vkMapMemory(device, m_uniformBuffersMemoryFromModel[currentImage_], 0,
-                    sizeof(UniformModel) * m_modelData.size(), 0, &data);
-
-        auto* pModelData = static_cast< UniformModel* >(data);
-        for (size_t i = 0, mi = m_modelData.size(); i < mi; i++) {
-            pModelData[i] = m_modelData.at(i);
-        }
-        vkUnmapMemory(device, m_uniformBuffersMemoryFromModel[currentImage_]);
-
-        //todo
-        updateWorldCoordsData(currentImage_);
-	}
-
-
-    void VulkanDriver::updateWorldCoordsData(uint32_t currentImage_)
+    void VulkanDriver::initDescriptors()
     {
-        void* data = nullptr;
-        auto device = m_core.getDevice();
-        //m_worldCoords.resize(vertices.size());
+        std::vector<VkDescriptorPoolSize> sizes =
+                {
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 },
+                        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 10 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 10 },
+                        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 10}
+                };
 
-        vkMapMemory(device, m_storageBufferMemoryWorldCoords[currentImage_], 0,
-                sizeof(OutputVertShader) * m_worldCoords.size(), 0, &data);
+        VkDescriptorPoolCreateInfo pool_info = {};
+        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        pool_info.flags = 0;
+        pool_info.maxSets = 10;
+        pool_info.poolSizeCount = (uint32_t)sizes.size();
+        pool_info.pPoolSizes = sizes.data();
 
-        //todo
-        auto* pOutData = static_cast< OutputVertShader* >(data);
-        for (size_t i = 0, mi = m_worldCoords.size(); i < mi; ++i)
-        {
-            m_worldCoords[i] = pOutData[i].world_coord;
-        }
-        vkUnmapMemory(device, m_storageBufferMemoryWorldCoords[currentImage_]);
-    }
+        auto&& device = m_core.getDevice();
+        vkCreateDescriptorPool(device, &pool_info, nullptr, &m_descriptorPool);
 
 
-    void VulkanDriver::createDescriptorSetLayout_()
-	{
-		VkDescriptorSetLayoutBinding uboLayoutBinding = {};
+        VkDescriptorSetLayoutBinding uboLayoutBinding = {};
         uboLayoutBinding.binding            = 0;
         uboLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         uboLayoutBinding.descriptorCount    = 1;
@@ -623,112 +468,83 @@ namespace vks
                 coordsLayoutBinding
         };
 
-		VkDescriptorSetLayoutCreateInfo layoutInfo = {};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = 3;
-		layoutInfo.pBindings = bindings;
+        VkDescriptorSetLayoutCreateInfo layoutInfo = {};
+        layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutInfo.bindingCount = 3;
+        layoutInfo.pBindings = bindings;
 
-		if (vkCreateDescriptorSetLayout(m_core.getDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
-			throw std::runtime_error(DEBUG_MSG("failed to create descriptor set layput!"));
-		}
-	}
-
-
-	void VulkanDriver::createDescriptorPool_()
-	{
-		VkDescriptorPoolSize poolSizeUbo = {};
-		poolSizeUbo.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizeUbo.descriptorCount = static_cast<uint32_t> (m_images.size());
-
-        VkDescriptorPoolSize poolSizeModel = {};
-        poolSizeModel.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-        poolSizeModel.descriptorCount = static_cast<uint32_t> (m_images.size());
-
-        VkDescriptorPoolSize poolSizeCoords = {};
-        poolSizeCoords.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-        poolSizeCoords.descriptorCount = static_cast<uint32_t> (m_images.size());
-
-        VkDescriptorPoolSize poolSizes[] = {
-                poolSizeUbo,
-                poolSizeModel,
-                poolSizeCoords
-        };
-
-		VkDescriptorPoolCreateInfo poolInfo = {};
-		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 3;
-		poolInfo.pPoolSizes = poolSizes;
-		poolInfo.maxSets = static_cast<uint32_t> (m_images.size());
-
-		if (vkCreateDescriptorPool(m_core.getDevice(), &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS) {
-			throw std::runtime_error(DEBUG_MSG("failed to create descriptor pool!"));
-		}
-	}
+        if (vkCreateDescriptorSetLayout(m_core.getDevice(), &layoutInfo, nullptr, &m_globalSetLayout) != VK_SUCCESS) {
+            throw std::runtime_error(DEBUG_MSG("failed to create descriptor set layput!"));
+        }
 
 
-	void VulkanDriver::createDescriptorSets_()
-	{
-		std::vector< VkDescriptorSetLayout > layputs(m_images.size(), m_descriptorSetLayout);
+        for(auto&& frame : m_frames)
+        {
+            frame.cameraBuffer = create_buffer_(sizeof(GPUCameraData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
-		VkDescriptorSetAllocateInfo allocInfo = {};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = m_descriptorPool;
-		allocInfo.descriptorSetCount = static_cast< uint32_t >(m_images.size());
-		allocInfo.pSetLayouts = layputs.data();
+            frame.objectBuffer = create_buffer_(sizeof(GPUObjectData) * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
-		auto device_ = m_core.getDevice();
+            frame.storageBufferWorldCoords = create_buffer_(sizeof(Vertex) * m_numVerticesInObject * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
-		m_descriptorSets.resize(m_images.size());
-		if (vkAllocateDescriptorSets(device_, &allocInfo, m_descriptorSets.data()) != VK_SUCCESS) {
-			throw std::runtime_error(DEBUG_MSG("failed to allocate descriptor sets!"));
-		}
+            VkDescriptorSetAllocateInfo allocInfo = {};
+            allocInfo.pNext = nullptr;
+            allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            allocInfo.descriptorPool = m_descriptorPool;
+            allocInfo.descriptorSetCount = 1;
+            allocInfo.pSetLayouts = &m_globalSetLayout;
 
-		for (size_t i = 0, mi = m_images.size(); i < mi; i++)
-		{
-			VkDescriptorBufferInfo bufferInfoUbo = {};
-            bufferInfoUbo.buffer = m_uniformBuffersFromUbo[i];
-            bufferInfoUbo.offset = 0;
-            bufferInfoUbo.range = sizeof(UniformView);
+            vkAllocateDescriptorSets(device, &allocInfo, &frame.globalDescriptor);
 
-			VkWriteDescriptorSet descriptorWriteUbo = {};
+
+
+            VkDescriptorBufferInfo cameraInfo;
+            cameraInfo.buffer = frame.cameraBuffer._buffer;
+            cameraInfo.offset = 0;
+            cameraInfo.range = sizeof(GPUCameraData);
+
+
+            VkDescriptorBufferInfo objectBufferInfo;
+            objectBufferInfo.buffer = frame.objectBuffer._buffer;
+            objectBufferInfo.offset = 0;
+            objectBufferInfo.range = sizeof(GPUObjectData) * m_numObjects;
+
+            ////
+
+
+            VkWriteDescriptorSet descriptorWriteUbo = {};
             descriptorWriteUbo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWriteUbo.dstSet = m_descriptorSets[i];
+            descriptorWriteUbo.dstSet = frame.globalDescriptor;
             descriptorWriteUbo.dstBinding = 0;
             descriptorWriteUbo.dstArrayElement = 0;
             descriptorWriteUbo.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             descriptorWriteUbo.descriptorCount = 1;
-            descriptorWriteUbo.pBufferInfo = &bufferInfoUbo;
+            descriptorWriteUbo.pBufferInfo = &cameraInfo;
             descriptorWriteUbo.pImageInfo = nullptr;
             descriptorWriteUbo.pTexelBufferView = nullptr;
 
             ///
 
-            VkDescriptorBufferInfo bufferInfoModel1 = {};
-            bufferInfoModel1.buffer = m_uniformBuffersFromModel[i];
-            bufferInfoModel1.offset = 0;
-            bufferInfoModel1.range = sizeof(UniformModel) * m_vertices.size();
-
             VkWriteDescriptorSet descriptorWriteModel1 = {};
             descriptorWriteModel1.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWriteModel1.dstSet = m_descriptorSets[i];
+            descriptorWriteModel1.dstSet = frame.globalDescriptor;
             descriptorWriteModel1.dstBinding = 1;
             descriptorWriteModel1.dstArrayElement = 0;
             descriptorWriteModel1.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
             descriptorWriteModel1.descriptorCount = 1;
-            descriptorWriteModel1.pBufferInfo = &bufferInfoModel1;
+            descriptorWriteModel1.pBufferInfo = &objectBufferInfo;
             descriptorWriteModel1.pImageInfo = nullptr;
             descriptorWriteModel1.pTexelBufferView = nullptr;
 
             ///
 
             VkDescriptorBufferInfo bufferInfoColors = {};
-            bufferInfoColors.buffer = m_storageBufferWorldCoords[i];
+            bufferInfoColors.buffer = frame.storageBufferWorldCoords._buffer;
             bufferInfoColors.offset = 0;
             bufferInfoColors.range = sizeof(OutputVertShader) * m_worldCoords.size();
 
             VkWriteDescriptorSet descriptorWriteColors = {};
             descriptorWriteColors.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWriteColors.dstSet = m_descriptorSets[i];
+            descriptorWriteColors.dstSet = frame.globalDescriptor;
             descriptorWriteColors.dstBinding = 2;
             descriptorWriteColors.dstArrayElement = 0;
             descriptorWriteColors.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
@@ -744,20 +560,99 @@ namespace vks
                     descriptorWriteColors
             };
 
-			vkUpdateDescriptorSets(device_, 3, descriptorWrites, 0, nullptr);
-		}
+            vkUpdateDescriptorSets(device, 3, descriptorWrites, 0, nullptr);
+        }
+
+        m_deletionQueue.push_function([&]() {
+
+            //vmaDestroyBuffer(m_allocator, _sceneParameterBuffer._buffer, _sceneParameterBuffer._allocation);
+            //vkDestroyDescriptorSetLayout(device, m_objectSetLayout, nullptr);
+            vkDestroyDescriptorSetLayout(device, m_globalSetLayout, nullptr);
+
+            vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
+
+            for (auto&& frame : m_frames)
+            {
+                vmaDestroyBuffer(m_allocator, frame.cameraBuffer._buffer, frame.cameraBuffer._allocation);
+
+                vmaDestroyBuffer(m_allocator, frame.objectBuffer._buffer, frame.objectBuffer._allocation);
+
+                vmaDestroyBuffer(m_allocator, frame.storageBufferWorldCoords._buffer, frame.storageBufferWorldCoords._allocation);
+            }
+        });
+    }
+
+
+
+	void VulkanDriver::updateUniformBuffer_(uint32_t currentImage_)
+	{
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration< float, std::chrono::seconds::period >(currentTime - startTime).count();
+	
+		GPUCameraData ubo = {};
+		ubo.view = m_cameraView.getViewMatrix();
+		ubo.proj = m_cameraView.getProjectionMatrix();
+
+		auto&& curFrame = m_frames[currentImage_];
+
+		void* data = nullptr;
+		auto device = m_core.getDevice();
+		vmaMapMemory(m_allocator, curFrame.cameraBuffer._allocation, &data);
+        memcpy(data, &ubo, sizeof(ubo));
+        vmaUnmapMemory(m_allocator, curFrame.cameraBuffer._allocation);
+        data = nullptr;
+
+
+
+        vmaMapMemory(m_allocator, curFrame.objectBuffer._allocation, &data);
+
+        auto* pModelData = static_cast< GPUObjectData* >(data);
+        for (size_t i = 0, mi = m_modelData.size(); i < mi; i++) {
+            pModelData[i] = m_modelData.at(i);
+        }
+
+        vmaUnmapMemory(m_allocator, curFrame.objectBuffer._allocation);
+
+
+        //todo
+        updateWorldCoordsData(currentImage_);
 	}
+
+
+    void VulkanDriver::updateWorldCoordsData(uint32_t currentImage_)
+    {
+        void* data = nullptr;
+        auto device = m_core.getDevice();
+        //m_worldCoords.resize(vertices.size());
+        auto&& curFrame = m_frames[currentImage_];
+
+
+        vmaMapMemory(m_allocator, curFrame.storageBufferWorldCoords._allocation, &data);
+
+        //todo
+        auto* pOutData = static_cast< OutputVertShader* >(data);
+        for (size_t i = 0, mi = m_worldCoords.size(); i < mi; ++i)
+        {
+            m_worldCoords[i] = pOutData[i].world_coord;
+        }
+        vmaUnmapMemory(m_allocator, curFrame.storageBufferWorldCoords._allocation);
+
+
+    }
 
 
 	void VulkanDriver::render()
 	{
-		vkWaitForFences(m_core.getDevice(), 1, &m_inFlightFences[m_currentFrame], VK_TRUE, UINT64_MAX);
+		vkWaitForFences(m_core.getDevice(), 1, &m_frames[m_currentFrame].renderFence, VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex = 0;
-		VkResult result = vkAcquireNextImageKHR(m_core.getDevice(), m_swapChainKHR, UINT64_MAX, m_imageAvailableSem[m_currentFrame], VK_NULL_HANDLE, &imageIndex); 
+		VkResult result = vkAcquireNextImageKHR(m_core.getDevice(), m_swapChainKHR, UINT64_MAX, m_frames[m_currentFrame].renderSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			m_framebufferResized = false;
-			recreateSwapChain_();
+			assert(0);
+			//recreateSwapChain_();
 			return;
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
@@ -765,12 +660,12 @@ namespace vks
 		}
 		
 
-		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
+/*		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 		if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
 			vkWaitForFences(m_core.getDevice(), 1, &m_imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
 		}
 		// Mark the image as now being in use by this frame
-		m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
+		m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];*/
 
 		//todo
 		updateUniformBuffer_(imageIndex);
@@ -779,21 +674,21 @@ namespace vks
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { m_imageAvailableSem[m_currentFrame] };
+		VkSemaphore waitSemaphores[] = { m_frames[m_currentFrame].renderSemaphore };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_cmdBufs[imageIndex];
+		submitInfo.pCommandBuffers = &m_frames[imageIndex].mainCommandBuffer;
 
-		VkSemaphore signalSemaphores[] = { m_renderFinishedSem[m_currentFrame] };
+		VkSemaphore signalSemaphores[] = { m_frames[m_currentFrame].presentSemaphore };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences(m_core.getDevice(), 1, &m_inFlightFences[m_currentFrame]);
+		vkResetFences(m_core.getDevice(), 1, &m_frames[m_currentFrame].renderFence);
 
-		if (VK_SUCCESS != vkQueueSubmit(m_queue, 1, &submitInfo, m_inFlightFences[m_currentFrame])) {
+		if (VK_SUCCESS != vkQueueSubmit(m_queue, 1, &submitInfo, m_frames[m_currentFrame].renderFence)) {
 			throw std::runtime_error(DEBUG_MSG("failed to submit draw command buffer!"));
 		}
 
@@ -812,7 +707,9 @@ namespace vks
 		result = vkQueuePresentKHR(m_queue, &presentInfo); 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_framebufferResized) {
 			m_framebufferResized = false;
-			recreateSwapChain_();
+
+			assert(0);
+			//recreateSwapChain_();
 		} 
 		else if (result != VK_SUCCESS) {
 			throw std::runtime_error(DEBUG_MSG("failed to present swap chain image!"));
@@ -887,19 +784,23 @@ namespace vks
 		if (vkCreateRenderPass(m_core.getDevice(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
 			throw std::runtime_error(DEBUG_MSG("failed to create render pass!"));
 		}
+		m_deletionQueue.push_function([=](){
+		    vkDestroyRenderPass(m_core.getDevice(), m_renderPass, nullptr);
+		});
 	}
 
 
 	void VulkanDriver::createFramebuffer_()
 	{
-		m_fbs.resize(m_images.size());
-
 		int wHeight = 0, wWidth = 0;
 		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
 		for (uint32_t i = 0, mi = m_images.size(); i < mi; i++)
 		{
 			m_views[i] = m_core.createImageView(m_images[i], m_core.getSurfaceFormat().format, VK_IMAGE_ASPECT_COLOR_BIT);
+            m_deletionQueue.push_function([=](){
+                vkDestroyImageView(m_core.getDevice(), m_views[i], nullptr);
+            });
 
 			std::array< VkImageView, 2 > attachments = {
 				m_views[i],
@@ -915,9 +816,12 @@ namespace vks
 			fbInfo.height = wHeight;
 			fbInfo.layers = 1;
 
-			if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_fbs[i])) {
+			if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_frames[i].frameBuffer)) {
 				throw std::runtime_error(DEBUG_MSG("failed to create frame buffer"));
 			}
+			m_deletionQueue.push_function([=](){
+			    vkDestroyFramebuffer(m_core.getDevice(), m_frames[i].frameBuffer, nullptr);
+			});
 		}
 	}
 
@@ -1072,13 +976,16 @@ namespace vks
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutInfo.setLayoutCount = 1;
-		pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
+		pipelineLayoutInfo.pSetLayouts = &m_globalSetLayout;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 		pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
 		if (vkCreatePipelineLayout(m_core.getDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS) {
 			throw std::runtime_error(DEBUG_MSG("failed to create pipeline layout!"));
 		}
+		m_deletionQueue.push_function([=](){
+		    vkDestroyPipelineLayout(m_core.getDevice(), m_pipelineLayout, nullptr);
+		});
 
 		VkGraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -1105,6 +1012,9 @@ namespace vks
 		if (vkCreateGraphicsPipelines(m_core.getDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_pipeline) != VK_SUCCESS) {
 			throw std::runtime_error(DEBUG_MSG("failed to create graphics pipeline!"));
 		}
+		m_deletionQueue.push_function([=](){
+		    vkDestroyPipeline(m_core.getDevice(), m_pipeline, nullptr);
+		});
 
 		vkDestroyShaderModule(m_core.getDevice(), fragShader, nullptr);
 		vkDestroyShaderModule(m_core.getDevice(), vertShader, nullptr);
@@ -1113,26 +1023,61 @@ namespace vks
 
 	void VulkanDriver::createSyncObjects_()
 	{
-		m_imageAvailableSem.resize(m_maxFramesInFlight);
-		m_renderFinishedSem.resize(m_maxFramesInFlight);
-		m_inFlightFences.resize(m_maxFramesInFlight);
-		m_imagesInFlight.resize(m_images.size(), VK_NULL_HANDLE);
+        VkFenceCreateInfo fenceInfo = {};
+        fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		VkSemaphoreCreateInfo createInfo = {};
-		createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        VkSemaphoreCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-		VkFenceCreateInfo fenceInfo = {};
-		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        auto&& device = m_core.getDevice();
 
-		for (size_t i = 0; i < m_maxFramesInFlight; i++) {
-			if (vkCreateSemaphore(m_core.getDevice(), &createInfo, nullptr, &m_imageAvailableSem[i]) != VK_SUCCESS ||
-				vkCreateSemaphore(m_core.getDevice(), &createInfo, nullptr, &m_renderFinishedSem[i]) != VK_SUCCESS ||
-				vkCreateFence(m_core.getDevice(), &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS) {
+	    for(auto&& frame : m_frames)
+        {
+            vkCreateFence(device, &fenceInfo, nullptr, &frame.renderFence);
 
-				throw std::runtime_error(DEBUG_MSG("failed to create semaphores!"));
-			}
-		}
+            //enqueue the destruction of the fence
+            m_deletionQueue.push_function([=]() {
+                vkDestroyFence(device, frame.renderFence, nullptr);
+            });
+
+
+            vkCreateSemaphore(device, &createInfo, nullptr, &frame.presentSemaphore);
+            vkCreateSemaphore(device, &createInfo, nullptr, &frame.renderSemaphore);
+
+            m_deletionQueue.push_function([=]() {
+                vkDestroySemaphore(device, frame.presentSemaphore, nullptr);
+                vkDestroySemaphore(device, frame.renderSemaphore, nullptr);
+            });
+        }
+
 	}
+
+
+    AllocatedBuffer VulkanDriver::create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage)
+    {
+        //allocate vertex buffer
+        VkBufferCreateInfo bufferInfo = {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.pNext = nullptr;
+        bufferInfo.size = allocSize;
+
+        bufferInfo.usage = usage;
+
+
+        //let the VMA library know that this data should be writeable by CPU, but also readable by GPU
+        VmaAllocationCreateInfo vmaallocInfo = {};
+        vmaallocInfo.usage = memoryUsage;
+
+        AllocatedBuffer newBuffer = {};
+
+        //allocate the buffer
+        vmaCreateBuffer(m_allocator, &bufferInfo, &vmaallocInfo,
+                &newBuffer._buffer,
+                &newBuffer._allocation,
+                nullptr);
+
+        return newBuffer;
+    }
 
 }//namespace vks
