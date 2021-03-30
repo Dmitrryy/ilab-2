@@ -7,8 +7,9 @@
  *
  ***/
 
-#include "Mesh.hpp"
+#include "Driver.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
 
@@ -68,9 +69,9 @@ namespace ezg
 
                     //copy it into our vertex
                     Vertex new_vert;
-                    new_vert.position.x = vx;
-                    new_vert.position.y = vy;
-                    new_vert.position.z = vz;
+                    new_vert.pos.x = vx;
+                    new_vert.pos.y = vy;
+                    new_vert.pos.z = vz;
 
                     new_vert.normal.x = nx;
                     new_vert.normal.y = ny;

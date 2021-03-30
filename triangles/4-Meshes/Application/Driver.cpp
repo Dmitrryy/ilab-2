@@ -53,16 +53,69 @@ namespace ezg
 			createCommandBuffer_();
 			createDepthResources_();
 			createFramebuffer_();
-			createVertexBuffer_();
-            createIndexBuffer_();
+/*			createVertexBuffer_();
+            createIndexBuffer_();*/
 
             initDescriptors();
 
 			createPipeline_();
-
-			recordCommandBuffers_();
+/*
+			recordCommandBuffers_();*/
 
 			createSyncObjects_();
+
+
+			//TODO
+
+			Mesh triMesh{};
+            //make the array 3 vertices long
+            triMesh._vertices.resize(3);
+
+            //vertex positions
+            triMesh._vertices[0].pos = { 1.f,1.f, 0.0f };
+            triMesh._vertices[1].pos = { -1.f,1.f, 0.0f };
+            triMesh._vertices[2].pos = { 0.f,-1.f, 0.0f };
+
+            //vertex colors, all green
+            triMesh._vertices[0].color = { 0.f,1.f, 0.0f }; //pure green
+            triMesh._vertices[1].color = { 0.f,1.f, 0.0f }; //pure green
+            triMesh._vertices[2].color = { 0.f,1.f, 0.0f }; //pure green
+            //we dont care about the vertex normals
+
+            //load the monkey
+            Mesh monkeyMesh{};
+            if(!monkeyMesh.load_from_obj("resource/meshes/monkey_smooth.obj")){
+                throw std::runtime_error("abort");
+            }
+
+            upload_mesh(triMesh);
+            upload_mesh(monkeyMesh);
+
+            m_meshes["monkey"] = monkeyMesh;
+            m_meshes["triangle"] = triMesh;
+
+            //TODO
+
+            	RenderObject monkey;
+	monkey.mesh = get_mesh("monkey");
+	monkey.material = get_material(PipelineType::DEFAULT_MESH);
+	monkey.transformMatrix = glm::mat4{ 1.0f };
+
+	m_renderables.push_back(monkey);
+
+	for (int x = -20; x <= 20; x++) {
+		for (int y = -20; y <= 20; y++) {
+
+			RenderObject tri;
+			tri.mesh = get_mesh("triangle");
+			tri.material = get_material(PipelineType::DEFAULT_MESH);
+			glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, 0, y));
+			glm::mat4 scale = glm::scale(glm::mat4{ 1.0 }, glm::vec3(0.2, 0.2, 0.2));
+			tri.transformMatrix = translation * scale;
+
+			m_renderables.push_back(tri);
+		}
+	}
         }
 		catch (std::exception& exc_)
 		{
@@ -74,8 +127,32 @@ namespace ezg
 	}
 
 
+	RenderMaterial* VulkanDriver::get_material(PipelineType type)
+{
+	//search for the object, and return nullpointer if not found
+	auto it = m_renderMaterials.find(type);
+	if (it == m_renderMaterials.end()) {
+		return nullptr;
+	}
+	else {
+		return &(*it).second;
+	}
+}
 
-    void VulkanDriver::addObject(const ObjectInfo& info)
+
+Mesh* VulkanDriver::get_mesh(const std::string& name)
+{
+	auto it = m_meshes.find(name);
+	if (it == m_meshes.end()) {
+		return nullptr;
+	}
+	else {
+		return &(*it).second;
+	}
+}
+
+
+  /*  void VulkanDriver::addObject(const ObjectInfo& info)
     {
 	    GPUObjectData cur {};
 	    cur.model = info.model_matrix;
@@ -105,8 +182,8 @@ namespace ezg
 	    else {
             m_indexBufferOffsets.push_back(m_indexBufferOffsets.at(id - 1) + 3);//TODO 3
 	    }
-    }
-    void VulkanDriver::setObjectInfo(size_t objectID, const ObjectInfo& info)
+    }*/
+  /*  void VulkanDriver::setObjectInfo(size_t objectID, const ObjectInfo& info)
     {
         auto& md = m_modelData.at(objectID);
 
@@ -126,7 +203,7 @@ namespace ezg
 	    }
 
 	    return res;
-    }
+    }*/
 
 
 
@@ -190,6 +267,7 @@ namespace ezg
 		VkCommandPoolCreateInfo cmdPoolCreateInfo = {};
 		cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		cmdPoolCreateInfo.queueFamilyIndex = m_core.getQueueFamily();
+		cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 		auto&& device = m_core.getDevice();
 
@@ -217,12 +295,12 @@ namespace ezg
 	}
 
 #include "../../../OtherLibs/timer.h"
+/*
 
 	void VulkanDriver::recordCommandBuffers_()
 	{
 		VkCommandBufferBeginInfo beginInfo = {};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		//beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
 		beginInfo.flags = 0;
 		beginInfo.pInheritanceInfo = nullptr;
 
@@ -246,7 +324,7 @@ namespace ezg
 				throw std::runtime_error(DEBUG_MSG("failed to begin recording command buffer!"));
 			}
 
-			VkRenderPassBeginInfo renderPassInfo = {};
+			VkRenderPassBeginInfo renderPassInfo = {}
 			renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 			renderPassInfo.renderPass = m_renderPass;
 			renderPassInfo.framebuffer = frame.frameBuffer;
@@ -262,12 +340,14 @@ namespace ezg
 			auto&& material = m_renderMaterials[PipelineType::DEFAULT_MESH];
 			vkCmdBindPipeline(curBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, material.pipeline);
 
+*/
 /*			VkBuffer vertexBuffers[] = {
 				m_vertexBuffer
 			};
 			VkDeviceSize offsets[] = {
 				0,
-			};*/
+			};*//*
+
             //std::vector< VkDeviceSize > offsets(m_vertexBuffer.size(), 0);
 			//vkCmdBindVertexBuffers(m_cmdBufs[k], 0, m_vertexBuffer.size(), m_vertexBuffer.data(), offsets.data());
             //todo
@@ -301,6 +381,7 @@ namespace ezg
 			std::cout << timer.elapsed() << std::endl;
 		}
 	}
+*/
 
 
 	void VulkanDriver::createDepthResources_()
@@ -342,7 +423,7 @@ namespace ezg
 	}
 
 
-	void VulkanDriver::createVertexBuffer_()
+/*	void VulkanDriver::createVertexBuffer_()
 	{
 	    const size_t num_buffers = m_vertices.size();
 
@@ -380,8 +461,9 @@ namespace ezg
 	        vmaDestroyBuffer(m_allocator, m_vertexBuffer._buffer, m_vertexBuffer._allocation);
 	    });
 
-    }
+    }*/
 
+/*
     void VulkanDriver::createIndexBuffer_()
     {
         auto&& device = m_core.getDevice();
@@ -421,6 +503,7 @@ namespace ezg
             vmaDestroyBuffer(m_allocator, m_indexBuffer._buffer, m_indexBuffer._allocation);
         });
     }
+*/
 
 
 
@@ -488,7 +571,8 @@ namespace ezg
 
             frame.objectBuffer = create_buffer_(sizeof(GPUObjectData) * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
-            frame.storageBufferWorldCoords = create_buffer_(sizeof(Vertex) * m_numVerticesInObject * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
+            //TODO
+            frame.storageBufferWorldCoords = create_buffer_(sizeof(Vertex) * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
             VkDescriptorSetAllocateInfo allocInfo = {};
             allocInfo.pNext = nullptr;
@@ -541,10 +625,11 @@ namespace ezg
 
             ///
 
+            //TODO
             VkDescriptorBufferInfo bufferInfoColors = {};
             bufferInfoColors.buffer = frame.storageBufferWorldCoords._buffer;
             bufferInfoColors.offset = 0;
-            bufferInfoColors.range = sizeof(OutputVertShader) * m_worldCoords.size();
+            bufferInfoColors.range = sizeof(Vertex) * m_numObjects;
 
             VkWriteDescriptorSet descriptorWriteColors = {};
             descriptorWriteColors.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -613,19 +698,19 @@ namespace ezg
         vmaMapMemory(m_allocator, curFrame.objectBuffer._allocation, &data);
 
         auto* pModelData = static_cast< GPUObjectData* >(data);
-        for (size_t i = 0, mi = m_modelData.size(); i < mi; i++) {
-            pModelData[i] = m_modelData.at(i);
+        for (size_t i = 0, mi = m_renderables.size(); i < mi; i++) {
+            pModelData[i] = { m_renderables.at(i).transformMatrix, {} };
         }
 
         vmaUnmapMemory(m_allocator, curFrame.objectBuffer._allocation);
 
 
         //todo
-        updateWorldCoordsData(currentImage_);
+        //updateWorldCoordsData(currentImage_);
 	}
 
 
-    void VulkanDriver::updateWorldCoordsData(uint32_t currentImage_)
+/*    void VulkanDriver::updateWorldCoordsData(uint32_t currentImage_)
     {
         void* data = nullptr;
         auto device = m_core.getDevice();
@@ -644,15 +729,62 @@ namespace ezg
         vmaUnmapMemory(m_allocator, curFrame.storageBufferWorldCoords._allocation);
 
 
+    }*/
+
+
+    void VulkanDriver::upload_mesh(Mesh& mesh)
+    {
+        //allocate vertex buffer
+        VkBufferCreateInfo bufferInfo = {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.pNext = nullptr;
+        //this is the total size, in bytes, of the buffer we are allocating
+        bufferInfo.size = mesh._vertices.size() * sizeof(Vertex);
+        //this buffer is going to be used as a Vertex Buffer
+        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+
+
+        //let the VMA library know that this data should be writeable by CPU, but also readable by GPU
+        VmaAllocationCreateInfo vmaallocInfo = {};
+        vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
+
+        //allocate the buffer
+        vmaCreateBuffer(m_allocator, &bufferInfo, &vmaallocInfo,
+                &mesh._vertexBuffer._buffer,
+                &mesh._vertexBuffer._allocation,
+                nullptr);
+
+        //add the destruction of triangle mesh buffer to the deletion queue
+        m_deletionQueue.push_function([=]() {
+
+            vmaDestroyBuffer(m_allocator, mesh._vertexBuffer._buffer, mesh._vertexBuffer._allocation);
+        });
+
+        //copy vertex data
+        void* data;
+        vmaMapMemory(m_allocator, mesh._vertexBuffer._allocation, &data);
+
+        memcpy(data, mesh._vertices.data(), mesh._vertices.size() * sizeof(Vertex));
+
+        vmaUnmapMemory(m_allocator, mesh._vertexBuffer._allocation);
     }
+
 
 
 	void VulkanDriver::render()
 	{
-		vkWaitForFences(m_core.getDevice(), 1, &m_frames[m_currentFrame].renderFence, VK_TRUE, UINT64_MAX);
+        auto&& curFrame = getCurFrame();
+        int wHeight = 0, wWidth = 0;
+        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
+
+		vkWaitForFences(m_core.getDevice(), 1, &curFrame.renderFence, VK_TRUE, UINT64_MAX);
+        vkResetFences(m_core.getDevice(), 1, &curFrame.renderFence);
+
+        VkCommandBuffer cmd = curFrame.mainCommandBuffer;
+        vkResetCommandBuffer(cmd, 0);
 
 		uint32_t imageIndex = 0;
-		VkResult result = vkAcquireNextImageKHR(m_core.getDevice(), m_swapChainKHR, UINT64_MAX, m_frames[m_currentFrame].renderSemaphore, VK_NULL_HANDLE, &imageIndex);
+		VkResult result = vkAcquireNextImageKHR(m_core.getDevice(), m_swapChainKHR, UINT64_MAX, curFrame.renderSemaphore, VK_NULL_HANDLE, &imageIndex);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR) {
 			m_framebufferResized = false;
 			assert(0);
@@ -662,7 +794,38 @@ namespace ezg
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
 			throw std::runtime_error(DEBUG_MSG("failed to acquire swap chain image!"));
 		}
-		
+
+
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = 0;
+        beginInfo.pInheritanceInfo = nullptr;
+
+        if (vkBeginCommandBuffer(cmd, &beginInfo) != VK_SUCCESS) {
+            throw std::runtime_error(DEBUG_MSG("failed to begin recording command buffer!"));
+        }
+
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+
+        VkRenderPassBeginInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassInfo.renderPass = m_renderPass;
+        renderPassInfo.framebuffer = m_frameBuffers[imageIndex];
+        renderPassInfo.renderArea.offset = { 0, 0 };
+        renderPassInfo.renderArea.extent.height = wHeight;
+        renderPassInfo.renderArea.extent.width = wWidth;
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
+
+        vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+        //TODO draw objects
+
+        vkCmdEndRenderPass(cmd);
+
+        vkEndCommandBuffer(cmd);
 
 /*		// Check if a previous frame is using this image (i.e. there is its fence to wait on)
 		if (m_imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
@@ -672,27 +835,26 @@ namespace ezg
 		m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];*/
 
 		//todo
-		updateUniformBuffer_(imageIndex);
+		//updateUniformBuffer_(m_currentFrame);
 		//todo
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-		VkSemaphore waitSemaphores[] = { m_frames[m_currentFrame].renderSemaphore };
+		VkSemaphore waitSemaphores[] = { curFrame.renderSemaphore };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
 		submitInfo.pWaitDstStageMask = waitStages;
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &m_frames[imageIndex].mainCommandBuffer;
+		submitInfo.pCommandBuffers = &cmd;
 
-		VkSemaphore signalSemaphores[] = { m_frames[m_currentFrame].presentSemaphore };
+		VkSemaphore signalSemaphores[] = { curFrame.presentSemaphore };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		vkResetFences(m_core.getDevice(), 1, &m_frames[m_currentFrame].renderFence);
 
-		if (VK_SUCCESS != vkQueueSubmit(m_queue, 1, &submitInfo, m_frames[m_currentFrame].renderFence)) {
+		if (VK_SUCCESS != vkQueueSubmit(m_queue, 1, &submitInfo, curFrame.renderFence)) {
 			throw std::runtime_error(DEBUG_MSG("failed to submit draw command buffer!"));
 		}
 
@@ -720,7 +882,7 @@ namespace ezg
 		}
 
 		//vkQueueWaitIdle(m_queue);
-		m_currentFrame = (m_currentFrame + 1) % m_maxFramesInFlight;
+		m_currentFrame = m_currentFrame + 1;
 	}
 
 
@@ -799,6 +961,8 @@ namespace ezg
 		int wHeight = 0, wWidth = 0;
 		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
+		m_frameBuffers.resize(m_maxFramesInFlight);
+
 		for (uint32_t i = 0, mi = m_images.size(); i < mi; i++)
 		{
 			m_views[i] = m_core.createImageView(m_images[i], m_core.getSurfaceFormat().format, VK_IMAGE_ASPECT_COLOR_BIT);
@@ -820,11 +984,11 @@ namespace ezg
 			fbInfo.height = wHeight;
 			fbInfo.layers = 1;
 
-			if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_frames[i].frameBuffer)) {
+			if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_frameBuffers[i])) {
 				throw std::runtime_error(DEBUG_MSG("failed to create frame buffer"));
 			}
 			m_deletionQueue.push_function([=](){
-			    vkDestroyFramebuffer(m_core.getDevice(), m_frames[i].frameBuffer, nullptr);
+			    vkDestroyFramebuffer(m_core.getDevice(), m_frameBuffers[i], nullptr);
 			});
 		}
 	}

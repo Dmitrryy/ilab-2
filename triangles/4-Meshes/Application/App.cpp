@@ -151,7 +151,7 @@ namespace ezg
             info.color = ent.m_color;
             info.model_matrix = ent.getModelMatrix();
 
-            m_driver.addObject(info);
+//            m_driver.addObject(info);
         }
         //end objects init
         //-----------------------------------------------
@@ -222,7 +222,7 @@ namespace ezg
             Entity& curEntity = m_entities.at(i);
             curEntity.update(time);
 
-            curEntity.m_coordsInWorld = m_driver.getWorldCoords(i);
+           // curEntity.m_coordsInWorld = m_driver.getWorldCoords(i);
 
 
 
@@ -276,7 +276,7 @@ namespace ezg
             info.color = ent.m_color;
             info.model_matrix = ent.getModelMatrix();
 
-            m_driver.setObjectInfo(i, info);
+           // m_driver.setObjectInfo(i, info);
         }
     }
 

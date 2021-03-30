@@ -124,7 +124,6 @@ namespace ezg
         VkCommandPool   commandPool       = nullptr;
         VkCommandBuffer mainCommandBuffer = nullptr;
 
-        VkFramebuffer   frameBuffer = nullptr;
 
         AllocatedBuffer cameraBuffer = {};
         VkDescriptorSet globalDescriptor = nullptr;
@@ -181,6 +180,16 @@ namespace ezg
     };
 
 
+    struct RenderObject
+    {
+        Mesh *mesh = nullptr;
+
+        RenderMaterial *material = nullptr;
+
+        glm::mat4 transformMatrix;
+    };
+
+
 	class VulkanDriver
 	{
 		std::string                    m_appName;
@@ -197,6 +206,7 @@ namespace ezg
 
         std::vector< VkImage >         m_images;
         std::vector< VkImageView >     m_views;
+        std::vector< VkFramebuffer >   m_frameBuffers;
 
         VkSwapchainKHR                 m_swapChainKHR   = nullptr;
 		VkQueue                        m_queue          = nullptr;
@@ -206,6 +216,8 @@ namespace ezg
         std::unordered_map< PipelineType, RenderMaterial > m_renderMaterials;
         std::unordered_map< std::string, Mesh >            m_meshes;
 
+        //std::vector< GPUObjectData >    m_modelData;
+        std::vector< RenderObject >     m_renderables;
 
 
         VkImageView                    m_depthImageView;
@@ -223,23 +235,21 @@ namespace ezg
 		size_t                         m_curNumFrameInFlight = 0;
 
 		size_t                         m_numObjects          = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
-		size_t                         m_numVerticesInObject = EZG_ENGINE_DEFAULT_MAX_VERTICES_IN_OBJECT;
+		//size_t                         m_numVerticesInObject = EZG_ENGINE_DEFAULT_MAX_VERTICES_IN_OBJECT;
 
-
-		std::vector< GPUObjectData >    m_modelData;
 
         ezg::CameraView     m_cameraView;
 
-        std::vector< std::vector< uint32_t > > m_indices;
+/*        std::vector< std::vector< uint32_t > > m_indices;
         size_t                                 m_numAllIndices = 0;
         std::vector< size_t >                  m_indexBufferOffsets;
-        AllocatedBuffer                        m_indexBuffer;
+        AllocatedBuffer                        m_indexBuffer;*/
 
         //todo: different buffer for each object
-		std::vector< std::vector < Vertex > >  m_vertices;
+/*		std::vector< std::vector < Vertex > >  m_vertices;
         size_t                                 m_numAllVertices = 0;
         std::vector< size_t >                  m_vertexBufferOffsets;
-        AllocatedBuffer                        m_vertexBuffer;
+        AllocatedBuffer                        m_vertexBuffer;*/
 
         //todo: access to the vertices of a specific element by offset in a shared array
         std::vector< glm::vec3 >               m_worldCoords;
@@ -271,12 +281,12 @@ namespace ezg
 		void Init(GLFWwindow* window);
 
 
-		void addObject(const ObjectInfo& info);
-		void setObjectInfo(size_t objectID, const ObjectInfo& info);
+		void upload_mesh(Mesh& mesh);
+		//void addObject(const ObjectInfo& info);
+		//void setObjectInfo(size_t objectID, const ObjectInfo& info);
 
-		void updateWorldCoordsData(uint32_t currentImage_);
-		std::vector< glm::vec3 > getWorldCoords(size_t objectID);
-
+		//void updateWorldCoordsData(uint32_t currentImage_);
+		//std::vector< glm::vec3 > getWorldCoords(size_t objectID);
 
 		void render();
 
@@ -289,6 +299,12 @@ namespace ezg
 
 	private:
 
+        RenderMaterial *get_material(PipelineType type);
+
+        Mesh *get_mesh(const std::string &name);
+
+	    FrameData& getCurFrame() { return m_frames[m_currentFrame % m_maxFramesInFlight]; }
+
         AllocatedBuffer create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
 
         VkShaderModule createShaderModule_(const std::vector< char >& source_);
@@ -298,13 +314,13 @@ namespace ezg
 		void initDescriptors();
 
 
-		void createVertexBuffer_();
-		void createIndexBuffer_();
+/*		void createVertexBuffer_();
+		void createIndexBuffer_();*/
 
 		void updateUniformBuffer_(uint32_t currentImage_);
 
 		void createCommandBuffer_();
-		void recordCommandBuffers_();
+/*		void recordCommandBuffers_();*/
 
 		void createFramebuffer_();
 
