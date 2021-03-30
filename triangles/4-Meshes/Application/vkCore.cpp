@@ -15,7 +15,7 @@
 #include "Helpa/helpa.h"
 
 
-namespace vks {
+namespace ezg {
 
     bool Core::Init(GLFWwindow* pWindow)
     {

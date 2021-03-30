@@ -26,7 +26,7 @@ namespace ezg
         virtual ~Entity() = default;
 
 
-        std::vector< vks::Vertex > m_vertices;
+        std::vector< Vertex > m_vertices;
         std::vector< glm::vec3 >   m_coordsInWorld;
         la::Rectangle3             m_area;
 

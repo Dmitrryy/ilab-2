@@ -40,6 +40,8 @@
 
 #include <cmath>
 
+#include <vulkan/vulkan.hpp>
+
 
 int main()
 {
@@ -55,6 +57,7 @@ int main()
 
     std::ifstream inPut("tests/1.txt");
 #endif
+
 
     size_t num = 0;
     int time = 0;

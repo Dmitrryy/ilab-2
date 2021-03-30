@@ -17,7 +17,7 @@
 #define DEBUG_MSG(msg) \
 (std::string(__FILE__) + ":" + std::to_string(__LINE__) + ' ' + std::string(msg))
 
-namespace vks
+namespace ezg
 {
 
 	std::vector<char> readFile(const std::string& filename);

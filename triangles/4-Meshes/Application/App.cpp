@@ -66,7 +66,7 @@ namespace ezg
         const size_t entityId = m_entities.size();
 
         Triangle entity;
-        vks::Vertex vertex[3];
+        Vertex vertex[3];
 
         glm::vec3 normal = glm::normalize(glm::cross(pos_b - pos_a, pos_c - pos_a));
 
@@ -146,7 +146,7 @@ namespace ezg
         //add object in driver
         for (const auto& ent : m_entities)
         {
-            vks::ObjectInfo info;
+            ObjectInfo info;
             info.vertices = ent.m_vertices;
             info.color = ent.m_color;
             info.model_matrix = ent.getModelMatrix();
@@ -272,7 +272,7 @@ namespace ezg
         {
             const auto& ent = m_entities.at(i);
 
-            vks::ObjectInfo info;
+            ObjectInfo info;
             info.color = ent.m_color;
             info.model_matrix = ent.getModelMatrix();
 

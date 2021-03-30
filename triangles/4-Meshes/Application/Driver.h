@@ -33,7 +33,7 @@
 
 
 
-namespace vks
+namespace ezg
 {
 
 	struct Vertex 
@@ -124,15 +124,15 @@ namespace vks
         VkCommandPool   commandPool       = nullptr;
         VkCommandBuffer mainCommandBuffer = nullptr;
 
-        VkFramebuffer   frameBuffer;
+        VkFramebuffer   frameBuffer = nullptr;
 
-        AllocatedBuffer cameraBuffer;
+        AllocatedBuffer cameraBuffer = {};
         VkDescriptorSet globalDescriptor = nullptr;
 
-        AllocatedBuffer objectBuffer;
+        AllocatedBuffer objectBuffer = {};
         VkDescriptorSet objectDescriptor = nullptr;
 
-        AllocatedBuffer storageBufferWorldCoords;
+        AllocatedBuffer storageBufferWorldCoords = {};
     };
 
 
@@ -159,6 +159,27 @@ namespace vks
 	};
 
 
+	enum class PipelineType
+    {
+	    DEFAULT_MESH
+	    //todo
+    };
+
+	struct RenderMaterial
+    {
+        VkPipeline pipeline;
+        VkPipelineLayout pipelineLayout;
+    };
+
+
+    struct Mesh {
+        std::vector<Vertex> _vertices;
+
+        AllocatedBuffer _vertexBuffer;
+
+        bool load_from_obj(const char* filename);
+    };
+
 
 	class VulkanDriver
 	{
@@ -168,38 +189,40 @@ namespace vks
 
 		Core                           m_core;
 
-		std::vector< FrameData >       m_frames;
-
         DeletionQueue                  m_deletionQueue;
 
         VmaAllocator                   m_allocator;
 
-		std::vector< VkImage >         m_images;
+        std::vector< FrameData >       m_frames;
+
+        std::vector< VkImage >         m_images;
         std::vector< VkImageView >     m_views;
 
         VkSwapchainKHR                 m_swapChainKHR   = nullptr;
 		VkQueue                        m_queue          = nullptr;
 
 		VkRenderPass                   m_renderPass     = nullptr;
-		VkPipeline                     m_pipeline       = nullptr;
+
+        std::unordered_map< PipelineType, RenderMaterial > m_renderMaterials;
+        std::unordered_map< std::string, Mesh >            m_meshes;
+
+
 
         VkImageView                    m_depthImageView;
         AllocatedImage                 m_depthImage;
 
 
 		VkDescriptorPool               m_descriptorPool = nullptr;
+        VkDescriptorSetLayout          m_globalSetLayout = nullptr;
+        //VkDescriptorSetLayout          m_objectSetLayout = nullptr; //todo
 
-        VkDescriptorSetLayout          m_globalSetLayout;
-        // todo VkDescriptorSetLayout          m_objectSetLayout;
-
-		VkPipelineLayout               m_pipelineLayout = nullptr;
 
 
 		size_t                         m_currentFrame      = 0;
 		size_t                         m_maxFramesInFlight = 2;
 		size_t                         m_curNumFrameInFlight = 0;
 
-		size_t                         m_numObjects = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
+		size_t                         m_numObjects          = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
 		size_t                         m_numVerticesInObject = EZG_ENGINE_DEFAULT_MAX_VERTICES_IN_OBJECT;
 
 
@@ -268,13 +291,9 @@ namespace vks
 
         AllocatedBuffer create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
 
-
         VkShaderModule createShaderModule_(const std::vector< char >& source_);
 
 		void createSwapChain_();
-		//void recreateSwapChain_();
-
-		//void cleanupSwapChain();
 
 		void initDescriptors();
 
@@ -284,7 +303,6 @@ namespace vks
 
 		void updateUniformBuffer_(uint32_t currentImage_);
 
-		void copyBuffer_(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 		void createCommandBuffer_();
 		void recordCommandBuffers_();
 
@@ -297,6 +315,7 @@ namespace vks
 		void createPipeline_();
 
 		void createSyncObjects_();
+
 
 
 		bool hasStencilComponent(VkFormat format) {

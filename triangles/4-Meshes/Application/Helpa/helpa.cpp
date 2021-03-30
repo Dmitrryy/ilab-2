@@ -10,7 +10,7 @@
 #include "helpa.h"
 
 
-namespace vks
+namespace ezg
 {
 
     std::vector<char> readFile(const std::string& filename) 

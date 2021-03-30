@@ -29,7 +29,7 @@ namespace ezg
     class AppLVL3
     {
 
-        vks::VulkanDriver m_driver;
+        VulkanDriver m_driver;
         GLFWwindow*       m_pWindow = nullptr;
 
         //TODO go to the pointer on Entity

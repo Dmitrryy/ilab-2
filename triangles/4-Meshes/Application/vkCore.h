@@ -25,7 +25,7 @@
 
 #endif
 
-namespace vks
+namespace ezg
 {
 
     struct VulkanPhysicalDevices

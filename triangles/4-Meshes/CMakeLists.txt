@@ -51,7 +51,7 @@ endif()
 
 
 add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp
-        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp #[[Engine/engine.cpp Engine/engine.hpp Engine/mesh.cpp Engine/mesh.hpp Engine/types.hpp Engine/initializer.cpp Engine/initializer.hpp]])
+        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp #[[Engine/engine.cpp Engine/engine.hpp Engine/mesh.cpp Engine/mesh.hpp Engine/types.hpp Engine/initializer.cpp Engine/initializer.hpp]] Application/PipelineBuilder.cpp Application/PipelineBuilder.hpp Application/Mesh.cpp Application/Mesh.hpp)
 
 
 ##############################
