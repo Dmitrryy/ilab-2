@@ -41,7 +41,13 @@
 
 
 #include "App.h"
-#include "../../Octree/Octree.h"
+#include "Entity.hpp"
+
+#include <Octree/Octree.h>
+
+#include <tinyxml2.h>
+
+#include <OtherLibs/random.h>
 
 
 #define WINDOW_HEIGHT 800
@@ -57,53 +63,97 @@ namespace ezg
      *
      ***/
 
-    void AppLVL3::addTriangle(glm::vec3 pos_a, glm::vec3 pos_b, glm::vec3 pos_c, glm::vec3 position
-                              , glm::vec3 direction_rotation, float rotation_speed, float live_time_sec)
+
+    bool AppLVL4::loadSceneFromXML(const std::string& fileName)
     {
-        if (direction_rotation == glm::vec3(0.f)) {
-            return ;
+        tinyxml2::XMLDocument doc;
+        auto&& res = doc.LoadFile(fileName.c_str());
+        if (res != tinyxml2::XML_SUCCESS) {
+            std::cerr << res << std::endl;
+            return false;
         }
-        const size_t entityId = m_entities.size();
 
-        Triangle entity;
-        Vertex vertex[3];
+        auto&& boxXML = doc.FirstChildElement("box");
+        if (boxXML != nullptr)
+        {
+            float x1, x2, y1, y2, z1, z2;
+            x1 = boxXML->FloatAttribute("x1");
+            y1 = boxXML->FloatAttribute("y1");
+            z1 = boxXML->FloatAttribute("z1");
 
-        glm::vec3 normal = glm::normalize(glm::cross(pos_b - pos_a, pos_c - pos_a));
+            x2 = boxXML->FloatAttribute("x2");
+            y2 = boxXML->FloatAttribute("y2");
+            z2 = boxXML->FloatAttribute("z2");
 
-        vertex[0].pos = pos_a;
-        vertex[0].normal = normal;
-        vertex[1].pos = pos_b;
-        vertex[1].normal = normal;
-        vertex[2].pos = pos_c;
-        vertex[2].normal = normal;
+            m_box.reup({x1, y1, z1}, {x2, y2, z2});
+        }
 
-        entity.m_vertices.at(0) = (vertex[0]);
-        entity.m_vertices.at(1) = (vertex[1]);
-        entity.m_vertices.at(2) = (vertex[2]);
+        tinyxml2::XMLElement* objectXML = doc.FirstChildElement("objects")->FirstChildElement();//todo
+        while(objectXML != nullptr)
+        {
+            auto&& entity = new TriangleMesh();
 
-        entity.m_position = position;
-        entity.m_dirRotation = direction_rotation;
-        entity.m_speedRotation = rotation_speed;
-        entity.m_liveTimeSec = live_time_sec;
+            if(!entity->load_from_obj(objectXML->FirstChildElement("model")->Attribute("file"))) {
+                std::cerr << "cant load model" << std::endl;
+                continue;
+            }
+            entity->m_position.x = objectXML->FirstChildElement("properties")->FirstChildElement("position")->FloatAttribute("x");
+            entity->m_position.y = objectXML->FirstChildElement("properties")->FirstChildElement("position")->FloatAttribute("y");
+            entity->m_position.z = objectXML->FirstChildElement("properties")->FirstChildElement("position")->FloatAttribute("z");
 
-        m_entities.push_back(entity);
+            entity->m_color.x = objectXML->FirstChildElement("properties")->FirstChildElement("color")->FloatAttribute("r");
+            entity->m_color.y = objectXML->FirstChildElement("properties")->FirstChildElement("color")->FloatAttribute("g");
+            entity->m_color.z = objectXML->FirstChildElement("properties")->FirstChildElement("color")->FloatAttribute("b");
+
+            entity->m_scale.x = objectXML->FirstChildElement("properties")->FirstChildElement("scale")->FloatAttribute("x");
+            entity->m_scale.y = objectXML->FirstChildElement("properties")->FirstChildElement("scale")->FloatAttribute("y");
+            entity->m_scale.z = objectXML->FirstChildElement("properties")->FirstChildElement("scale")->FloatAttribute("z");
+
+            entity->m_dirTravel.x = objectXML->FirstChildElement("properties")->FirstChildElement("dirTravel")->FloatAttribute("x");
+            entity->m_dirTravel.y = objectXML->FirstChildElement("properties")->FirstChildElement("dirTravel")->FloatAttribute("y");
+            entity->m_dirTravel.z = objectXML->FirstChildElement("properties")->FirstChildElement("dirTravel")->FloatAttribute("z");
+
+            entity->m_dirRotation.x = objectXML->FirstChildElement("properties")->FirstChildElement("dirRotate")->FloatAttribute("x");
+            entity->m_dirRotation.y = objectXML->FirstChildElement("properties")->FirstChildElement("dirRotate")->FloatAttribute("y");
+            entity->m_dirRotation.z = objectXML->FirstChildElement("properties")->FirstChildElement("dirRotate")->FloatAttribute("z");
+
+            entity->m_speedRotation = objectXML->FirstChildElement("properties")->FirstChildElement("speedRotation")->FloatAttribute("val");
+
+            auto&& grow = objectXML->FirstChildElement("grow");
+            if (grow != nullptr)
+            {
+                size_t stages = grow->Unsigned64Attribute("stages");
+                float max_dist = grow->FloatAttribute("distance");
+
+                const size_t Prost = 100000;
+                const auto max = static_cast<uint>(max_dist * Prost);
+                ezg::Random randDist(static_cast<uint>(max / 6), max);
+
+                for (size_t i = 0; i < stages; ++i)
+                {
+                    ezg::Random randTriangle(0, entity->vertices.size() / 3 - 1);
+
+                    entity->grow(randTriangle(), static_cast<float>(randDist()) / Prost);
+                }
+            }
+
+            m_entities.push_back(entity);
+
+            objectXML = objectXML->NextSiblingElement();
+        }
+
+        return true;
     }
 
 
-
-    void AppLVL3::run()
+    void AppLVL4::run()
     {
         init_();
 
-        //TODO
-        //===-------------------------------------------
-        // first initialization of buffers for each frame
-        m_driver.render();
-        m_driver.render();
-        m_driver.render();
-        m_driver.render();
-        m_driver.render();
-        //===-------------------------------------------
+        for (auto&& o : m_entities){
+            m_driver.upload_mesh(*o);
+        }
+
 
         m_cameraView.setPosition({1.f, 1.f, 1.f});
         m_cameraView.setDirection({-1.f, -1.f, -1.f});
@@ -119,16 +169,13 @@ namespace ezg
             glfwPollEvents();
 
             update_entities_(dTime);
-            load_entity_data_in_driver_();
 
             update_camera_(dTime);
             m_driver.setCameraView(m_cameraView);
 
-            //std::cout << m_cameraView.m_direction.x << " | " << m_cameraView.m_direction.y << " | " << m_cameraView.m_direction.z << std::endl;
-
-            m_driver.render();
+            m_driver.render_meshes(m_entities);
         }
-
+        m_entities.clear();
         std::cout << "App closed!" << std::endl;
     }
 
@@ -143,35 +190,20 @@ namespace ezg
      *
      ***/
 
-    void AppLVL3::init_()
+    void AppLVL4::init_()
     {
-        //-----------------------------------------------
-        //add object in driver
-        for (const auto& ent : m_entities)
-        {
-            ObjectInfo info;
-            info.vertices = ent.m_vertices;
-            info.color = ent.m_color;
-            info.model_matrix = ent.getModelMatrix();
-
-//            m_driver.addObject(info);
-        }
-        //end objects init
-        //-----------------------------------------------
-
-
         //-----------------------------------------------
         // create window
         int res = glfwInit();
         if (res != GLFW_TRUE) {
-            throw std::runtime_error(DEBUG_MSG("failed glfwInit!"));
+            throw std::runtime_error("failed glfwInit!");
         }
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
         if (m_pWindow == nullptr) {
-            throw std::runtime_error(DEBUG_MSG("failed create window"));
+            throw std::runtime_error("failed create window");
         }
 
         glfwSetWindowUserPointer(m_pWindow, this);
@@ -193,99 +225,35 @@ namespace ezg
         //-----------------------------------------------
         // init camera view
         m_cameraView.setAspect(wHeight /(float) wWidth);
-
-        glm::vec3 a(std::numeric_limits<double>::max()), b(std::numeric_limits<double>::min());
-        for (const auto& cur : m_entities)
-        {
-            for (const auto& vert : cur.m_vertices)
-            {
-                a.x = std::min(a.x, vert.pos.x + cur.m_position.x);
-                a.y = std::min(a.y, vert.pos.y + cur.m_position.y);
-                a.z = std::min(a.z, vert.pos.z + cur.m_position.z);
-
-                b.x = std::max(b.x, vert.pos.x + cur.m_position.x);
-                b.y = std::max(b.y, vert.pos.y + cur.m_position.y);
-                b.z = std::max(b.z, vert.pos.z + cur.m_position.z);
-            }
-        }
-
-        m_cameraView.setPosition(b);
-        m_cameraView.setDirection(((a + b) / 2.f) - m_cameraView.getPosition());
         // end init camera view
         //-----------------------------------------------
     }
 
 
 
-    void AppLVL3::update_entities_(float time)
+    void AppLVL4::update_entities_(float time)
     {
-        la::Vector3f a(std::numeric_limits<double>::max()), b(std::numeric_limits<double>::min());
-
-        for(size_t i = 0, mi = m_entities.size(); i < mi; ++i) {
-            Entity& curEntity = m_entities.at(i);
-            curEntity.update(time);
-
-           // curEntity.m_coordsInWorld = m_driver.getWorldCoords(i);
-
-
-
-/*
-            std::cout << '[' << i << ']' << curEntity.m_coordsInWorld[0].x << ", " << curEntity.m_coordsInWorld[0].y << ", " << curEntity.m_coordsInWorld[0].z << " | "
-                                         << curEntity.m_coordsInWorld[1].x << ", " << curEntity.m_coordsInWorld[1].y << ", " << curEntity.m_coordsInWorld[1].z << " | "
-                                         << curEntity.m_coordsInWorld[2].x << ", " << curEntity.m_coordsInWorld[2].y << ", " << curEntity.m_coordsInWorld[2].z << std::endl;
-*/
-
-
-
-            curEntity.updateArea();
-            if (curEntity.type() == Entity::Type::Triangle)
-            {
-                static_cast< Triangle& >(curEntity).updateLaTriangle();
-            }
-
-
-            a.x = std::min(a.x, curEntity.m_area.getA().x);
-            a.y = std::min(a.y, curEntity.m_area.getA().y);
-            a.z = std::min(a.z, curEntity.m_area.getA().z);
-
-            b.x = std::max(b.x, curEntity.m_area.getB().x);
-            b.y = std::max(b.y, curEntity.m_area.getB().y);
-            b.z = std::max(b.z, curEntity.m_area.getB().z);
-        }
-
-
-
-        la::Octree< Entity* > octTree({a, b});
-        for (auto& ent : m_entities) {
-            ent.m_color = { 0.f, 1.f, 0.f };
-            octTree.add(&ent);
-        }
-
-
-        octTree.msplit();
-
-        octTree.getIntersections();
-    }
-
-
-
-    void AppLVL3::load_entity_data_in_driver_()
-    {
-        for (size_t i = 0, mi = m_entities.size(); i < mi; ++i)
+        for(size_t i = 0, mi = m_entities.size(); i < mi; ++i)
         {
-            const auto& ent = m_entities.at(i);
+            auto&& curEntity = static_cast<TriangleMesh*>(m_entities.at(i));
 
-            ObjectInfo info;
-            info.color = ent.m_color;
-            info.model_matrix = ent.getModelMatrix();
-
-           // m_driver.setObjectInfo(i, info);
+            if(curEntity->m_position.x < m_box.getA().x || curEntity->m_position.x > m_box.getB().x) {
+                curEntity->m_dirTravel.x = std::abs(curEntity->m_dirTravel.x) * ((m_box.getA().x - curEntity->m_position.x) / std::abs(m_box.getA().x - curEntity->m_position.x));
+            }
+            if(curEntity->m_position.y < m_box.getA().y || curEntity->m_position.y > m_box.getB().y) {
+                curEntity->m_dirTravel.y = std::abs(curEntity->m_dirTravel.y) * ((m_box.getA().y - curEntity->m_position.y) / std::abs(m_box.getA().y - curEntity->m_position.y));
+            }
+            if(curEntity->m_position.z < m_box.getA().z || curEntity->m_position.z > m_box.getB().z) {
+                curEntity->m_dirTravel.z = std::abs(curEntity->m_dirTravel.z) * ((m_box.getA().z - curEntity->m_position.z) / std::abs(m_box.getA().z - curEntity->m_position.z));
+            }
+            curEntity->update(time);
         }
+
     }
 
 
 
-    void AppLVL3::update_camera_(float time)
+    void AppLVL4::update_camera_(float time)
     {
         int wHeight = 0, wWidth = 0;
         glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
@@ -339,9 +307,9 @@ namespace ezg
      *
      ***/
 
-    /*static*/ void AppLVL3::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+    /*static*/ void AppLVL4::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
     {
-        auto app = static_cast<AppLVL3 *>(glfwGetWindowUserPointer(window));
+        auto app = static_cast<AppLVL4 *>(glfwGetWindowUserPointer(window));
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GL_TRUE);
@@ -357,8 +325,8 @@ namespace ezg
         }
     }
 
-    /*static*/ void AppLVL3::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-        auto app = static_cast<AppLVL3*>(glfwGetWindowUserPointer(window));
+    /*static*/ void AppLVL4::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+        auto app = static_cast<AppLVL4*>(glfwGetWindowUserPointer(window));
         app->m_driver.detectFrameBufferResized();
         app->m_cameraView.setAspect(width /(float) height);
     }

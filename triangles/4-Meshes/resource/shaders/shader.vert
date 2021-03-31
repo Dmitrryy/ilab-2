@@ -61,7 +61,7 @@ layout(location = 0) out vec3 fragColor;
 
 // light options
 //=======================================================================================
-vec3 light1 = normalize(vec3(0.0, -1.0, -1.0));
+vec3 light1 = normalize(vec3(-1.0, -1.0, -1.0));
 vec3 light2 = normalize(vec3(0.0, 1.0, -1.0));
 float minLight = 0.2;
 //=======================================================================================
@@ -88,12 +88,12 @@ void main()
 
 
     vec4 worldPosition = model_matrix * vec4(inPosition, 1.0);
-    // store the position of the vertex in the world.
+    // TODO store the position of the vertex in the world.
     //output_vert[ gl_VertexIndex ].world_coord = worldPosition.xyz;
 
 
     gl_Position = ubo.proj * ubo.view * worldPosition;
 
     //fragColor = inColor * max(minLight, abs(dot(validNormal.xyz, light1)));
-    fragColor = validNormal.xyz;
+    fragColor = validNormal.xyz / 2.f + 0.5;
 }

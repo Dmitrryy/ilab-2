@@ -49,47 +49,82 @@ if(NOT LAL_FOUND)
     add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
 endif()
 
+#
+## app
+##---------------------------------------------------------------------------------------
+set(EXECUTE_NAME app)
+add_executable(${EXECUTE_NAME} app_main.cpp Engine/Engine.cpp Engine/vkCore.cpp
+        Application/App.cpp Application/Entity.cpp Engine/PipelineBuilder.cpp Engine/Mesh.cpp)
 
-add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp
-        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp #[[Engine/engine.cpp Engine/engine.hpp Engine/mesh.cpp Engine/mesh.hpp Engine/types.hpp Engine/initializer.cpp Engine/initializer.hpp]] Application/PipelineBuilder.cpp Application/PipelineBuilder.hpp Application/Mesh.cpp Application/Mesh.hpp)
+target_sources(${EXECUTE_NAME} PRIVATE ../path/tinyxml2.cpp)
 
-
-##############################
 # Build mode dependent actions
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+    target_compile_definitions(${EXECUTE_NAME} PRIVATE DEBUG)
+    target_compile_options(${EXECUTE_NAME} PRIVATE -Wall)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
 endif()
-##############################
-
-
-#add_definitions(-DVK_USE_PLATFORM_XLIB_KHR)
 
 
 # Add vulkan dependencies using enviornment variable from LunarG SDK Setup
-target_include_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/include")
-target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/lib")
-target_link_directories(${PROJECT_NAME} PRIVATE "$ENV{VULKAN_SDK}/etc/explicit_layer.d")
+target_include_directories(${EXECUTE_NAME} PRIVATE "$ENV{VULKAN_SDK}/include")
+target_link_directories(${EXECUTE_NAME} PRIVATE "$ENV{VULKAN_SDK}/lib")
+target_link_directories(${EXECUTE_NAME} PRIVATE "$ENV{VULKAN_SDK}/etc/explicit_layer.d")
 
 
 # To connect other libraries (only OtherLibs)
-target_include_directories(${PROJECT_NAME} PRIVATE ../../)
-target_include_directories(${PROJECT_NAME} PRIVATE ../path)
+target_include_directories(${EXECUTE_NAME} PRIVATE ../../)
+target_include_directories(${EXECUTE_NAME} PRIVATE ../)
+target_include_directories(${EXECUTE_NAME} PRIVATE .)
+target_include_directories(${EXECUTE_NAME} PRIVATE ../path)
 
 # Link dependencies
-target_link_libraries(${PROJECT_NAME} LAL)
-target_link_libraries(${PROJECT_NAME} glfw)
-target_link_libraries(${PROJECT_NAME} Vulkan::Vulkan)
-target_link_libraries(${PROJECT_NAME} ${X11_LIBRARIES})
+target_link_libraries(${EXECUTE_NAME} LAL)
+target_link_libraries(${EXECUTE_NAME} glfw)
+target_link_libraries(${EXECUTE_NAME} Vulkan::Vulkan)
+target_link_libraries(${EXECUTE_NAME} ${X11_LIBRARIES})
 
 
 # see above
-add_dependencies(${PROJECT_NAME} ${FB_TARGET})
+add_dependencies(${EXECUTE_NAME} ${FB_TARGET})
+##---------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------
+#
+
+#
+## gen scene
+##---------------------------------------------------------------------------------------
+set(EXECUTE_NAME gen_scene)
+
+add_executable(${EXECUTE_NAME} main_genScene.cpp)
+
+
+if( NOT CMAKE_BUILD_TYPE )
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+if(${CMAKE_BUILD_TYPE} MATCHES Debug)
+    target_compile_definitions(${EXECUTE_NAME} PRIVATE DEBUG)
+    target_compile_options(${EXECUTE_NAME} PRIVATE -Wall)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+endif()
+
+
+# To connect other libraries (only OtherLibs)
+target_include_directories(${EXECUTE_NAME} PRIVATE ../../)
+target_include_directories(${EXECUTE_NAME} PRIVATE ../)
+target_include_directories(${EXECUTE_NAME} PRIVATE .)
+target_include_directories(${EXECUTE_NAME} PRIVATE ../path)
+
+target_sources(${EXECUTE_NAME} PRIVATE ../path/tinyxml2.cpp)
+##---------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------
+
+
 ##=======================================================================================
 ##=======================================================================================
 #

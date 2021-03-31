@@ -61,7 +61,7 @@ int main()
     inPut >> num >> time;
 
 
-    ezg::AppLVL3 app;
+    ezg::AppLVL4 app;
     for (size_t i = 0; i < num; ++i) {
         glm::vec3 a, b, c, rot_dir_v1, rot_dir_v2;
         float speed = 0;

@@ -57,7 +57,7 @@ namespace ezg
      *
      ***/
 
-    void AppLVL3::addTriangle(glm::vec3 pos_a, glm::vec3 pos_b, glm::vec3 pos_c, glm::vec3 position
+    void AppLVL4::addTriangle(glm::vec3 pos_a, glm::vec3 pos_b, glm::vec3 pos_c, glm::vec3 position
                               , glm::vec3 direction_rotation, float rotation_speed, float live_time_sec)
     {
         if (direction_rotation == glm::vec3(0.f)) {
@@ -94,7 +94,7 @@ namespace ezg
 
 
 
-    void AppLVL3::run()
+    void AppLVL4::run()
     {
         init_();
 
@@ -141,7 +141,7 @@ namespace ezg
      *
      ***/
 
-    void AppLVL3::init_()
+    void AppLVL4::init_()
     {
         //-----------------------------------------------
         //add object in driver
@@ -215,7 +215,7 @@ namespace ezg
 
 
 
-    void AppLVL3::update_entities_(float time)
+    void AppLVL4::update_entities_(float time)
     {
         la::Vector3f a(std::numeric_limits<double>::max()), b(std::numeric_limits<double>::min());
 
@@ -263,7 +263,7 @@ namespace ezg
 
 
 
-    void AppLVL3::load_entity_data_in_driver_()
+    void AppLVL4::load_entity_data_in_driver_()
     {
         for (size_t i = 0, mi = m_entities.size(); i < mi; ++i)
         {
@@ -279,7 +279,7 @@ namespace ezg
 
 
 
-    void AppLVL3::update_camera_(float time)
+    void AppLVL4::update_camera_(float time)
     {
         int wHeight = 0, wWidth = 0;
         glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
@@ -333,9 +333,9 @@ namespace ezg
      *
      ***/
 
-    /*static*/ void AppLVL3::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+    /*static*/ void AppLVL4::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
     {
-        auto app = static_cast<AppLVL3 *>(glfwGetWindowUserPointer(window));
+        auto app = static_cast<AppLVL4 *>(glfwGetWindowUserPointer(window));
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GL_TRUE);
@@ -351,8 +351,8 @@ namespace ezg
         }
     }
 
-    /*static*/ void AppLVL3::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-        auto app = static_cast<AppLVL3*>(glfwGetWindowUserPointer(window));
+    /*static*/ void AppLVL4::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
+        auto app = static_cast<AppLVL4*>(glfwGetWindowUserPointer(window));
         app->m_driver.detectFrameBufferResized();
         app->m_cameraView.setAspect(width /(float) height);
     }

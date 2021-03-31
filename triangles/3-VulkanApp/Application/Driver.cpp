@@ -7,7 +7,7 @@
  *
  ***/
 
-#include "Driver.h"
+#include "Engine.h"
 
 #include <cassert>
 #include <cstring>
@@ -54,9 +54,9 @@ namespace vks
         }
 		catch (std::exception& exc_)
 		{
-			std::cerr << "Fatal error in VulkanDriver::Init():\n";
+			std::cerr << "Fatal error in Engine::Init():\n";
 			std::cerr << "What(): " << exc_.what() << std::endl;
-			std::cerr << "Called VulkanDriver::cleanup()" << std::endl;
+			std::cerr << "Called Engine::cleanup()" << std::endl;
 			cleanup();
 		}
 	}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<box x1="-100" y1="-100" z1="-100" x2="100" y2="100" z2="100"/>
+
+<objects>
+    <obj0>
+        <model file="resource/meshes/ak_47.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="1" g="1" b="1"/>
+            <position x="0" y="0" z="0"/>
+            <dirTravel x="20" y="30" z="-100"/>
+            <dirRotate x="0" y="9" z="1"/>
+            <speedRotation val="50"/>
+        </properties>
+    </obj0>
+    <obj1>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="20" y="20" z="20"/>
+            <color r="1" g="1" b="1"/>
+            <position x="100" y="100" z="100"/>
+            <dirTravel x="30" y="-20" z="30"/>
+            <dirRotate x="-2" y="0" z="1"/>
+            <speedRotation val="-90"/>
+        </properties>
+    </obj1>
+</objects>

@@ -26,7 +26,7 @@
 namespace ezg
 {
 
-    class AppLVL3
+    class AppLVL4
     {
 
         vks::VulkanDriver m_driver;
@@ -42,18 +42,18 @@ namespace ezg
 
     public:
 
-        AppLVL3           (const AppLVL3&) = delete; //not supported
-        AppLVL3& operator=(const AppLVL3&) = delete; //not supported
-        AppLVL3           (AppLVL3&&)      = delete; //not supported
-        AppLVL3& operator=(AppLVL3&&)      = delete; //not supported
+        AppLVL4           (const AppLVL4&) = delete; //not supported
+        AppLVL4& operator=(const AppLVL4&) = delete; //not supported
+        AppLVL4           (AppLVL4&&)      = delete; //not supported
+        AppLVL4& operator=(AppLVL4&&)      = delete; //not supported
 
         //default destructor
-        AppLVL3()
+        AppLVL4()
             : m_driver     ("Triangles-3")
             , m_cameraView ({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
         {}
 
-        ~AppLVL3() {
+        ~AppLVL4() {
             glfwDestroyWindow(m_pWindow);
         }
 

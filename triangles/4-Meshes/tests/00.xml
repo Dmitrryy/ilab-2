@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<box x1="-50" y1="-50" z1="-50" x2="50" y2="50" z2="50"/>
+
+<objects>
+    <obj0>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="20" y="20" z="20"/>
+            <color r="1" g="1" b="1"/>
+            <position x="0" y="0" z="0"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="10000" distance="0.10000001"/>
+    </obj0>
+</objects>

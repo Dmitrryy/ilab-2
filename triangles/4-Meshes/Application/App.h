@@ -13,7 +13,8 @@
 
 #include <OtherLibs/timer.h>
 #include "../../LAL/include/LAL.h"
-#include "Entity.hpp"
+#include <Engine/Engine.hpp>
+
 
 
 ///======================================================================================
@@ -26,57 +27,41 @@
 namespace ezg
 {
 
-    class AppLVL3
+    class AppLVL4
     {
 
-        VulkanDriver m_driver;
+        Engine            m_driver;
         GLFWwindow*       m_pWindow = nullptr;
 
-        //TODO go to the pointer on Entity
-        std::vector< Triangle > m_entities;
+        std::vector< Engine::Mesh* > m_entities;
+        la::Rectangle3    m_box = { { -10, -10, -10 }, { 10, 10, 10 } };
 
-        CameraView m_cameraView;
-        float      m_speed = 100.f;
+        CameraView     m_cameraView;
+        float          m_speed = 100.f;
 
         ezg::Timer     m_time;
 
     public:
 
-        AppLVL3           (const AppLVL3&) = delete; //not supported
-        AppLVL3& operator=(const AppLVL3&) = delete; //not supported
-        AppLVL3           (AppLVL3&&)      = delete; //not supported
-        AppLVL3& operator=(AppLVL3&&)      = delete; //not supported
+        AppLVL4           (const AppLVL4&) = delete; //not supported
+        AppLVL4& operator=(const AppLVL4&) = delete; //not supported
+        AppLVL4           (AppLVL4&&)      = delete; //not supported
+        AppLVL4& operator=(AppLVL4&&)      = delete; //not supported
 
         //default destructor
-        AppLVL3()
-            : m_driver     ("Triangles-3")
+        AppLVL4()
+            : m_driver     ("Triangles-4")
             , m_cameraView ({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
         {}
 
-        ~AppLVL3() {
+        ~AppLVL4() {
             glfwDestroyWindow(m_pWindow);
         }
 
 
     public:
 
-        /// Adds a triangle
-        /// \param pos_a    - position of the vertex 'A' relative to the coordinate center.
-        /// \param pos_b    - position of the vertex 'B' relative to the coordinate center.
-        /// \param pos_c    - position of the vertex 'C' relative to the coordinate center.
-        /// \param position - offset of the shape center relative to the coordinate center.
-        /// \param direction_rotation - angular velocity vector.
-        /// \param rotation_speed     - angular velocity (does not have to be the same as the
-        ///                             modulus of the angular velocity vector).
-        /// \param live_time_sec      - the time that the triangle will make the movement.
-        /// \return void
-        void addTriangle(glm::vec3 pos_a,
-                         glm::vec3 pos_b,
-                         glm::vec3 pos_c,
-                         glm::vec3 position,
-                         glm::vec3 direction_rotation,
-                         float rotation_speed,
-                         float live_time_sec);
+        bool loadSceneFromXML(const std::string& fileName);
 
         /// Launch the app!
         /// A window opens with a visualization of the triangles
@@ -92,8 +77,6 @@ namespace ezg
         void update_camera_(float time);
 
         void clear_();
-
-        void load_entity_data_in_driver_();
 
 
         void init_();
