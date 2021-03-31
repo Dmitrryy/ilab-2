@@ -76,102 +76,30 @@ namespace ezg
 	};
 
 
-    struct AllocatedBuffer
-    {
-        VkBuffer _buffer;
-        VmaAllocation _allocation;
-    };
-
-    struct AllocatedImage
-    {
-        VkImage _image;
-        VmaAllocation _allocation;
-    };
-
-
-/*    struct DeletionQueue
-    {
-        std::deque< std::function< void() > > deletors;
-
-        void push_function(std::function< void() > &&function)
-        {
-            deletors.push_front(function);
-        }
-
-        void flush()
-        {
-            // reverse iterate the deletion queue to execute all the functions
-            for (auto&& f : deletors) {
-                f(); //call functors
-            }
-
-            deletors.clear();
-        }
-    };*/
-
-
-    struct FrameData
-    {
-        VkSemaphore presentSemaphore = nullptr;
-        VkSemaphore renderSemaphore  = nullptr;
-        VkFence     renderFence      = nullptr;
-
-        std::deque< std::function< void() > >   frameDeletionQueue;
-
-        VkCommandPool   commandPool       = nullptr;
-        VkCommandBuffer mainCommandBuffer = nullptr;
-
-
-        AllocatedBuffer cameraBuffer = {};
-        VkDescriptorSet globalDescriptor = nullptr;
-
-        AllocatedBuffer objectBuffer = {};
-        VkDescriptorSet objectDescriptor = nullptr;
-
-        AllocatedBuffer storageBufferWorldCoords = {};
-    };
-
-
-	struct ObjectInfo
-    {
-	    std::vector< Vertex > vertices;
-	    glm::mat4 model_matrix;
-	    glm::vec3 color;
-    };
-
-
-	struct GPUCameraData {
-		glm::mat4 view;
-		glm::mat4 proj;
-	};
-
-	struct GPUObjectData {
-        alignas(16) glm::mat4 model;
-        alignas(16) glm::vec3 color;
-	};
-
-	struct OutputVertShader {
-        alignas(16) glm::vec3 world_coord;
-	};
-
-
 	enum class PipelineType
     {
 	    DEFAULT_MESH
 	    //todo
     };
 
-	struct RenderMaterial
-    {
-        VkPipeline pipeline;
-        VkPipelineLayout pipelineLayout;
-    };
-
-
 
 	class Engine
 	{
-	public:
+
+        struct AllocatedBuffer
+        {
+            VkBuffer _buffer;
+            VmaAllocation _allocation;
+        };
+
+        struct AllocatedImage
+        {
+            VkImage _image;
+            VmaAllocation _allocation;
+        };
+
+
+    public:
 
         class Mesh {
             AllocatedBuffer m_vertexBuffer = {};
@@ -194,6 +122,47 @@ namespace ezg
             virtual glm::vec3 getColor()       const noexcept { return glm::vec3(1.f); }
 
             bool load_from_obj(const char* filename);
+        };//class Mesh
+
+	private:
+
+        struct FrameData
+        {
+            VkSemaphore presentSemaphore = nullptr;
+            VkSemaphore renderSemaphore  = nullptr;
+            VkFence     renderFence      = nullptr;
+
+            //std::deque< std::function< void() > >   frameDeletionQueue;
+
+            VkCommandPool   commandPool       = nullptr;
+            VkCommandBuffer mainCommandBuffer = nullptr;
+
+
+            AllocatedBuffer cameraBuffer = {};
+            VkDescriptorSet globalDescriptor = nullptr;
+
+            AllocatedBuffer objectBuffer = {};
+            VkDescriptorSet objectDescriptor = nullptr;
+
+            //AllocatedBuffer storageBufferWorldCoords = {};
+        };//struct FrameData
+
+
+        struct RenderMaterial
+        {
+            VkPipeline pipeline;
+            VkPipelineLayout pipelineLayout;
+        };
+
+
+        struct GPUCameraData {
+            glm::mat4 view;
+            glm::mat4 proj;
+        };
+
+        struct GPUObjectData {
+            alignas(16) glm::mat4 model;
+            alignas(16) glm::vec3 color;
         };
 
 	private:
@@ -201,10 +170,6 @@ namespace ezg
         struct RenderObject
         {
             Mesh *mesh = nullptr;
-
-            RenderMaterial *material = nullptr;
-
-            glm::mat4 transformMatrix = {};
         };
 
 	private:
@@ -246,14 +211,10 @@ namespace ezg
 
 		size_t                         m_currentFrame      = 0;
 		size_t                         m_maxFramesInFlight = 2;
-		size_t                         m_curNumFrameInFlight = 0;
 
 		size_t                         m_numObjects          = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
 
-        ezg::CameraView     m_cameraView;
-
-        //todo: access to the vertices of a specific element by offset in a shared array
-        std::vector< glm::vec3 >               m_worldCoords;
+        ezg::CameraView                m_cameraView;
 
 	public:
 
@@ -294,10 +255,6 @@ namespace ezg
 
 	private:
 
-        RenderMaterial *get_material(PipelineType type);
-
-        Mesh *get_mesh(const std::string &name);
-
 	    FrameData& getCurFrame() { return m_frames[m_currentFrame % m_maxFramesInFlight]; }
 
         AllocatedBuffer create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
@@ -308,14 +265,9 @@ namespace ezg
 
 		void initDescriptors();
 
-
-/*		void createVertexBuffer_();
-		void createIndexBuffer_();*/
-
 		void updateUniformBuffer_(uint32_t currentImage_, const std::vector< Mesh* >& meshes);
 
 		void createCommandBuffer_();
-/*		void recordCommandBuffers_();*/
 
 		void createFramebuffer_();
 
@@ -326,7 +278,6 @@ namespace ezg
 		void createPipeline_();
 
 		void createSyncObjects_();
-
 
 
 		bool hasStencilComponent(VkFormat format) {

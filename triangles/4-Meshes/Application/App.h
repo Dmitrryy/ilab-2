@@ -18,9 +18,7 @@
 
 
 ///======================================================================================
-/// This file defines a class that performs a level-3 triangle task:
-/// visualizes rotating triangles in three-dimensional space and highlights intersecting
-/// triangles.
+
 ///======================================================================================
 ///======================================================================================
 
@@ -36,10 +34,10 @@ namespace ezg
         std::vector< Engine::Mesh* > m_entities;
         la::Rectangle3    m_box = { { -10, -10, -10 }, { 10, 10, 10 } };
 
-        CameraView     m_cameraView;
-        float          m_speed = 100.f;
+        CameraView        m_cameraView;
+        float             m_speed = 100.f;
 
-        ezg::Timer     m_time;
+        ezg::Timer        m_time;
 
     public:
 

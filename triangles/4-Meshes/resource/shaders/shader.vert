@@ -19,11 +19,6 @@ struct ObjectInfo
     vec3 color;
 };
 
-struct OutputVertShader
-{
-    vec3 world_coord;
-};
-
 // set 0
 //=======================================================================================
 layout(set = 0, binding = 0) uniform UniformBufferObject {
@@ -34,10 +29,6 @@ layout(set = 0, binding = 0) uniform UniformBufferObject {
 layout(set = 0, binding = 1) readonly buffer object_transform
 {
     ObjectInfo object_info[];
-};
-layout(set = 0, binding = 2) writeonly buffer out_vert_shader
-{
-    OutputVertShader output_vert[];
 };
 //=======================================================================================
 //=======================================================================================
@@ -88,8 +79,6 @@ void main()
 
 
     vec4 worldPosition = model_matrix * vec4(inPosition, 1.0);
-    // TODO store the position of the vertex in the world.
-    //output_vert[ gl_VertexIndex ].world_coord = worldPosition.xyz;
 
 
     gl_Position = ubo.proj * ubo.view * worldPosition;

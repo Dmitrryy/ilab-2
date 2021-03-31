@@ -17,7 +17,6 @@
 
 #include "Application/App.h"
 
-#include <tinyxml2.h>
 
 
 int main()

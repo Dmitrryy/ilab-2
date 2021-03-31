@@ -237,6 +237,7 @@ namespace ezg
         {
             auto&& curEntity = static_cast<TriangleMesh*>(m_entities.at(i));
 
+            //we detected the exit of the figure outside the box
             if(curEntity->m_position.x < m_box.getA().x || curEntity->m_position.x > m_box.getB().x) {
                 curEntity->m_dirTravel.x = std::abs(curEntity->m_dirTravel.x) * ((m_box.getA().x - curEntity->m_position.x) / std::abs(m_box.getA().x - curEntity->m_position.x));
             }

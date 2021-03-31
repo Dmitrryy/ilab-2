@@ -72,19 +72,6 @@ namespace ezg
 	}
 
 
-	RenderMaterial* Engine::get_material(PipelineType type)
-    {
-    	//search for the object, and return nullpointer if not found
-    	auto it = m_renderMaterials.find(type);
-    	if (it == m_renderMaterials.end()) {
-    		return nullptr;
-    	}
-    	else {
-    		return &(*it).second;
-    	}
-    }
-
-
     void Engine::createSwapChain_()
 	{
 		const VkSurfaceCapabilitiesKHR& SurfaceCaps = m_core.getSurfaceCaps();
@@ -250,22 +237,15 @@ namespace ezg
         modelLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
         modelLayoutBinding.pImmutableSamplers = nullptr;
 
-        VkDescriptorSetLayoutBinding coordsLayoutBinding = {};
-        coordsLayoutBinding.binding            = 2;
-        coordsLayoutBinding.descriptorType     = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-        coordsLayoutBinding.descriptorCount    = 1;
-        coordsLayoutBinding.stageFlags         = VK_SHADER_STAGE_VERTEX_BIT;
-        coordsLayoutBinding.pImmutableSamplers = nullptr;
-
         VkDescriptorSetLayoutBinding bindings[] {
                 uboLayoutBinding,
-                modelLayoutBinding,
-                coordsLayoutBinding
+                modelLayoutBinding
+                //coordsLayoutBinding
         };
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = {};
         layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutInfo.bindingCount = 3;
+        layoutInfo.bindingCount = 2;
         layoutInfo.pBindings = bindings;
 
         if (vkCreateDescriptorSetLayout(m_core.getDevice(), &layoutInfo, nullptr, &m_globalSetLayout) != VK_SUCCESS) {
@@ -278,9 +258,6 @@ namespace ezg
             frame.cameraBuffer = create_buffer_(sizeof(GPUCameraData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
             frame.objectBuffer = create_buffer_(sizeof(GPUObjectData) * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
-
-            //TODO
-            frame.storageBufferWorldCoords = create_buffer_(sizeof(Vertex) * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VMA_MEMORY_USAGE_CPU_TO_GPU);
 
             VkDescriptorSetAllocateInfo allocInfo = {};
             allocInfo.pNext = nullptr;
@@ -331,39 +308,18 @@ namespace ezg
             descriptorWriteModel1.pImageInfo = nullptr;
             descriptorWriteModel1.pTexelBufferView = nullptr;
 
-            ///
-
-            //TODO
-            VkDescriptorBufferInfo bufferInfoColors = {};
-            bufferInfoColors.buffer = frame.storageBufferWorldCoords._buffer;
-            bufferInfoColors.offset = 0;
-            bufferInfoColors.range = sizeof(Vertex) * m_numObjects;
-
-            VkWriteDescriptorSet descriptorWriteColors = {};
-            descriptorWriteColors.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-            descriptorWriteColors.dstSet = frame.globalDescriptor;
-            descriptorWriteColors.dstBinding = 2;
-            descriptorWriteColors.dstArrayElement = 0;
-            descriptorWriteColors.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC;
-            descriptorWriteColors.descriptorCount = 1;
-            descriptorWriteColors.pBufferInfo = &bufferInfoColors;
-            descriptorWriteColors.pImageInfo = nullptr;
-            descriptorWriteColors.pTexelBufferView = nullptr;
-
 
             VkWriteDescriptorSet descriptorWrites[] = {
                     descriptorWriteUbo,
-                    descriptorWriteModel1,
-                    descriptorWriteColors
+                    descriptorWriteModel1
+                    //descriptorWriteColors
             };
 
-            vkUpdateDescriptorSets(device, 3, descriptorWrites, 0, nullptr);
+            vkUpdateDescriptorSets(device, 2, descriptorWrites, 0, nullptr);
         }
 
         m_deletionQueue.push_front([&]() {
 
-            //vmaDestroyBuffer(m_allocator, _sceneParameterBuffer._buffer, _sceneParameterBuffer._allocation);
-            //vkDestroyDescriptorSetLayout(device, m_objectSetLayout, nullptr);
             vkDestroyDescriptorSetLayout(device, m_globalSetLayout, nullptr);
 
             vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
@@ -373,8 +329,6 @@ namespace ezg
                 vmaDestroyBuffer(m_allocator, frame.cameraBuffer._buffer, frame.cameraBuffer._allocation);
 
                 vmaDestroyBuffer(m_allocator, frame.objectBuffer._buffer, frame.objectBuffer._allocation);
-
-                vmaDestroyBuffer(m_allocator, frame.storageBufferWorldCoords._buffer, frame.storageBufferWorldCoords._allocation);
             }
         });
     }
@@ -455,10 +409,6 @@ namespace ezg
         }
 
         vmaUnmapMemory(m_allocator, curFrame.objectBuffer._allocation);
-
-
-        //todo
-        //updateWorldCoordsData(currentImage_);
     }
 
 
@@ -512,7 +462,7 @@ namespace ezg
 
         vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        //TODO draw objects
+
         updateUniformBuffer_(m_currentFrame % m_maxFramesInFlight, objects);
 
 
@@ -533,16 +483,9 @@ namespace ezg
                 lastMaterial = material;
 
                 uint32_t dynamicOffsets[] = {
-                        0,
                         0
                 };
-                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, material->pipelineLayout, 0, 1, &getCurFrame().globalDescriptor, 2, dynamicOffsets);
-
-                //uint32_t uniform_offset = pad_uniform_buffer_size(sizeof(GPUSceneData)) * frameIndex;
-                //vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipelineLayout, 0, 1, &getCurFrame().globalDescriptor, 1, &uniform_offset);
-
-                //object data descriptor
-                //vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, object.material->pipelineLayout, 1, 1, &getCurFrame().objectDescriptor, 0, nullptr);
+                vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, material->pipelineLayout, 0, 1, &getCurFrame().globalDescriptor, 1, dynamicOffsets);
             }
 
             VkDeviceSize offset = 0;
@@ -550,7 +493,6 @@ namespace ezg
 
             vkCmdDraw(cmd, object.vertices.size(), 1,0 , i);
         }
-        //TODO
 
         vkCmdEndRenderPass(cmd);
 
@@ -913,7 +855,7 @@ namespace ezg
 	}
 
 
-    AllocatedBuffer Engine::create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage)
+    Engine::AllocatedBuffer Engine::create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage)
     {
         //allocate vertex buffer
         VkBufferCreateInfo bufferInfo = {};
