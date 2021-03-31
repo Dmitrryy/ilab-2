@@ -124,7 +124,7 @@ namespace ezg
             update_camera_(dTime);
             m_driver.setCameraView(m_cameraView);
 
-            //std::cout << m_cameraView.m_position.x << " | " << m_cameraView.m_position.y << " | " << m_cameraView.m_position.z << std::endl;
+            //std::cout << m_cameraView.m_direction.x << " | " << m_cameraView.m_direction.y << " | " << m_cameraView.m_direction.z << std::endl;
 
             m_driver.render();
         }

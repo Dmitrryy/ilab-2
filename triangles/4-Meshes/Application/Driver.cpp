@@ -84,38 +84,63 @@ namespace ezg
 
             //load the monkey
             Mesh monkeyMesh{};
-            if(!monkeyMesh.load_from_obj("resource/meshes/monkey_smooth.obj")){
+            if(!monkeyMesh.load_from_obj("resource/meshes/monkey_flat.obj")){
+                throw std::runtime_error("abort");
+            }
+
+            Mesh horseMesh{};
+            if(!horseMesh.load_from_obj("resource/meshes/horse.obj")){
+                throw std::runtime_error("abort");
+            }
+
+            Mesh ak47Mesh{};
+            if(!ak47Mesh.load_from_obj("resource/meshes/ak_47.obj")){
                 throw std::runtime_error("abort");
             }
 
             upload_mesh(triMesh);
             upload_mesh(monkeyMesh);
+            upload_mesh(horseMesh);
+            upload_mesh(ak47Mesh);
 
             m_meshes["monkey"] = monkeyMesh;
             m_meshes["triangle"] = triMesh;
-
+            m_meshes["horse"] = horseMesh;
+            m_meshes["ak47"] = ak47Mesh;
             //TODO
 
-            	RenderObject monkey;
-	monkey.mesh = get_mesh("monkey");
-	monkey.material = get_material(PipelineType::DEFAULT_MESH);
-	monkey.transformMatrix = glm::mat4{ 1.0f };
+            RenderObject monkey;
+	        monkey.mesh = get_mesh("monkey");
+	        monkey.material = get_material(PipelineType::DEFAULT_MESH);
+	        monkey.transformMatrix = glm::translate(glm::mat4{ 1.0 }, glm::vec3(0, 0, 0));
+	        m_renderables.push_back(monkey);
 
-	m_renderables.push_back(monkey);
+	        RenderObject horse;
+	        horse.mesh = get_mesh("horse");
+	        horse.material = get_material(PipelineType::DEFAULT_MESH);
+	        horse.transformMatrix = glm::translate(glm::mat4{ 1.0 }, glm::vec3(0, 200, 0));
+            m_renderables.push_back(horse);
 
-	for (int x = -20; x <= 20; x++) {
-		for (int y = -20; y <= 20; y++) {
+            RenderObject ak47;
+	        ak47.mesh = get_mesh("ak47");
+	        ak47.material = get_material(PipelineType::DEFAULT_MESH);
+	        ak47.transformMatrix = glm::translate(glm::mat4{ 1.0 }, glm::vec3(0, 0, 0));
+            m_renderables.push_back(ak47);
 
-			RenderObject tri;
-			tri.mesh = get_mesh("triangle");
-			tri.material = get_material(PipelineType::DEFAULT_MESH);
-			glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, 0, y));
-			glm::mat4 scale = glm::scale(glm::mat4{ 1.0 }, glm::vec3(0.2, 0.2, 0.2));
-			tri.transformMatrix = translation * scale;
 
-			m_renderables.push_back(tri);
-		}
-	}
+	        for (int x = -20; x <= 20; x++) {
+	        	for (int y = -20; y <= 20; y++) {
+
+	        		RenderObject tri;
+	        		tri.mesh = get_mesh("triangle");
+	        		tri.material = get_material(PipelineType::DEFAULT_MESH);
+	        		glm::mat4 translation = glm::translate(glm::mat4{ 1.0 }, glm::vec3(x, y, 0));
+	        		glm::mat4 scale = glm::scale(glm::mat4{ 1.0 }, glm::vec3(0.2, 0.2, 0.2));
+	        		tri.transformMatrix = translation * scale;
+
+	        		m_renderables.push_back(tri);
+	        	}
+	        }
         }
 		catch (std::exception& exc_)
 		{
@@ -694,12 +719,11 @@ Mesh* VulkanDriver::get_mesh(const std::string& name)
         data = nullptr;
 
 
-
         vmaMapMemory(m_allocator, curFrame.objectBuffer._allocation, &data);
 
         auto* pModelData = static_cast< GPUObjectData* >(data);
         for (size_t i = 0, mi = m_renderables.size(); i < mi; i++) {
-            pModelData[i] = { m_renderables.at(i).transformMatrix, { 1.f, 0.f, 0.f } };
+            pModelData[i] = { glm::rotate(glm::mat4(1.f), glm::radians(static_cast<float>(m_time.elapsed() * 10)), glm::vec3{0.f, 0.f, 1.f}) * m_renderables.at(i).transformMatrix, { 0.2f, 0.8f, 0.8f } };
         }
 
         vmaUnmapMemory(m_allocator, curFrame.objectBuffer._allocation);

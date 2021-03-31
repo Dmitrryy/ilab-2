@@ -35,78 +35,6 @@ namespace ezg {
     }
 
 
-   /* void Core::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory) {
-        if (size <= 0) {
-            throw std::invalid_argument("invalid size of buffer");
-        }
-        VkBufferCreateInfo bufferInfo{};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.size = size;
-        bufferInfo.usage = usage;
-        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-        auto device = getDevice();
-
-        if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-            throw std::runtime_error(DEBUG_MSG("failed to create buffer!"));
-        }
-
-        VkMemoryRequirements memRequirements;
-        vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
-
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-
-        VkResult res = vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory);
-        if (res != VK_SUCCESS) {
-            throw std::runtime_error(DEBUG_MSG("failed to allocate buffer memory!")
-            + " error code: " + std::to_string(res) + " size buff: " + std::to_string(size));
-        }
-
-        vkBindBufferMemory(device, buffer, bufferMemory, 0);
-    }
-
-
-    void Core::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
-        VkImageCreateInfo imageInfo{};
-        imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        imageInfo.imageType = VK_IMAGE_TYPE_2D;
-        imageInfo.extent.width = width;
-        imageInfo.extent.height = height;
-        imageInfo.extent.depth = 1;
-        imageInfo.mipLevels = 1;
-        imageInfo.arrayLayers = 1;
-        imageInfo.format = format;
-        imageInfo.tiling = tiling;
-        imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        imageInfo.usage = usage;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-        auto device = getDevice();
-
-        if (vkCreateImage(device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
-            throw std::runtime_error(DEBUG_MSG("failed to create image!"));
-        }
-
-        VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(device, image, &memRequirements);
-
-        VkMemoryAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, properties);
-
-        if (vkAllocateMemory(device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-            throw std::runtime_error(DEBUG_MSG(DEBUG_MSG("failed to allocate image memory!")));
-        }
-
-        vkBindImageMemory(device, image, imageMemory, 0);
-    }*/
-
-
     VkImageView Core::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
         VkImageViewCreateInfo viewInfo = {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -208,11 +136,7 @@ namespace ezg {
                 printf("Chawo?!? (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount)\n");
                 continue;
             }
-/*            if (!(SurfaceCaps.supportedUsageFlags & VK_BUFFER_USAGE_STORAGE_BUFFER_BIT))
-            {
-                printf("storage buffer not supported\n");
-                continue;
-            }*/
+
 
             for (size_t k = 0, km = m_physDevices.m_qFamilyProps[i].size(); k < km; k++)
             {

@@ -70,12 +70,12 @@ namespace ezg
                     //copy it into our vertex
                     Vertex new_vert;
                     new_vert.pos.x = vx;
-                    new_vert.pos.y = vy;
-                    new_vert.pos.z = vz;
+                    new_vert.pos.y = vz;
+                    new_vert.pos.z = vy;
 
                     new_vert.normal.x = nx;
-                    new_vert.normal.y = ny;
-                    new_vert.normal.z = nz;
+                    new_vert.normal.y = nz;
+                    new_vert.normal.z = ny;
 
                     //we are setting the vertex color as the vertex normal. This is just for display purposes
                     new_vert.color = new_vert.normal;

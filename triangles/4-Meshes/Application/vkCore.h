@@ -131,13 +131,6 @@ namespace ezg
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-/*        void createBuffer(VkDeviceSize size,
-            VkBufferUsageFlags usage,
-            VkMemoryPropertyFlags properties,
-            VkBuffer& buffer,
-            VkDeviceMemory& bufferMemory);*/
-
-        //void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
 

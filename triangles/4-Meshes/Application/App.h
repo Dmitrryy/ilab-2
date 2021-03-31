@@ -36,7 +36,7 @@ namespace ezg
         std::vector< Triangle > m_entities;
 
         CameraView m_cameraView;
-        float      m_speed = 10.f;
+        float      m_speed = 100.f;
 
         ezg::Timer     m_time;
 

@@ -89,10 +89,11 @@ void main()
 
     vec4 worldPosition = model_matrix * vec4(inPosition, 1.0);
     // store the position of the vertex in the world.
-    output_vert[ gl_VertexIndex ].world_coord = worldPosition.xyz;
+    //output_vert[ gl_VertexIndex ].world_coord = worldPosition.xyz;
 
 
     gl_Position = ubo.proj * ubo.view * worldPosition;
 
-    fragColor = model_color * max(minLight, abs(dot(validNormal.xyz, light1)));
+    //fragColor = inColor * max(minLight, abs(dot(validNormal.xyz, light1)));
+    fragColor = validNormal.xyz;
 }

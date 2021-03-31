@@ -26,6 +26,7 @@
 #include <deque>
 #include <array>
 
+#include <OtherLibs/timer.h>
 
 
 #define EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM 10000
@@ -228,7 +229,7 @@ namespace ezg
         VkDescriptorSetLayout          m_globalSetLayout = nullptr;
         //VkDescriptorSetLayout          m_objectSetLayout = nullptr; //todo
 
-
+        Timer m_time;
 
 		size_t                         m_currentFrame      = 0;
 		size_t                         m_maxFramesInFlight = 2;

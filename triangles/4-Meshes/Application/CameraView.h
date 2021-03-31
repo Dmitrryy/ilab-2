@@ -24,7 +24,7 @@ namespace ezg
 		glm::vec3 m_direction;
 
 		glm::vec3 m_topDirection = glm::vec3(0.f, 0.f, 1.f);
-		float m_viewingAngle = 45.f;
+		float m_viewingAngle = glm::radians(70.f);
 		float m_aspect = 19.f / 8.f;
 		float m_near = 0.1f;
 		float m_far = 1000.f;
