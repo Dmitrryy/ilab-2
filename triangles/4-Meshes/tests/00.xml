@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<box x1="-50" y1="-50" z1="-50" x2="50" y2="50" z2="50"/>
+<box x1="-10" y1="-10" z1="-10" x2="20" y2="20" z2="20"/>
+
+<camera speed="20">
+    <position x="40" y="40" z="40"/>
+    <direction x="-1" y="-1" z="-1"/>
+</camera>
 
 <objects>
     <obj0>
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
-            <scale x="20" y="20" z="20"/>
+            <scale x="2" y="2" z="2"/>
             <color r="1" g="1" b="1"/>
             <position x="0" y="0" z="0"/>
-            <dirTravel x="0" y="0" z="0"/>
-            <dirRotate x="0" y="0" z="1"/>
-            <speedRotation val="0"/>
+            <dirTravel x="12" y="-23" z="123"/>
+            <dirRotate x="-123" y="-32" z="213"/>
+            <speedRotation val="12"/>
         </properties>
-        <grow stages="10000" distance="0.10000001"/>
+        <grow stages="4" distance="20"/>
     </obj0>
 </objects>

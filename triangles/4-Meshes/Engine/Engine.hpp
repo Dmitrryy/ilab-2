@@ -6,6 +6,26 @@
  * 22.02.2021
  *
  ***/
+
+
+//
+/// Engine
+///======================================================================================
+/// A humble engine based on the Vulkan API.
+///
+/// In this version, the following features:
+/// - Drawing a grid of triangles of different sizes.
+/// - Maximum objects == 10000 (configurable by default in the header of the current
+///   file).
+/// - Ability to load new objects after engine initialization.
+/// - Rendering only those objects that are passed to the render function.
+/// - All objects must be inherited from the Mesh class. In this class, you can override
+///   methods that return the model matrix and color.
+///======================================================================================
+///======================================================================================
+//
+
+
 #pragma once
 
 #include "vkCore.h"
@@ -79,19 +99,22 @@ namespace ezg
 	enum class PipelineType
     {
 	    DEFAULT_MESH
-	    //todo
     };
 
 
 	class Engine
 	{
 
+	    // this structure is used to compactly store data
+	    // defining the same buffer (from Vulkan and vma)
         struct AllocatedBuffer
         {
             VkBuffer _buffer;
             VmaAllocation _allocation;
         };
 
+        // this structure is used to compactly store data
+        // defining the same image (from Vulkan and vma)
         struct AllocatedImage
         {
             VkImage _image;
@@ -101,28 +124,33 @@ namespace ezg
 
     public:
 
+	    /// class Mesh
+	    /// class that defines the required fields and methods required for rendering
         class Mesh {
             AllocatedBuffer m_vertexBuffer = {};
             bool            m_isUploaded   = false;
 
             PipelineType    m_pipelineType = PipelineType::DEFAULT_MESH;
 
+            // so that the engine can access private fields
+            // (these fields are not needed by an external user)
             friend Engine;
         public:
 
-            std::vector<Vertex> vertices;
+            std::vector< Vertex > vertices;
 
         public:
 
-            ~Mesh() = default;
+            virtual ~Mesh() = default;
 
         public:
 
             virtual glm::mat4 getModelMatrix() const noexcept { return glm::mat4{1.f}; }
             virtual glm::vec3 getColor()       const noexcept { return glm::vec3(1.f); }
 
-            bool load_from_obj(const char* filename);
+            bool load_from_obj(const std::string& filename);
         };//class Mesh
+
 
 	private:
 
@@ -131,8 +159,6 @@ namespace ezg
             VkSemaphore presentSemaphore = nullptr;
             VkSemaphore renderSemaphore  = nullptr;
             VkFence     renderFence      = nullptr;
-
-            //std::deque< std::function< void() > >   frameDeletionQueue;
 
             VkCommandPool   commandPool       = nullptr;
             VkCommandBuffer mainCommandBuffer = nullptr;
@@ -143,8 +169,6 @@ namespace ezg
 
             AllocatedBuffer objectBuffer = {};
             VkDescriptorSet objectDescriptor = nullptr;
-
-            //AllocatedBuffer storageBufferWorldCoords = {};
         };//struct FrameData
 
 
@@ -212,6 +236,7 @@ namespace ezg
 		size_t                         m_currentFrame      = 0;
 		size_t                         m_maxFramesInFlight = 2;
 
+		// TODO increase if necessary
 		size_t                         m_numObjects          = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
 
         ezg::CameraView                m_cameraView;

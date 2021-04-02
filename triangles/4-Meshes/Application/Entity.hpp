@@ -32,8 +32,16 @@ namespace ezg
         glm::mat4 getModelMatrix() const noexcept override;
         glm::vec3 getColor() const noexcept override { return m_color; }
 
+        /// Carries out the growth of the mesh according to the following algorithm:
+        /// A point is selected in the triangle, then it is stretched along the normal
+        /// to the triangle. The result is 3 triangles from the original one.
+        /// \param triangleId - the number of the triangle in the grid that will be
+        /// the base for the growth
+        /// \param distance - the distance the new point will be stretched along the normal
         void grow(size_t triangleId, float distance);
 
+        /// moves the object at a distance corresponding to a given time interval
+        /// \param dt - the amount of time it takes to move the object
         void update(float dt) noexcept;
     };
 

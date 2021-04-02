@@ -20,7 +20,7 @@ namespace ezg
     /// download code taken from article
     /// \param filename - source with vertex data
     /// \return
-    bool Engine::Mesh::load_from_obj(const char* filename)
+    bool Engine::Mesh::load_from_obj(const std::string& filename)
     {
         //attrib will contain the vertex arrays of the file
         tinyobj::attrib_t attrib;
@@ -34,7 +34,7 @@ namespace ezg
         std::string err;
 
         //load the OBJ file
-        tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename,
+        tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str(),
                 nullptr);
         //make sure to output the warnings to the console, in case there are issues with the file
         if (!warn.empty()) {

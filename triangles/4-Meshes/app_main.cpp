@@ -3,14 +3,21 @@
  *   app_main.cpp
  *
  *   Created by dmitry
- *   01.11.2020
+ *   28.03.2021
  *
  ***/
 
 
 //
+/// LVL 4
 ///======================================================================================
-
+/// This is the 4th level of triangles.
+/// Objective: to draw a mesh of triangles using the Vulkan API; Implement mesh growth
+/// (before rendering).
+///
+/// The input is an .xml file with the scene data (information about the camera, objects
+/// and bounding box).
+/// The output is the rendering of the scene.
 ///======================================================================================
 ///======================================================================================
 //

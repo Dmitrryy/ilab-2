@@ -10,31 +10,10 @@
 //
 /// App
 ///======================================================================================
-/// This application visualizes the intersection of triangles that can move.
-///
-/// The vulkan api is used for visualization. In the current version, all objects
-/// (triangles) must be known before the driver is initialized. To create a window, use
-/// the glfw library.
-///
-///
-/// learn more about what happens in the loop located in the run method:
-///
-/// - first of all, the window events are checked(button clicks, cursor movement, etc.).
-///
-/// - then the object states are updated. in this case, the triangle is moved, a collision
-/// is detected, and when it intersects, it is repainted in red. Since the entity class
-/// does not store (store but does not update itself) data about the world position of
-/// vertices, they are taken from the driver (more precisely, from the vertex shader).
-///
-/// - after that, the data in the vulkan driver is updated. The world matrices and the
-/// color for each triangle are sent.
-///
-/// - Next comes the update of the camera position.
-///
-/// - and finally, the scene render command is sent to the driver.
-///
-/// Then the next iteration begins. Exit the loop if the window was closed.
-///
+/// the tinyxml2 library is used to parse the input scene data file.
+/// Unlike the previous version, the displayed promises are inherited from the class
+/// that the engine can display.
+/// More details in the implementation files
 ///======================================================================================
 ///======================================================================================
 //
@@ -86,10 +65,25 @@ namespace ezg
             m_box.reup({x1, y1, z1}, {x2, y2, z2});
         }
 
+        auto&& cameraXML = doc.FirstChildElement("camera");
+        if (cameraXML != nullptr)
+        {
+            m_speed = cameraXML->FloatAttribute("speed");
+
+            m_cameraView.m_position.x = cameraXML->FirstChildElement("position")->FloatAttribute("x");
+            m_cameraView.m_position.y = cameraXML->FirstChildElement("position")->FloatAttribute("y");
+            m_cameraView.m_position.z = cameraXML->FirstChildElement("position")->FloatAttribute("z");
+
+            m_cameraView.m_direction.x = cameraXML->FirstChildElement("direction")->FloatAttribute("x");
+            m_cameraView.m_direction.y = cameraXML->FirstChildElement("direction")->FloatAttribute("y");
+            m_cameraView.m_direction.z = cameraXML->FirstChildElement("direction")->FloatAttribute("z");
+        }
+
         tinyxml2::XMLElement* objectXML = doc.FirstChildElement("objects")->FirstChildElement();//todo
         while(objectXML != nullptr)
         {
             auto&& entity = new TriangleMesh();
+            m_entities.push_back(entity);
 
             if(!entity->load_from_obj(objectXML->FirstChildElement("model")->Attribute("file"))) {
                 std::cerr << "cant load model" << std::endl;
@@ -136,8 +130,6 @@ namespace ezg
                 }
             }
 
-            m_entities.push_back(entity);
-
             objectXML = objectXML->NextSiblingElement();
         }
 
@@ -152,10 +144,6 @@ namespace ezg
         for (auto&& o : m_entities){
             m_driver.upload_mesh(*o);
         }
-
-
-        m_cameraView.setPosition({1.f, 1.f, 1.f});
-        m_cameraView.setDirection({-1.f, -1.f, -1.f});
 
         m_time.reset();
 
@@ -174,7 +162,7 @@ namespace ezg
 
             m_driver.render_meshes(m_entities);
         }
-        m_entities.clear();
+
         std::cout << "App closed!" << std::endl;
     }
 

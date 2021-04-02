@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <box x1="-100" y1="-100" z1="-100" x2="100" y2="100" z2="100"/>
 
+<camera speed="80">
+<position x="250" y="250" z="250"/>
+<direction x="-1" y="-1" z="-1"/>
+</camera>
+
 <objects>
     <obj0>
         <model file="resource/meshes/ak_47.obj"/>

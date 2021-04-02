@@ -7,6 +7,15 @@
  *
  ***/
 
+
+//
+/// Engine
+///======================================================================================
+///
+///======================================================================================
+///======================================================================================
+//
+
 #include "Engine.hpp"
 #include "PipelineBuilder.hpp"
 
@@ -21,8 +30,8 @@
 #include "vk_mem_alloc.h"
 
 
-const std::string vert_shader_fname = "resource/shaders/vert.spv";
-const std::string frag_shader_fname = "resource/shaders/frag.spv";
+constexpr char vert_shader_fname[] = "resource/shaders/vert.spv";
+constexpr char frag_shader_fname[] = "resource/shaders/frag.spv";
 
 namespace ezg
 {
@@ -431,7 +440,7 @@ namespace ezg
         VkResult result = vkAcquireNextImageKHR(m_core.getDevice(), m_swapChainKHR, UINT64_MAX, curFrame.renderSemaphore, VK_NULL_HANDLE, &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             m_framebufferResized = false;
-            assert(0);
+            assert(0); //TODO resize window
             //recreateSwapChain_();
             return;
         }
@@ -545,7 +554,6 @@ namespace ezg
             throw std::runtime_error(("failed to present swap chain image!"));
         }
 
-        //vkQueueWaitIdle(m_queue);
         m_currentFrame++;
     }
 
@@ -560,7 +568,6 @@ namespace ezg
 		colorAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-		//colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 		colorAttachment.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
 		VkAttachmentReference attachRef = {};
@@ -709,7 +716,7 @@ namespace ezg
 
         std::vector< VkDescriptorSetLayout > setLayouts = {
                 m_globalSetLayout
-                //, m_objectSetLayout TODO
+                //, m_objectSetLayout
         };
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
@@ -813,7 +820,7 @@ namespace ezg
 
 		VkPipeline meshPipeline = pipelineBuildInfo.build_pipeline(m_core.getDevice(), m_renderPass);
 
-		//todo
+
 		m_renderMaterials[PipelineType::DEFAULT_MESH] = {meshPipeline, pipelineLayout };
 
 		m_deletionQueue.push_front([=](){
