@@ -53,7 +53,8 @@ namespace ezg
 
 			createCommandBuffer_();
 			createDepthResources_();
-			createFramebuffer_();
+
+            createFramebuffer_();
 
             initDescriptors();
 
@@ -65,9 +66,10 @@ namespace ezg
 		catch (std::exception& exc_)
 		{
 			std::cerr << "Fatal error in Engine::Init():\n";
-			std::cerr << "What(): " << exc_.what() << std::endl;
 			std::cerr << "Called Engine::cleanup()" << std::endl;
 			cleanup();
+
+			throw;
 		}
 	}
 
@@ -120,13 +122,14 @@ namespace ezg
 
 	void Engine::cleanup()
 	{
-	    vkDeviceWaitIdle(m_core.getDevice());
+	    if (m_core.getDevice() != nullptr)
+	        vkDeviceWaitIdle(m_core.getDevice());
 
 	    for (auto&& f : m_deletionQueue)
         {
 	        f();
         }
-
+	    m_deletionQueue.clear();
 	}
 
 	
@@ -622,7 +625,7 @@ namespace ezg
 		int wHeight = 0, wWidth = 0;
 		glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
 
-		m_frameBuffers.resize(m_maxFramesInFlight);
+		m_frameBuffers.resize(m_images.size());
 
 		for (uint32_t i = 0, mi = m_images.size(); i < mi; i++)
 		{

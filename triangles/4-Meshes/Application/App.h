@@ -15,6 +15,8 @@
 #include "../../LAL/include/LAL.h"
 #include <Engine/Engine.hpp>
 
+#include <tinyxml2.h>
+
 
 
 ///======================================================================================
@@ -59,7 +61,7 @@ namespace ezg
 
     public:
 
-        bool loadSceneFromXML(const std::string& fileName);
+        tinyxml2::XMLError loadSceneFromXML(const std::string& fileName);
 
         /// Launch the app!
         /// A window opens with a visualization of the triangles

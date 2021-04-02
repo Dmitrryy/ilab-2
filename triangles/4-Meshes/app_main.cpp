@@ -28,9 +28,18 @@ int main()
 
     ezg::AppLVL4 app;
 
-    app.loadSceneFromXML(fileName);
+    if(app.loadSceneFromXML(fileName) != tinyxml2::XML_SUCCESS) {
+        std::cerr << "cant load scene from file: " << fileName << std::endl;
+        return 1;
+    }
 
-    app.run();
+    try {
+        app.run();
+    }
+    catch (std::exception& ex) {
+        std::cerr << "What: " << ex.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 

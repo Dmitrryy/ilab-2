@@ -45,7 +45,6 @@
 
 #include <Octree/Octree.h>
 
-#include <tinyxml2.h>
 
 #include <OtherLibs/random.h>
 
@@ -64,13 +63,12 @@ namespace ezg
      ***/
 
 
-    bool AppLVL4::loadSceneFromXML(const std::string& fileName)
+    tinyxml2::XMLError AppLVL4::loadSceneFromXML(const std::string& fileName)
     {
         tinyxml2::XMLDocument doc;
         auto&& res = doc.LoadFile(fileName.c_str());
         if (res != tinyxml2::XML_SUCCESS) {
-            std::cerr << res << std::endl;
-            return false;
+            return res;
         }
 
         auto&& boxXML = doc.FirstChildElement("box");
@@ -119,6 +117,7 @@ namespace ezg
 
             entity->m_speedRotation = objectXML->FirstChildElement("properties")->FirstChildElement("speedRotation")->FloatAttribute("val");
 
+
             auto&& grow = objectXML->FirstChildElement("grow");
             if (grow != nullptr)
             {
@@ -142,7 +141,7 @@ namespace ezg
             objectXML = objectXML->NextSiblingElement();
         }
 
-        return true;
+        return tinyxml2::XML_SUCCESS;
     }
 
 
