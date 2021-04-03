@@ -42,17 +42,16 @@ namespace ezg
      ***/
 
 
-    tinyxml2::XMLError AppLVL4::loadSceneFromXML(const std::string& fileName)
+    tinyxml2::XMLError AppLVL4::loadSceneFromXML(const std::string &fileName)
     {
         tinyxml2::XMLDocument doc;
-        auto&& res = doc.LoadFile(fileName.c_str());
+        auto &&res = doc.LoadFile(fileName.c_str());
         if (res != tinyxml2::XML_SUCCESS) {
             return res;
         }
 
-        auto&& boxXML = doc.FirstChildElement("box");
-        if (boxXML != nullptr)
-        {
+        auto &&boxXML = doc.FirstChildElement("box");
+        if (boxXML != nullptr) {
             float x1, x2, y1, y2, z1, z2;
             x1 = boxXML->FloatAttribute("x1");
             y1 = boxXML->FloatAttribute("y1");
@@ -65,72 +64,103 @@ namespace ezg
             m_box.reup({x1, y1, z1}, {x2, y2, z2});
         }
 
-        auto&& cameraXML = doc.FirstChildElement("camera");
-        if (cameraXML != nullptr)
-        {
+        auto &&cameraXML = doc.FirstChildElement("camera");
+        if (cameraXML != nullptr) {
             m_speed = cameraXML->FloatAttribute("speed");
 
-            m_cameraView.m_position.x = cameraXML->FirstChildElement("position")->FloatAttribute("x");
-            m_cameraView.m_position.y = cameraXML->FirstChildElement("position")->FloatAttribute("y");
-            m_cameraView.m_position.z = cameraXML->FirstChildElement("position")->FloatAttribute("z");
+            auto&& posXML = cameraXML->FirstChildElement("position");
+            if (posXML != nullptr) {
+                m_cameraView.m_position.x = posXML->FloatAttribute("x");
+                m_cameraView.m_position.y = posXML->FloatAttribute("y");
+                m_cameraView.m_position.z = posXML->FloatAttribute("z");
+            }
 
-            m_cameraView.m_direction.x = cameraXML->FirstChildElement("direction")->FloatAttribute("x");
-            m_cameraView.m_direction.y = cameraXML->FirstChildElement("direction")->FloatAttribute("y");
-            m_cameraView.m_direction.z = cameraXML->FirstChildElement("direction")->FloatAttribute("z");
+            auto&& dirXML = cameraXML->FirstChildElement("direction");
+            if (dirXML != nullptr) {
+                m_cameraView.m_direction.x = dirXML->FloatAttribute("x");
+                m_cameraView.m_direction.y = dirXML->FloatAttribute("y");
+                m_cameraView.m_direction.z = dirXML->FloatAttribute("z");
+            }
         }
 
-        tinyxml2::XMLElement* objectXML = doc.FirstChildElement("objects")->FirstChildElement();//todo
-        while(objectXML != nullptr)
-        {
-            auto&& entity = new TriangleMesh();
-            m_entities.push_back(entity);
+        tinyxml2::XMLElement *objectXML = doc.FirstChildElement("objects");
+        if (objectXML != nullptr) {
+            objectXML = objectXML->FirstChildElement();
+            while (objectXML != nullptr) {
+                auto &&entity = new TriangleMesh();
+                m_entities.push_back(entity);
 
-            if(!entity->load_from_obj(objectXML->FirstChildElement("model")->Attribute("file"))) {
-                std::cerr << "cant load model" << std::endl;
-                continue;
-            }
-            entity->m_position.x = objectXML->FirstChildElement("properties")->FirstChildElement("position")->FloatAttribute("x");
-            entity->m_position.y = objectXML->FirstChildElement("properties")->FirstChildElement("position")->FloatAttribute("y");
-            entity->m_position.z = objectXML->FirstChildElement("properties")->FirstChildElement("position")->FloatAttribute("z");
-
-            entity->m_color.x = objectXML->FirstChildElement("properties")->FirstChildElement("color")->FloatAttribute("r");
-            entity->m_color.y = objectXML->FirstChildElement("properties")->FirstChildElement("color")->FloatAttribute("g");
-            entity->m_color.z = objectXML->FirstChildElement("properties")->FirstChildElement("color")->FloatAttribute("b");
-
-            entity->m_scale.x = objectXML->FirstChildElement("properties")->FirstChildElement("scale")->FloatAttribute("x");
-            entity->m_scale.y = objectXML->FirstChildElement("properties")->FirstChildElement("scale")->FloatAttribute("y");
-            entity->m_scale.z = objectXML->FirstChildElement("properties")->FirstChildElement("scale")->FloatAttribute("z");
-
-            entity->m_dirTravel.x = objectXML->FirstChildElement("properties")->FirstChildElement("dirTravel")->FloatAttribute("x");
-            entity->m_dirTravel.y = objectXML->FirstChildElement("properties")->FirstChildElement("dirTravel")->FloatAttribute("y");
-            entity->m_dirTravel.z = objectXML->FirstChildElement("properties")->FirstChildElement("dirTravel")->FloatAttribute("z");
-
-            entity->m_dirRotation.x = objectXML->FirstChildElement("properties")->FirstChildElement("dirRotate")->FloatAttribute("x");
-            entity->m_dirRotation.y = objectXML->FirstChildElement("properties")->FirstChildElement("dirRotate")->FloatAttribute("y");
-            entity->m_dirRotation.z = objectXML->FirstChildElement("properties")->FirstChildElement("dirRotate")->FloatAttribute("z");
-
-            entity->m_speedRotation = objectXML->FirstChildElement("properties")->FirstChildElement("speedRotation")->FloatAttribute("val");
-
-
-            auto&& grow = objectXML->FirstChildElement("grow");
-            if (grow != nullptr)
-            {
-                size_t stages = grow->Unsigned64Attribute("stages");
-                float max_dist = grow->FloatAttribute("distance");
-
-                const size_t Prost = 100000;
-                const auto max = static_cast<uint>(max_dist * Prost);
-                ezg::Random randDist(static_cast<uint>(max / 6), max);
-
-                for (size_t i = 0; i < stages; ++i)
-                {
-                    ezg::Random randTriangle(0, entity->vertices.size() / 3 - 1);
-
-                    entity->grow(randTriangle(), static_cast<float>(randDist()) / Prost);
+                auto&& modelXML = objectXML->FirstChildElement("model");
+                if (modelXML == nullptr || !entity->load_from_obj(modelXML->Attribute("file"))) {
+                    std::cerr << "cant load model" << std::endl;
+                    continue;
                 }
-            }
 
-            objectXML = objectXML->NextSiblingElement();
+                auto &&prop = objectXML->FirstChildElement("properties");
+                if (prop != nullptr)
+                {
+                    auto&& posXML = prop->FirstChildElement("position");
+                    if (posXML != nullptr) {
+                        entity->m_position.x = posXML->FloatAttribute("x");
+                        entity->m_position.y = posXML->FloatAttribute("y");
+                        entity->m_position.z = posXML->FloatAttribute("z");
+                    }
+
+                    auto&& colorXML = prop->FirstChildElement("color");
+                    if (colorXML != nullptr) {
+                        entity->m_color.x = colorXML->FloatAttribute("r");
+                        entity->m_color.y = colorXML->FloatAttribute("g");
+                        entity->m_color.z = colorXML->FloatAttribute("b");
+                    }
+
+                    auto&& scaleXML = prop->FirstChildElement("scale");
+                    if (scaleXML != nullptr) {
+                        entity->m_scale.x = scaleXML->FloatAttribute("x");
+                        entity->m_scale.y = scaleXML->FloatAttribute("y");
+                        entity->m_scale.z = scaleXML->FloatAttribute("z");
+                    }
+
+                    auto&& dirTravelXML = prop->FirstChildElement("dirTravel");
+                    if (dirTravelXML != nullptr) {
+                        entity->m_dirTravel.x = dirTravelXML->FloatAttribute("x");
+                        entity->m_dirTravel.y = dirTravelXML->FloatAttribute("y");
+                        entity->m_dirTravel.z = dirTravelXML->FloatAttribute("z");
+                    }
+
+                    auto&& dirRotateXML = prop->FirstChildElement("dirRotate");
+                    if (dirRotateXML != nullptr) {
+                        entity->m_dirRotation.x = dirRotateXML->FloatAttribute("x");
+                        entity->m_dirRotation.y = dirRotateXML->FloatAttribute("y");
+                        entity->m_dirRotation.z = dirRotateXML->FloatAttribute("z");
+                    }
+
+                    auto&& speedRotationXML = prop->FirstChildElement("speedRotation");
+                    if (speedRotationXML != nullptr) {
+                        entity->m_speedRotation = speedRotationXML->FloatAttribute("val");
+                    }
+                }
+
+
+                auto &&grow = objectXML->FirstChildElement("grow");
+                if (grow != nullptr) {
+                    size_t stages = grow->Unsigned64Attribute("stages");
+                    float max_dist = grow->FloatAttribute("distance");
+
+                    entity->vertices.reserve(entity->vertices.size() + stages * 2);
+
+                    const size_t Prost = 100000;
+                    const auto max = static_cast<uint>(max_dist * Prost);
+                    ezg::Random randDist(static_cast<uint>(max / 6), max);
+
+                    for (size_t i = 0; i < stages; ++i) {
+                        ezg::Random randTriangle(0, entity->vertices.size() / 3 - 1);
+
+                        entity->grow(randTriangle(), static_cast<float>(randDist()) / Prost);
+                    }
+                }
+
+                objectXML = objectXML->NextSiblingElement();
+            }
         }
 
         return tinyxml2::XML_SUCCESS;
@@ -141,15 +171,14 @@ namespace ezg
     {
         init_();
 
-        for (auto&& o : m_entities){
+        for (auto &&o : m_entities) {
             m_driver.upload_mesh(*o);
         }
 
         m_time.reset();
 
         Timer frameTimer;
-        while(!glfwWindowShouldClose(m_pWindow))
-        {
+        while (!glfwWindowShouldClose(m_pWindow)) {
             float dTime = frameTimer.elapsed();
             frameTimer.reset();
 
@@ -211,34 +240,37 @@ namespace ezg
 
         //-----------------------------------------------
         // init camera view
-        m_cameraView.setAspect(wHeight /(float) wWidth);
+        m_cameraView.setAspect(wHeight / (float) wWidth);
         // end init camera view
         //-----------------------------------------------
     }
 
 
-
     void AppLVL4::update_entities_(float time)
     {
-        for(size_t i = 0, mi = m_entities.size(); i < mi; ++i)
-        {
-            auto&& curEntity = static_cast<TriangleMesh*>(m_entities.at(i));
+        for (auto &&entitie : m_entities) {
+            auto &&curEntity = static_cast<TriangleMesh *>(entitie);
 
             //we detected the exit of the figure outside the box
-            if(curEntity->m_position.x < m_box.getA().x || curEntity->m_position.x > m_box.getB().x) {
-                curEntity->m_dirTravel.x = std::abs(curEntity->m_dirTravel.x) * ((m_box.getA().x - curEntity->m_position.x) / std::abs(m_box.getA().x - curEntity->m_position.x));
+            if (curEntity->m_position.x < m_box.getA().x || curEntity->m_position.x > m_box.getB().x) {
+                curEntity->m_dirTravel.x = std::abs(curEntity->m_dirTravel.x)
+                                           * ((m_box.getA().x - curEntity->m_position.x) /
+                                              std::abs(m_box.getA().x - curEntity->m_position.x));
             }
-            if(curEntity->m_position.y < m_box.getA().y || curEntity->m_position.y > m_box.getB().y) {
-                curEntity->m_dirTravel.y = std::abs(curEntity->m_dirTravel.y) * ((m_box.getA().y - curEntity->m_position.y) / std::abs(m_box.getA().y - curEntity->m_position.y));
+            if (curEntity->m_position.y < m_box.getA().y || curEntity->m_position.y > m_box.getB().y) {
+                curEntity->m_dirTravel.y = std::abs(curEntity->m_dirTravel.y)
+                                           * ((m_box.getA().y - curEntity->m_position.y) /
+                                              std::abs(m_box.getA().y - curEntity->m_position.y));
             }
-            if(curEntity->m_position.z < m_box.getA().z || curEntity->m_position.z > m_box.getB().z) {
-                curEntity->m_dirTravel.z = std::abs(curEntity->m_dirTravel.z) * ((m_box.getA().z - curEntity->m_position.z) / std::abs(m_box.getA().z - curEntity->m_position.z));
+            if (curEntity->m_position.z < m_box.getA().z || curEntity->m_position.z > m_box.getB().z) {
+                curEntity->m_dirTravel.z = std::abs(curEntity->m_dirTravel.z)
+                                           * ((m_box.getA().z - curEntity->m_position.z) /
+                                              std::abs(m_box.getA().z - curEntity->m_position.z));
             }
             curEntity->update(time);
         }
 
     }
-
 
 
     void AppLVL4::update_camera_(float time)
@@ -267,12 +299,10 @@ namespace ezg
             if (left && right) { left = right = false; }
 
 
-            if (forward || back)
-            {
+            if (forward || back) {
                 m_cameraView.moveAlongDirection(time * m_speed * ((forward) ? 1.f : -1.f));
             }
-            if (left || right)
-            {
+            if (left || right) {
                 m_cameraView.movePerpendicularDirection(time * m_speed * ((right) ? 1.f : -1.f));
             }
         }
@@ -313,10 +343,11 @@ namespace ezg
         }
     }
 
-    /*static*/ void AppLVL4::framebufferResizeCallback(GLFWwindow* window, int width, int height) {
-        auto app = static_cast<AppLVL4*>(glfwGetWindowUserPointer(window));
+    /*static*/ void AppLVL4::framebufferResizeCallback(GLFWwindow *window, int width, int height)
+    {
+        auto app = static_cast<AppLVL4 *>(glfwGetWindowUserPointer(window));
         app->m_driver.detectFrameBufferResized();
-        app->m_cameraView.setAspect(width /(float) height);
+        app->m_cameraView.setAspect(width / (float) height);
     }
 
     /***
