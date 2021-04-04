@@ -36,7 +36,7 @@ by line from top to bottom and each line from left to right
     >   R->clone(P);  
     >   // P = R    
     >   R->reduceAdd(R, Rho);  
-    >   rho = sum(R * R);    
+    >   // rho = sum(R * R);    
     > }  
     > 
     > void clCGSolver::solveIteration() 
