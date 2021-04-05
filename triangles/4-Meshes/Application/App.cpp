@@ -92,9 +92,11 @@ namespace ezg
      *
      ***/
 
+/*
     template< typename T, typename ...Args >
     void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, T& res, Args &...args);
 
+*/
 
     template< typename T = void >
     void getAttribute(tinyxml2::XMLElement*) {}
@@ -106,7 +108,7 @@ namespace ezg
         getAttribute(xmlElement, args...);
     }
     /*
-     * specializations for other types ща фекшигеу
+     * specializations for other types of attribute
      * ...
      */
 
