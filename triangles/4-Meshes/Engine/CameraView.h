@@ -20,8 +20,8 @@ namespace ezg
 
 	struct CameraView
 	{
-		glm::vec3 m_position;
-		glm::vec3 m_direction;
+		glm::vec3 m_position   = { 2.f, 2.f, 2.f };
+		glm::vec3 m_direction  = { -1.f, -1.f, -1.f };
 
 		glm::vec3 m_topDirection = glm::vec3(0.f, 0.f, 1.f);
 		float m_viewingAngle = glm::radians(70.f);
@@ -33,7 +33,7 @@ namespace ezg
 
 	public:
 
-		CameraView(const glm::vec3& pos, const glm::vec3& direct)
+		CameraView(const glm::vec3& pos = {}, const glm::vec3& direct = {})
 			: m_position(pos)
 			, m_direction(glm::normalize(direct))
 		{		}

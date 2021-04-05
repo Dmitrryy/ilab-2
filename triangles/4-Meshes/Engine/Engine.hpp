@@ -30,6 +30,7 @@
 
 #include "vkCore.h"
 #include "CameraView.h"
+#include "DeleteonQueue.hpp"
 
 #include <vk_mem_alloc.h>
 
@@ -45,11 +46,12 @@
 #include <functional>
 #include <deque>
 #include <array>
+#include <algorithm>
 
 #include <OtherLibs/timer.h>
 
 
-#define EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM 10000
+const size_t ezg_default_max_objects = 10000;
 
 
 namespace ezg
@@ -96,12 +98,6 @@ namespace ezg
 	};
 
 
-	enum class PipelineType
-    {
-	    DEFAULT_MESH
-    };
-
-
 	class Engine
 	{
 
@@ -130,8 +126,6 @@ namespace ezg
             AllocatedBuffer m_vertexBuffer = {};
             bool            m_isUploaded   = false;
 
-            PipelineType    m_pipelineType = PipelineType::DEFAULT_MESH;
-
             // so that the engine can access private fields
             // (these fields are not needed by an external user)
             friend Engine;
@@ -145,8 +139,8 @@ namespace ezg
 
         public:
 
-            virtual glm::mat4 getModelMatrix() const noexcept { return glm::mat4{1.f}; }
-            virtual glm::vec3 getColor()       const noexcept { return glm::vec3(1.f); }
+            virtual glm::mat4 getModelMatrix() const { return glm::mat4{1.f}; }
+            virtual glm::vec3 getColor()       const { return glm::vec3(1.f); }
 
             bool load_from_obj(const std::string& filename);
         };//class Mesh
@@ -198,17 +192,11 @@ namespace ezg
 
 	private:
 
-	    using FunctionQueue = std::deque< std::function< void() > >;
-
-		std::string                    m_appName;
-		GLFWwindow*                    m_pWindow = nullptr;
-		bool                           m_framebufferResized = false;
+		GLFWwindow*                    m_pWindow            = nullptr;
 
 		Core                           m_core;
 
-        FunctionQueue                  m_deletionQueue;
-
-        VmaAllocator                   m_allocator;
+        VmaAllocator                   m_allocator = nullptr;
 
         std::vector< FrameData >       m_frames;
 
@@ -221,10 +209,10 @@ namespace ezg
 
 		VkRenderPass                   m_renderPass     = nullptr;
 
-        std::unordered_map< PipelineType, RenderMaterial > m_renderMaterials;
+        RenderMaterial                 m_renderMaterial = {};
 
-        VkImageView                    m_depthImageView;
-        AllocatedImage                 m_depthImage;
+        VkImageView                    m_depthImageView = nullptr;
+        AllocatedImage                 m_depthImage     = {};
 
 
 		VkDescriptorPool               m_descriptorPool = nullptr;
@@ -237,11 +225,14 @@ namespace ezg
 		size_t                         m_maxFramesInFlight = 2;
 
 		// TODO increase if necessary
-		size_t                         m_numObjects          = EZG_ENGINE_DEFAULT_MAX_OBJECTS_NUM;
+		size_t                         m_numObjects        = ezg_default_max_objects;
 
         ezg::CameraView                m_cameraView;
 
-	public:
+
+        DeletionQueue_t                m_deletionQueue;
+
+    public:
 
 	    Engine           (const Engine&) = delete; //not supported
 	    Engine& operator=(const Engine&) = delete; //not supported
@@ -249,26 +240,17 @@ namespace ezg
 	    Engine& operator=(Engine&&)      = delete; //not supported
 
 
-		Engine(std::string appName_)
-			: m_core(appName_)
-			, m_appName(std::move(appName_))
-			, m_cameraView({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
-		{ }
+		Engine(GLFWwindow* pWindow);
 
 
-		~Engine()
-		{
-			cleanup();
-		}
+		~Engine();
 
 
-		void detectFrameBufferResized() { m_framebufferResized = true; }
-
-
-		void Init(GLFWwindow* window);
-
+	public:
 
 		void upload_mesh(Mesh& mesh);
+		void unload_mesh(Mesh& mesh);
+
 		void render_meshes(const std::vector< Mesh* >& objects);
 
 
@@ -279,6 +261,8 @@ namespace ezg
 
 
 	private:
+
+        void init_(GLFWwindow* window);
 
 	    FrameData& getCurFrame() { return m_frames[m_currentFrame % m_maxFramesInFlight]; }
 

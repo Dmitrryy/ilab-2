@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "DeleteonQueue.hpp"
+
 #include <vulkan/vulkan.h>
 
 #include <string>
@@ -48,7 +50,8 @@ namespace ezg
         std::vector< std::vector< VkBool32 > >                m_qSupportPresent;
         std::vector< std::vector< VkSurfaceFormatKHR > >      m_surfaceFormats;
         std::vector< VkSurfaceCapabilitiesKHR >               m_surfaceCaps;
-    };
+    };//struct VulkanPhysicalDevices
+
 
     VulkanPhysicalDevices VulkanGetPhysicalDevices(
             const VkInstance &inst_,
@@ -67,23 +70,13 @@ namespace ezg
         VkSurfaceKHR          m_surface = nullptr;
         VulkanPhysicalDevices m_physDevices;
 
-        std::string m_appName;
         size_t      m_DeviceIndex = -1;
         size_t      m_QueueFamily = -1;
 
+        DeletionQueue_t m_deletionQueue;
+
 #ifdef ENABLE_DEBUG_LAYERS
         const bool enableValidationLayers = true;
-#else
-        const bool enableValidationLayers = false;
-#endif
-
-        const std::vector<const char*> m_deviceExtensions = {
-                VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-                VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME//,
-                //VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME
-        };
-
-#ifdef ENABLE_DEBUG_LAYERS
 
         bool checkValidationLayerSupport() const;
 
@@ -91,27 +84,27 @@ namespace ezg
                 "VK_LAYER_KHRONOS_validation"
         };
 
-
         static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-            VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
-            VkDebugUtilsMessageTypeFlagsEXT             messageType,
-            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-            void*                                       pUserData
+                VkDebugUtilsMessageSeverityFlagBitsEXT      messageSeverity,
+                VkDebugUtilsMessageTypeFlagsEXT             messageType,
+                const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                void*                                       pUserData
         );
-
+#else
+        const bool enableValidationLayers = false;
 #endif //ENABLE_DEBUG_LAYERS
+
+        const std::vector<const char*> m_deviceExtensions = {
+                VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+                VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME//,
+                //VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME
+        };
 
     public:
 
-        Core(const std::string& appName_)
-            : m_appName(appName_)
-        {}
-        ~Core()
-        {
-            cleanup();
-        }
+        Core(GLFWwindow* pWindow);
 
-        bool Init(GLFWwindow* pWindowControl);
+    public:
 
         void updataPhysDivicesProp() { m_physDevices.update(m_surface); }
         size_t      getQueueFamily() const { return m_QueueFamily; }
@@ -136,24 +129,6 @@ namespace ezg
 
         VkFormat findSupportedFormat(const std::vector< VkFormat >& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
-        void cleanup() 
-        {
-            if (m_inst != nullptr) 
-            {
-                vkDestroyDevice(m_device, nullptr);
-                m_device = nullptr;
-
-                vkDestroySurfaceKHR(m_inst, m_surface, nullptr);
-                m_surface = nullptr;
-
-                vkDestroyInstance(m_inst, nullptr);
-                m_inst = nullptr;
-
-                m_DeviceIndex = m_QueueFamily = -1;
-                m_physDevices.resize(0);
-            }
-        }
-
     private:
 
         void createInstance_();
@@ -162,6 +137,6 @@ namespace ezg
         void createLogicalDevice();
 
 
-    };
+    };//class Core
 
 }//namespace vks

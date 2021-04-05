@@ -33,14 +33,14 @@ int main()
     std::cin >> fileName;
 
 
-    ezg::AppLVL4 app;
-
-    if(app.loadSceneFromXML(fileName) != tinyxml2::XML_SUCCESS) {
-        std::cerr << "cant load scene from file: " << fileName << std::endl;
-        return 1;
-    }
-
     try {
+        ezg::AppLVL4 app;
+
+        if(app.loadSceneFromXML(fileName) != tinyxml2::XML_SUCCESS) {
+            std::cerr << "cant load scene from file: " << fileName << std::endl;
+            return 1;
+        }
+
         app.run();
     }
     catch (std::exception& ex) {

@@ -58,6 +58,8 @@ add_executable(${EXECUTE_NAME} app_main.cpp Engine/Engine.cpp Engine/vkCore.cpp
 
 target_sources(${EXECUTE_NAME} PRIVATE ../path/tinyxml2.cpp)
 
+target_compile_features(${EXECUTE_NAME} PRIVATE cxx_std_17)
+
 # Build mode dependent actions
 if( NOT CMAKE_BUILD_TYPE )
     set(CMAKE_BUILD_TYPE Release)

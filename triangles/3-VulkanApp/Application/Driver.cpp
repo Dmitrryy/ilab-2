@@ -54,7 +54,7 @@ namespace vks
         }
 		catch (std::exception& exc_)
 		{
-			std::cerr << "Fatal error in Engine::Init():\n";
+			std::cerr << "Fatal error in Engine::init_():\n";
 			std::cerr << "What(): " << exc_.what() << std::endl;
 			std::cerr << "Called Engine::cleanup()" << std::endl;
 			cleanup();

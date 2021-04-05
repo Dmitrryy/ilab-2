@@ -46,7 +46,7 @@ find_package(OpenCL REQUIRED)
 SET(MY_COMPILE_FLAGS "-lOpenCL")
 
 # add the executable
-add_executable(${PROJECT_NAME} main.cpp BitonicSort.cpp)
+add_executable(${PROJECT_NAME} main.cpp BitonicSort.cpp ../3-DirichletProblem/main.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MEASUREMENTS)
 

@@ -35,11 +35,80 @@
 namespace ezg
 {
 
+
+    AppLVL4::AppLVL4()
+    {
+        //-----------------------------------------------
+        // create window
+        int res = glfwInit();
+        if (res != GLFW_TRUE) {
+            throw std::runtime_error("failed glfwInit!");
+        }
+
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+
+        m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LVL 4", nullptr, nullptr);
+        if (m_pWindow == nullptr) {
+            throw std::runtime_error("failed create window");
+        }
+
+        glfwSetWindowUserPointer(m_pWindow, this);
+        glfwSetKeyCallback(m_pWindow, keyCallback);
+
+        glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
+
+        int wHeight = 0, wWidth = 0;
+        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
+
+        glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
+        glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        // end create window
+        //-----------------------------------------------
+
+        m_driver = std::make_unique< Engine >(m_pWindow);
+
+        //-----------------------------------------------
+        // init camera view
+        m_cameraView.setAspect(static_cast< float >(wHeight) / static_cast< float >(wWidth));
+        // end init camera view
+        //-----------------------------------------------
+    }
+
+    AppLVL4::~AppLVL4() {
+        glfwDestroyWindow(m_pWindow);
+
+        std::transform(m_entities.begin(), m_entities.end(), m_entities.begin(), [&driver = m_driver](auto* pEnt) -> TriangleMesh* {
+            driver->unload_mesh(*pEnt);
+            delete pEnt;
+            return nullptr;
+        });
+
+    }
+
     /****************************************************************************************
      *
      *   public methods
      *
      ***/
+
+    template< typename T, typename ...Args >
+    void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, T& res, Args &...args);
+
+
+    template< typename T = void >
+    void getAttribute(tinyxml2::XMLElement*) {}
+
+    template< typename ...Args >
+    void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, float& res, Args &...args)
+    {
+        res = xmlElement->FloatAttribute(name.c_str());
+        getAttribute(xmlElement, args...);
+    }
+    /*
+     * specializations for other types ща фекшигеу
+     * ...
+     */
 
 
     tinyxml2::XMLError AppLVL4::loadSceneFromXML(const std::string &fileName)
@@ -52,14 +121,9 @@ namespace ezg
 
         auto &&boxXML = doc.FirstChildElement("box");
         if (boxXML != nullptr) {
-            float x1, x2, y1, y2, z1, z2;
-            x1 = boxXML->FloatAttribute("x1");
-            y1 = boxXML->FloatAttribute("y1");
-            z1 = boxXML->FloatAttribute("z1");
-
-            x2 = boxXML->FloatAttribute("x2");
-            y2 = boxXML->FloatAttribute("y2");
-            z2 = boxXML->FloatAttribute("z2");
+            float x1 = 0, x2 = 0, y1 = 0, y2 = 0, z1 = 0, z2 = 0;
+            getAttribute(boxXML, "x1", x1, "y1", y1, "z1", z1);
+            getAttribute(boxXML, "x2", x2, "y2", y2, "z2", z2);
 
             m_box.reup({x1, y1, z1}, {x2, y2, z2});
         }
@@ -70,16 +134,16 @@ namespace ezg
 
             auto&& posXML = cameraXML->FirstChildElement("position");
             if (posXML != nullptr) {
-                m_cameraView.m_position.x = posXML->FloatAttribute("x");
-                m_cameraView.m_position.y = posXML->FloatAttribute("y");
-                m_cameraView.m_position.z = posXML->FloatAttribute("z");
+                getAttribute(posXML, "x", m_cameraView.m_position.x
+                                , "y", m_cameraView.m_position.y
+                                , "z", m_cameraView.m_position.z);
             }
 
             auto&& dirXML = cameraXML->FirstChildElement("direction");
             if (dirXML != nullptr) {
-                m_cameraView.m_direction.x = dirXML->FloatAttribute("x");
-                m_cameraView.m_direction.y = dirXML->FloatAttribute("y");
-                m_cameraView.m_direction.z = dirXML->FloatAttribute("z");
+                getAttribute(dirXML, "x", m_cameraView.m_direction.x
+                            , "y", m_cameraView.m_direction.y
+                            , "z", m_cameraView.m_direction.z);
             }
         }
 
@@ -101,37 +165,27 @@ namespace ezg
                 {
                     auto&& posXML = prop->FirstChildElement("position");
                     if (posXML != nullptr) {
-                        entity->m_position.x = posXML->FloatAttribute("x");
-                        entity->m_position.y = posXML->FloatAttribute("y");
-                        entity->m_position.z = posXML->FloatAttribute("z");
+                        getAttribute(posXML, "x", entity->m_position.x, "y", entity->m_position.y, "z", entity->m_position.z);
                     }
 
                     auto&& colorXML = prop->FirstChildElement("color");
                     if (colorXML != nullptr) {
-                        entity->m_color.x = colorXML->FloatAttribute("r");
-                        entity->m_color.y = colorXML->FloatAttribute("g");
-                        entity->m_color.z = colorXML->FloatAttribute("b");
+                        getAttribute(colorXML, "r", entity->m_color.x, "g", entity->m_color.y, "b", entity->m_color.z);
                     }
 
                     auto&& scaleXML = prop->FirstChildElement("scale");
                     if (scaleXML != nullptr) {
-                        entity->m_scale.x = scaleXML->FloatAttribute("x");
-                        entity->m_scale.y = scaleXML->FloatAttribute("y");
-                        entity->m_scale.z = scaleXML->FloatAttribute("z");
+                        getAttribute(scaleXML, "x", entity->m_scale.x, "y", entity->m_scale.y, "z", entity->m_scale.z);
                     }
 
                     auto&& dirTravelXML = prop->FirstChildElement("dirTravel");
                     if (dirTravelXML != nullptr) {
-                        entity->m_dirTravel.x = dirTravelXML->FloatAttribute("x");
-                        entity->m_dirTravel.y = dirTravelXML->FloatAttribute("y");
-                        entity->m_dirTravel.z = dirTravelXML->FloatAttribute("z");
+                        getAttribute(dirTravelXML, "x", entity->m_dirTravel.x, "y", entity->m_dirTravel.y, "z", entity->m_dirTravel.z);
                     }
 
                     auto&& dirRotateXML = prop->FirstChildElement("dirRotate");
                     if (dirRotateXML != nullptr) {
-                        entity->m_dirRotation.x = dirRotateXML->FloatAttribute("x");
-                        entity->m_dirRotation.y = dirRotateXML->FloatAttribute("y");
-                        entity->m_dirRotation.z = dirRotateXML->FloatAttribute("z");
+                        getAttribute(dirRotateXML, "x", entity->m_dirRotation.x, "y", entity->m_dirRotation.y, "z", entity->m_dirRotation.z);
                     }
 
                     auto&& speedRotationXML = prop->FirstChildElement("speedRotation");
@@ -148,14 +202,17 @@ namespace ezg
 
                     entity->vertices.reserve(entity->vertices.size() + stages * 2);
 
-                    const size_t Prost = 100000;
-                    const auto max = static_cast<uint>(max_dist * Prost);
-                    ezg::Random randDist(static_cast<uint>(max / 6), max);
+                    // the random number generator can only generate integers.
+                    // To get a random non-integer number, we multiply the limits
+                    // by accuracy and, during the generation itself, divide by accuracy
+                    const size_t accuracy = 100000;
+                    const uint max = static_cast<uint>(max_dist * accuracy);
+                    ezg::Random randDist(max / 6, max);
 
                     for (size_t i = 0; i < stages; ++i) {
                         ezg::Random randTriangle(0, entity->vertices.size() / 3 - 1);
 
-                        entity->grow(randTriangle(), static_cast<float>(randDist()) / Prost);
+                        entity->grow(randTriangle(), static_cast<float>(randDist()) / accuracy);
                     }
                 }
 
@@ -163,22 +220,26 @@ namespace ezg
             }
         }
 
+        m_sceneIsLoaded = true;
         return tinyxml2::XML_SUCCESS;
     }
 
 
     void AppLVL4::run()
     {
-        init_();
+        if (!m_sceneIsLoaded) {
+            throw std::runtime_error("scene isn't loaded!");
+        }
 
         for (auto &&o : m_entities) {
-            m_driver.upload_mesh(*o);
+            m_driver->upload_mesh(*o);
         }
 
         m_time.reset();
 
         Timer frameTimer;
-        while (!glfwWindowShouldClose(m_pWindow)) {
+        while (!glfwWindowShouldClose(m_pWindow))
+        {
             float dTime = frameTimer.elapsed();
             frameTimer.reset();
 
@@ -187,9 +248,9 @@ namespace ezg
             update_entities_(dTime);
 
             update_camera_(dTime);
-            m_driver.setCameraView(m_cameraView);
+            m_driver->setCameraView(m_cameraView);
 
-            m_driver.render_meshes(m_entities);
+            m_driver->render_meshes(m_entities);
         }
 
         std::cout << "App closed!" << std::endl;
@@ -205,45 +266,6 @@ namespace ezg
      *   private methods
      *
      ***/
-
-    void AppLVL4::init_()
-    {
-        //-----------------------------------------------
-        // create window
-        int res = glfwInit();
-        if (res != GLFW_TRUE) {
-            throw std::runtime_error("failed glfwInit!");
-        }
-
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-        m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Vulkan", nullptr, nullptr);
-        if (m_pWindow == nullptr) {
-            throw std::runtime_error("failed create window");
-        }
-
-        glfwSetWindowUserPointer(m_pWindow, this);
-        glfwSetFramebufferSizeCallback(m_pWindow, framebufferResizeCallback);
-        glfwSetKeyCallback(m_pWindow, keyCallback);
-
-        glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
-
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
-
-        glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
-        glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-        // end create window
-        //-----------------------------------------------
-
-        m_driver.Init(m_pWindow);
-
-        //-----------------------------------------------
-        // init camera view
-        m_cameraView.setAspect(wHeight / (float) wWidth);
-        // end init camera view
-        //-----------------------------------------------
-    }
 
 
     void AppLVL4::update_entities_(float time)
@@ -341,13 +363,6 @@ namespace ezg
                 glfwSetInputMode(app->m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
             }
         }
-    }
-
-    /*static*/ void AppLVL4::framebufferResizeCallback(GLFWwindow *window, int width, int height)
-    {
-        auto app = static_cast<AppLVL4 *>(glfwGetWindowUserPointer(window));
-        app->m_driver.detectFrameBufferResized();
-        app->m_cameraView.setAspect(width / (float) height);
     }
 
     /***

@@ -54,7 +54,7 @@ namespace ezg
             for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
 
                 //hardcode loading to triangles
-                int fv = 3;
+                size_t fv = 3;
 
                 // Loop over vertices in the face.
                 for (size_t v = 0; v < fv; v++) {

@@ -29,8 +29,8 @@ namespace ezg
         float     m_angle         = 0;
         float     m_speedRotation = 0;
 
-        glm::mat4 getModelMatrix() const noexcept override;
-        glm::vec3 getColor() const noexcept override { return m_color; }
+        glm::mat4 getModelMatrix() const override;
+        glm::vec3 getColor() const override { return m_color; }
 
         /// Carries out the growth of the mesh according to the following algorithm:
         /// A point is selected in the triangle, then it is stretched along the normal

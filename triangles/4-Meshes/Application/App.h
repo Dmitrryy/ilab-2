@@ -40,16 +40,19 @@ namespace ezg
     class AppLVL4
     {
 
-        Engine            m_driver;
-        GLFWwindow*       m_pWindow = nullptr;
+        std::unique_ptr< Engine >    m_driver;
+
+        GLFWwindow*                  m_pWindow = nullptr;
 
         std::vector< Engine::Mesh* > m_entities;
-        la::Rectangle3    m_box = { { -10, -10, -10 }, { 10, 10, 10 } };
+        la::Rectangle3               m_box;
 
-        CameraView        m_cameraView;
-        float             m_speed = 100.f;
+        CameraView                   m_cameraView;
+        float                        m_speed = 100.f;
 
-        ezg::Timer        m_time;
+        ezg::Timer                   m_time;
+
+        bool                         m_sceneIsLoaded = false;
 
     public:
 
@@ -58,19 +61,9 @@ namespace ezg
         AppLVL4           (AppLVL4&&)      = delete; //not supported
         AppLVL4& operator=(AppLVL4&&)      = delete; //not supported
 
-        //default destructor
-        AppLVL4()
-            : m_driver     ("Triangles-4")
-            , m_cameraView ({ 2.f, 2.f, 2.f }, { -2.f, -2.f, -2.f})
-        {}
+        AppLVL4();
 
-        ~AppLVL4() {
-            glfwDestroyWindow(m_pWindow);
-
-            for(auto&& e : m_entities) {
-                delete e;
-            }
-        }
+        ~AppLVL4();
 
 
     public:
@@ -80,6 +73,8 @@ namespace ezg
         /// \param fileName - file with data of scene
         /// \return result code(enumeration member). If successful, tinyxml2::XML_SUCCESS is returned
         tinyxml2::XMLError loadSceneFromXML(const std::string& fileName);
+
+        bool sceneIsLoaded() const noexcept { return m_sceneIsLoaded; }
 
         /// Launch the app!
         /// A window opens with a visualization of the triangle meshes.
@@ -93,10 +88,8 @@ namespace ezg
         void update_entities_(float time);
         void update_camera_(float time);
 
-        void init_();
 
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
-        static void framebufferResizeCallback(GLFWwindow* window, int width, int height); //TODO now you cant resize window
     };
 
 }//namespace ezg

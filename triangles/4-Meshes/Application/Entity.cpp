@@ -15,7 +15,7 @@
 namespace ezg
 {
 
-    glm::mat4 TriangleMesh::getModelMatrix() const noexcept /*override*/
+    glm::mat4 TriangleMesh::getModelMatrix() const /*override*/
     {
         glm::mat4 res = glm::translate(glm::mat4(1.f), m_position);
         res = glm::rotate(res, glm::radians(m_angle), m_dirRotation);
