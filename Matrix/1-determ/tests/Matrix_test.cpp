@@ -326,3 +326,25 @@ TEST_F(MatrixTest, multipl)
     };
     EXPECT_EQ(q1_.multiplication(q2_), q3_);
 }
+
+
+TEST_F(MatrixTest, solve)
+{
+    Matrix< float > m = {
+            {-4, 1, 1, 0},
+            {1, -4, 0, 1},
+            {1, 0, -4, 1},
+            {0, 1, 1, -4}
+    };
+
+    std::vector< float > b = { -6, -10, -2, -6 };
+
+    q1_ = {
+            { -6 },
+            { -10 },
+            { -2 },
+            { -6 }
+    };
+
+    std::cout << m.solve(b).first << std::endl;
+}

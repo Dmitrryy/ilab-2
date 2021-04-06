@@ -31,7 +31,7 @@
 namespace matrix
 {
 
-#define EPSIL 0.000000001
+#define EPSIL 0.0000001
 
     /// \name class Matrix
     /// \brief

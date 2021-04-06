@@ -103,13 +103,13 @@ namespace ezg
     void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, float& res, Args&& ...args)
     {
         res = xmlElement->FloatAttribute(name.c_str());
-        getAttribute(xmlElement, args...);
+        getAttribute(xmlElement, std::forward<Args>(args)...);
     }
     template< typename ...Args >
     void getAttribute(tinyxml2::XMLElement* xmlElement, const char* name, float& res, Args&& ...args)
     {
         res = xmlElement->FloatAttribute(name);
-        getAttribute(xmlElement, args...);
+        getAttribute(xmlElement, std::forward<Args>(args)...);
     }
 
 
@@ -117,13 +117,13 @@ namespace ezg
     void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, int& res, Args&& ...args)
     {
         res = xmlElement->IntAttribute(name.c_str());
-        getAttribute(xmlElement, args...);
+        getAttribute(xmlElement, std::forward<Args>(args)...);
     }
     template< typename ...Args >
     void getAttribute(tinyxml2::XMLElement* xmlElement, const char* name, int& res, Args&& ...args)
     {
         res = xmlElement->IntAttribute(name);
-        getAttribute(xmlElement, args...);
+        getAttribute(xmlElement, std::forward<Args>(args)...);
     }
     /*
      * specializations for other types of attribute
