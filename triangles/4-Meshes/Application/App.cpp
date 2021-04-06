@@ -92,19 +92,37 @@ namespace ezg
      *
      ***/
 
-/*
-    template< typename T, typename ...Args >
-    void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, T& res, Args &...args);
+    template< typename ...Args >
+    void getAttribute(tinyxml2::XMLElement* xmlElement, Args&& ...args);
 
-*/
+    template< >
+    void getAttribute(tinyxml2::XMLElement* ) { /* nop */ }
 
-    template< typename T = void >
-    void getAttribute(tinyxml2::XMLElement*) {}
 
     template< typename ...Args >
-    void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, float& res, Args &...args)
+    void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, float& res, Args&& ...args)
     {
         res = xmlElement->FloatAttribute(name.c_str());
+        getAttribute(xmlElement, args...);
+    }
+    template< typename ...Args >
+    void getAttribute(tinyxml2::XMLElement* xmlElement, const char* name, float& res, Args&& ...args)
+    {
+        res = xmlElement->FloatAttribute(name);
+        getAttribute(xmlElement, args...);
+    }
+
+
+    template< typename ...Args >
+    void getAttribute(tinyxml2::XMLElement* xmlElement, const std::string& name, int& res, Args&& ...args)
+    {
+        res = xmlElement->IntAttribute(name.c_str());
+        getAttribute(xmlElement, args...);
+    }
+    template< typename ...Args >
+    void getAttribute(tinyxml2::XMLElement* xmlElement, const char* name, int& res, Args&& ...args)
+    {
+        res = xmlElement->IntAttribute(name);
         getAttribute(xmlElement, args...);
     }
     /*
