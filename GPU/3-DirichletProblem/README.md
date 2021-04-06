@@ -103,4 +103,7 @@ by line from top to bottom and each line from left to right
     > clNext->unpack(cluCurrent);              
     > // unpack for rendering  
     > renderHF(cluCurrent->m_pVectorTexture); 
-    > ```` 
+    > ````
+  
+- [2] [Conjugate gradient method](https://en.wikipedia.org/wiki/Conjugate_gradient_method)
+
