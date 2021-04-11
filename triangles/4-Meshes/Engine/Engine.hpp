@@ -28,13 +28,13 @@
 
 #pragma once
 
+
 #include "vkCore.h"
 #include "CameraView.h"
 #include "DeleteonQueue.hpp"
 
 #include <vk_mem_alloc.h>
 
-#include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -192,8 +192,7 @@ namespace ezg
 
 	private:
 
-		GLFWwindow*                    m_pWindow            = nullptr;
-
+		const Window&                  m_rWindow;
 		Core                           m_core;
 
         VmaAllocator                   m_allocator = nullptr;
@@ -240,7 +239,7 @@ namespace ezg
 	    Engine& operator=(Engine&&)      = delete; //not supported
 
 
-		Engine(GLFWwindow* pWindow);
+		Engine(const Window& window);
 
 
 		~Engine();

@@ -40,33 +40,28 @@ namespace ezg
     {
         //-----------------------------------------------
         // create window
-        int res = glfwInit();
-        if (res != GLFW_TRUE) {
-            throw std::runtime_error("failed glfwInit!");
-        }
+        std::vector< std::pair< int, int > > hints = {
+                { GLFW_CLIENT_API, GLFW_NO_API },
+                { GLFW_RESIZABLE, GLFW_FALSE }
+        };
 
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        m_window = std::make_unique< Window >(WINDOW_WIDTH, WINDOW_HEIGHT
+                                              , "LVL 4"
+                                              , nullptr, nullptr
+                                              , hints);
+        m_window->setUserPointer(this);
+        m_window->setKeyCallback(keyCallback);
 
-        m_pWindow = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "LVL 4", nullptr, nullptr);
-        if (m_pWindow == nullptr) {
-            throw std::runtime_error("failed create window");
-        }
+        m_window->setInputMode(GLFW_STICKY_KEYS, 1);
+        m_window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-        glfwSetWindowUserPointer(m_pWindow, this);
-        glfwSetKeyCallback(m_pWindow, keyCallback);
-
-        glfwSetInputMode(m_pWindow, GLFW_STICKY_KEYS, 1);
-
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
-
-        glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
-        glfwSetInputMode(m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        const int wHeight = m_window->getHeight();
+        const int wWidth = m_window->getWidth();
+        m_window->setCursorPosition(wWidth / 2.0, wHeight / 2.0);
         // end create window
         //-----------------------------------------------
 
-        m_driver = std::make_unique< Engine >(m_pWindow);
+        m_driver = std::make_unique< Engine >(*m_window);
 
         //-----------------------------------------------
         // init camera view
@@ -75,15 +70,13 @@ namespace ezg
         //-----------------------------------------------
     }
 
-    AppLVL4::~AppLVL4() {
-        glfwDestroyWindow(m_pWindow);
-
+    AppLVL4::~AppLVL4()
+    {
         std::transform(m_entities.begin(), m_entities.end(), m_entities.begin(), [&driver = m_driver](auto* pEnt) -> TriangleMesh* {
             driver->unload_mesh(*pEnt);
             delete pEnt;
             return nullptr;
         });
-
     }
 
     /****************************************************************************************
@@ -258,7 +251,7 @@ namespace ezg
         m_time.reset();
 
         Timer frameTimer;
-        while (!glfwWindowShouldClose(m_pWindow))
+        while (!m_window->shouldClose())
         {
             float dTime = frameTimer.elapsed();
             frameTimer.reset();
@@ -317,27 +310,27 @@ namespace ezg
 
     void AppLVL4::update_camera_(float time)
     {
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
-        if (glfwGetKey(m_pWindow, GLFW_KEY_TAB) != GLFW_PRESS) {
-            double x = 0, y = 0;
-            glfwGetCursorPos(m_pWindow, &x, &y);
+        int wHeight = m_window->getHeight(), wWidth = m_window->getWidth();
+
+        if (m_window->getKey(GLFW_KEY_TAB) != GLFW_PRESS)
+        {
+            double x = m_window->getCursorXPos(), y = m_window->getCursorYPos();
             const float dx = wWidth / 2.f - x;
             const float dy = wHeight / 2.f - y;
 
             m_cameraView.turnInHorizontalPlane(glm::radians(90.f * dx / wWidth));
             m_cameraView.turnInVerticalPlane(glm::radians(90.f * dy / wHeight));
 
-            glfwSetCursorPos(m_pWindow, wWidth / 2.0, wHeight / 2.0);
+            m_window->setCursorPosition(wWidth / 2.0, wHeight / 2.0);
         }
 
         {
-            bool forward = glfwGetKey(m_pWindow, GLFW_KEY_W) == GLFW_PRESS;
-            bool back = glfwGetKey(m_pWindow, GLFW_KEY_S) == GLFW_PRESS;
+            bool forward = m_window->getKey(GLFW_KEY_W) == GLFW_PRESS;
+            bool back = m_window->getKey(GLFW_KEY_S) == GLFW_PRESS;
             if (forward && back) { forward = back = false; }
 
-            bool left = glfwGetKey(m_pWindow, GLFW_KEY_A) == GLFW_PRESS;
-            bool right = glfwGetKey(m_pWindow, GLFW_KEY_D) == GLFW_PRESS;
+            bool left = m_window->getKey(GLFW_KEY_A) == GLFW_PRESS;
+            bool right = m_window->getKey(GLFW_KEY_D) == GLFW_PRESS;
             if (left && right) { left = right = false; }
 
 
@@ -350,8 +343,8 @@ namespace ezg
         }
 
         {
-            bool down = glfwGetKey(m_pWindow, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-            bool up = glfwGetKey(m_pWindow, GLFW_KEY_SPACE) == GLFW_PRESS;
+            bool down = m_window->getKey(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+            bool up = m_window->getKey(GLFW_KEY_SPACE) == GLFW_PRESS;
             if (down && up) { down = up = false; }
 
             if (down || up) {
@@ -375,12 +368,11 @@ namespace ezg
             glfwSetWindowShouldClose(window, GL_TRUE);
         } else if (key == GLFW_KEY_TAB) {
             if (action == GLFW_PRESS) {
-                glfwSetInputMode(app->m_pWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                app->m_window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             } else if (action == GLFW_RELEASE) {
-                int wHeight = 0, wWidth = 0;
-                glfwGetWindowSize(app->m_pWindow, &wWidth, &wHeight);
-                glfwSetCursorPos(app->m_pWindow, wWidth / 2.0, wHeight / 2.0);
-                glfwSetInputMode(app->m_pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+                int wHeight = app->m_window->getHeight(), wWidth = app->m_window->getWidth();
+                app->m_window->setCursorPosition(wWidth / 2.0, wHeight / 2.0);
+                app->m_window->setInputMode(GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
             }
         }
     }

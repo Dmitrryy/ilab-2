@@ -7,6 +7,8 @@
  *
  ***/
 
+
+
 #include "vkCore.h"
 
 #include <cassert>
@@ -16,15 +18,13 @@
 namespace ezg
 {
 
-    Core::Core(GLFWwindow *pWindow)
+    Core::Core(const Window& window)
     {
         std::vector< VkExtensionProperties > ExtProps = VulkanEnumExtProps();
 
         createInstance_();
 
-        if (glfwCreateWindowSurface(m_inst, pWindow, nullptr, &m_surface) != VK_SUCCESS) {
-            throw std::runtime_error(("failed to create window surface!"));
-        }
+        m_surface = window.createSurface(m_inst);
         m_deletionQueue.push([inst = m_inst, surf = m_surface]()
                              {
                                  vkDestroySurfaceKHR(inst, surf, nullptr);

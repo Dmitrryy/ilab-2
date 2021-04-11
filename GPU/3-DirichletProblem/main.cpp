@@ -9,11 +9,12 @@
 
 
 #include <iostream>
-#include <CL/cl2.hpp>
+
+#include "native_CPU/DPNativeCPU.hpp"
+
 
 int main()
 {
-
 
     return 0;
 }

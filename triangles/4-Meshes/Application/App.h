@@ -29,6 +29,8 @@
 
 #include <OtherLibs/timer.h>
 #include "../../LAL/include/LAL.h"
+
+
 #include <Engine/Engine.hpp>
 
 #include <tinyxml2.h>
@@ -42,7 +44,8 @@ namespace ezg
 
         std::unique_ptr< Engine >    m_driver;
 
-        GLFWwindow*                  m_pWindow = nullptr;
+        //GLFWwindow*                  m_pWindow = nullptr;
+        std::unique_ptr< Window >    m_window;
 
         std::vector< Engine::Mesh* > m_entities;
         la::Rectangle3               m_box;

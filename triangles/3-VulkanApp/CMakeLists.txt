@@ -51,7 +51,7 @@ endif()
 
 
 add_executable(${PROJECT_NAME} app_main.cpp Application/Driver.cpp Application/vkCore.cpp
-        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp)
+        Application/App.cpp Application/Helpa/helpa.cpp Application/Entity.cpp gen_tests.hpp ../GLFWWrap/GLFWWrap.cpp ../GLFWWrap/GLFWWrap.hpp)
 
 
 ##############################

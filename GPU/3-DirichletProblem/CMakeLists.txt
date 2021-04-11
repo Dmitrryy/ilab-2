@@ -19,10 +19,10 @@ cmake_minimum_required(VERSION 3.10)
 project(DirichletProblem)
 
 
-set(EXECUTE_NAME app)
+set(EXECUTE_NAME Dirichlet)
 
 # add the executable
-add_executable(${EXECUTE_NAME} main.cpp)
+add_executable(${EXECUTE_NAME} main.cpp native_CPU/DPNativeCPU.hpp)
 
 
 # setting the 17th language standard
@@ -39,8 +39,8 @@ if( NOT CMAKE_BUILD_TYPE )
 endif()
 
 if(${CMAKE_BUILD_TYPE} MATCHES Debug)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
-    target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
+    target_compile_definitions(${EXECUTE_NAME} PRIVATE DEBUG)
+    target_compile_options(${EXECUTE_NAME} PRIVATE -Wall)
 endif()
 ##-----------------------------------------------------------------------------
 #

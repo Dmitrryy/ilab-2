@@ -38,8 +38,9 @@ namespace ezg
 {
 
 
-    Engine::Engine(GLFWwindow *pWindow)
-            : m_pWindow(pWindow), m_core(pWindow)
+    Engine::Engine(const Window& window)
+            : m_rWindow(window)
+            , m_core(window)
     {
         VmaAllocatorCreateInfo allocatorInfo = {};
         allocatorInfo.physicalDevice = m_core.getPhysDevice();
@@ -175,8 +176,7 @@ namespace ezg
                 {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}
                 , VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
         );
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
+        int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
 
         VkImageCreateInfo dimg_imfo = {};
         dimg_imfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -425,8 +425,8 @@ namespace ezg
     void Engine::render_meshes(const std::vector< Mesh * > &objects)
     {
         auto &&curFrame = getCurFrame();
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
+        int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
+
 
         vkWaitForFences(m_core.getDevice(), 1, &curFrame.renderFence, VK_TRUE, UINT64_MAX);
         vkResetFences(m_core.getDevice(), 1, &curFrame.renderFence);
@@ -623,8 +623,7 @@ namespace ezg
 
     void Engine::createFramebuffer_()
     {
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
+        int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
 
         m_frameBuffers.resize(m_images.size());
 
@@ -753,9 +752,7 @@ namespace ezg
 
         pipelineBuildInfo.inputAssembly = inputAssembly;
 
-
-        int wHeight = 0, wWidth = 0;
-        glfwGetWindowSize(m_pWindow, &wWidth, &wHeight);
+        int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
 
         pipelineBuildInfo.viewport.x = 0.f;
         pipelineBuildInfo.viewport.y = 0.f;

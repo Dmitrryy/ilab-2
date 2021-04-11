@@ -11,14 +11,15 @@
 
 #include "DeleteonQueue.hpp"
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFWWrap/Window.hpp>
+
 #include <vulkan/vulkan.h>
 
 #include <string>
 #include <vector>
 #include <iostream>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 #ifndef NDEBUG
 
@@ -102,7 +103,7 @@ namespace ezg
 
     public:
 
-        Core(GLFWwindow* pWindow);
+        Core(const Window& window);
 
     public:
 
