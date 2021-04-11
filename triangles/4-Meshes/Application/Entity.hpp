@@ -13,6 +13,9 @@
 
 #include "../../LAL/include/LALmath.h"
 
+#include <path/tinyxml2p.hpp>
+
+
 namespace ezg
 {
 
@@ -43,6 +46,8 @@ namespace ezg
         /// moves the object at a distance corresponding to a given time interval
         /// \param dt - the amount of time it takes to move the object
         void update(float dt) noexcept;
+
+        void loadFromXML(tinyxml2::XMLElement* xmlElem);
     };
 
 }// namespace ezg

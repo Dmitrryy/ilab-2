@@ -32,7 +32,6 @@ int main()
     std::string fileName;
     std::cin >> fileName;
 
-
     try {
         ezg::AppLVL4 app;
 

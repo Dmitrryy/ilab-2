@@ -39,8 +39,7 @@ namespace ezg
 
 
     Engine::Engine(const Window& window)
-            : m_rWindow(window)
-            , m_core(window)
+            : m_rWindow(window), m_core(window)
     {
         VmaAllocatorCreateInfo allocatorInfo = {};
         allocatorInfo.physicalDevice = m_core.getPhysDevice();
@@ -83,7 +82,7 @@ namespace ezg
 
     void Engine::createSwapChain_()
     {
-        const VkSurfaceCapabilitiesKHR &SurfaceCaps = m_core.getSurfaceCaps();
+        const VkSurfaceCapabilitiesKHR& SurfaceCaps = m_core.getSurfaceCaps();
 
         uint32_t numImages = SurfaceCaps.minImageCount + 1;
         assert(numImages <= SurfaceCaps.maxImageCount);
@@ -144,9 +143,9 @@ namespace ezg
         cmdPoolCreateInfo.queueFamilyIndex = m_core.getQueueFamily();
         cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
-        auto &&device = m_core.getDevice();
+        auto&& device = m_core.getDevice();
 
-        for (auto &&frame : m_frames) {
+        for (auto&& frame : m_frames) {
             if (vkCreateCommandPool(device, &cmdPoolCreateInfo, nullptr, &(frame.commandPool)) != VK_SUCCESS) {
                 throw std::runtime_error(("failed to create graphics command pool!"));
             }
@@ -227,7 +226,7 @@ namespace ezg
         pool_info.poolSizeCount = (uint32_t) sizes.size();
         pool_info.pPoolSizes = sizes.data();
 
-        auto &&device = m_core.getDevice();
+        auto&& device = m_core.getDevice();
         vkCreateDescriptorPool(device, &pool_info, nullptr, &m_descriptorPool);
         m_deletionQueue.push([device, dp = m_descriptorPool]()
                              {
@@ -268,7 +267,7 @@ namespace ezg
                              });
 
 
-        for (auto &&frame : m_frames) {
+        for (auto&& frame : m_frames) {
             frame.cameraBuffer = create_buffer_(sizeof(GPUCameraData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
                                                 , VMA_MEMORY_USAGE_CPU_TO_GPU);
             m_deletionQueue.push([alloc = m_allocator, cb = frame.cameraBuffer]()
@@ -343,7 +342,7 @@ namespace ezg
     }
 
 
-    void Engine::upload_mesh(Mesh &mesh)
+    void Engine::upload_mesh(Mesh& mesh)
     {
         if (mesh.vertices.empty()) {
             throw std::runtime_error("cant create a mesh with empty vertex data!");
@@ -372,7 +371,7 @@ namespace ezg
                         , &mesh.m_vertexBuffer._allocation, nullptr);
 
         //copy vertex data
-        void *data;
+        void* data;
         vmaMapMemory(m_allocator, mesh.m_vertexBuffer._allocation, &data);
         memcpy(data, mesh.vertices.data(), mesh.vertices.size() * sizeof(Vertex));
         vmaUnmapMemory(m_allocator, mesh.m_vertexBuffer._allocation);
@@ -381,7 +380,7 @@ namespace ezg
     }
 
 
-    void Engine::unload_mesh(Mesh &mesh)
+    void Engine::unload_mesh(Mesh& mesh)
     {
         if (!mesh.m_isUploaded) {
             std::cerr << "I can not upload data that has not been downloaded" << std::endl;
@@ -395,15 +394,15 @@ namespace ezg
     }
 
 
-    void Engine::updateUniformBuffer_(uint32_t currentImage_, const std::vector< Mesh * > &meshes)
+    void Engine::updateUniformBuffer_(uint32_t currentImage_, const std::vector< Mesh* >& meshes)
     {
         GPUCameraData ubo = {};
         ubo.view = m_cameraView.getViewMatrix();
         ubo.proj = m_cameraView.getProjectionMatrix();
 
-        auto &&curFrame = m_frames[currentImage_];
+        auto&& curFrame = m_frames[currentImage_];
 
-        void *data = nullptr;
+        void* data = nullptr;
         vmaMapMemory(m_allocator, curFrame.cameraBuffer._allocation, &data);
         memcpy(data, &ubo, sizeof(ubo));
         vmaUnmapMemory(m_allocator, curFrame.cameraBuffer._allocation);
@@ -412,7 +411,7 @@ namespace ezg
 
         vmaMapMemory(m_allocator, curFrame.objectBuffer._allocation, &data);
 
-        auto *pModelData = static_cast< GPUObjectData * >(data);
+        auto* pModelData = static_cast< GPUObjectData* >(data);
         for (size_t i = 0, mi = meshes.size(); i < mi; i++) {
             pModelData[i].model = meshes[i]->getModelMatrix();
             pModelData[i].color = meshes[i]->getColor();
@@ -422,9 +421,9 @@ namespace ezg
     }
 
 
-    void Engine::render_meshes(const std::vector< Mesh * > &objects)
+    void Engine::render_meshes(const std::vector< Mesh* >& objects)
     {
-        auto &&curFrame = getCurFrame();
+        auto&& curFrame = getCurFrame();
         int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
 
 
@@ -474,15 +473,15 @@ namespace ezg
         updateUniformBuffer_(m_currentFrame % m_maxFramesInFlight, objects);
 
 
-        RenderMaterial *lastMaterial = nullptr;
+        RenderMaterial* lastMaterial = nullptr;
         for (size_t i = 0, mi = objects.size(); i < mi; ++i) {
-            auto &&object = *objects.at(i);
+            auto&& object = *objects.at(i);
             if (!object.m_isUploaded) {
                 std::cerr << "object with id " << i << " isn't uploaded!" << std::endl;
                 continue;
             }
 
-            auto &&material = &m_renderMaterial;
+            auto&& material = &m_renderMaterial;
             //only bind the pipeline if it doesnt match with the already bound one
             if (material != lastMaterial) {
 
@@ -660,12 +659,12 @@ namespace ezg
     }
 
 
-    VkShaderModule Engine::createShaderModule_(const std::string &source_)
+    VkShaderModule Engine::createShaderModule_(const std::string& source_)
     {
         VkShaderModuleCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = source_.size();
-        createInfo.pCode = reinterpret_cast< const uint32_t * >(source_.data());
+        createInfo.pCode = reinterpret_cast< const uint32_t* >(source_.data());
 
         VkShaderModule sModule = nullptr;
         if (vkCreateShaderModule(m_core.getDevice(), &createInfo, nullptr, &sModule) != VK_SUCCESS) {
@@ -836,9 +835,9 @@ namespace ezg
         VkSemaphoreCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-        auto &&device = m_core.getDevice();
+        auto&& device = m_core.getDevice();
 
-        for (auto &&frame : m_frames) {
+        for (auto&& frame : m_frames) {
             vkCreateFence(device, &fenceInfo, nullptr, &frame.renderFence);
 
             //enqueue the destruction of the fence

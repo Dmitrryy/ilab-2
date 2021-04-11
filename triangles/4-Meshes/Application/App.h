@@ -33,13 +33,13 @@
 
 #include <Engine/Engine.hpp>
 
-#include <tinyxml2.h>
+#include <tinyxml2p.hpp>
 
 
 namespace ezg
 {
 
-    class AppLVL4
+    class AppLVL4 final
     {
         std::unique_ptr< Engine >    m_driver;
 
@@ -51,7 +51,7 @@ namespace ezg
         CameraView                   m_cameraView;
         float                        m_speed = 100.f;
 
-        ezg::Timer                   m_time;
+        Timer                        m_time;
 
         bool                         m_sceneIsLoaded = false;
 
@@ -85,6 +85,11 @@ namespace ezg
         void run();
 
     private:
+
+        void load_box_from_XML(tinyxml2::XMLDocument& doc);
+        void load_camera_from_XML(tinyxml2::XMLDocument& doc);
+        void load_objects_from_XML(tinyxml2::XMLDocument& doc);
+        void load_object_properties_from_XML(tinyxml2::XMLElement* elem);
 
         void update_entities_(float time);
         void update_camera_(float time);

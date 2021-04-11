@@ -8,6 +8,8 @@
  ***/
 
 #include <algorithm>
+#include <OtherLibs/random.h>
+
 
 #include "Entity.hpp"
 
@@ -61,7 +63,74 @@ namespace ezg
             vertices.at(id1) = v0;
             vertices.at(id2) = v3;
         }
+    }
 
+
+    void TriangleMesh::loadFromXML(tinyxml2::XMLElement* xmlElem)
+    {
+        auto* modelXML = xmlElem->FirstChildElement("model");
+        if (modelXML == nullptr || !load_from_obj(modelXML->Attribute("file"))) {
+            throw std::runtime_error("cant load model from file: " + std::string(modelXML->Attribute("file")));
+        }
+
+        using tinyxml2p::getAttribute;
+
+        auto* prop = xmlElem->FirstChildElement("properties");
+        if (prop != nullptr) {
+            auto* posXML = prop->FirstChildElement("position");
+            if (posXML != nullptr) {
+                getAttribute(posXML, "x", m_position.x, "y", m_position.y, "z"
+                             , m_position.z);
+            }
+
+            auto* colorXML = prop->FirstChildElement("color");
+            if (colorXML != nullptr) {
+                getAttribute(colorXML, "r", m_color.x, "g", m_color.y, "b", m_color.z);
+            }
+
+            auto* scaleXML = prop->FirstChildElement("scale");
+            if (scaleXML != nullptr) {
+                getAttribute(scaleXML, "x", m_scale.x, "y", m_scale.y, "z", m_scale.z);
+            }
+
+            auto* dirTravelXML = prop->FirstChildElement("dirTravel");
+            if (dirTravelXML != nullptr) {
+                getAttribute(dirTravelXML, "x", m_dirTravel.x, "y", m_dirTravel.y, "z"
+                             , m_dirTravel.z);
+            }
+
+            auto* dirRotateXML = prop->FirstChildElement("dirRotate");
+            if (dirRotateXML != nullptr) {
+                getAttribute(dirRotateXML, "x", m_dirRotation.x, "y", m_dirRotation.y, "z"
+                             , m_dirRotation.z);
+            }
+
+            auto* speedRotationXML = prop->FirstChildElement("speedRotation");
+            if (speedRotationXML != nullptr) {
+                m_speedRotation = speedRotationXML->FloatAttribute("val");
+            }
+        }
+
+        auto* growXML = xmlElem->FirstChildElement("grow");
+        if (growXML != nullptr) {
+            size_t stages = growXML->Unsigned64Attribute("stages");
+            float max_dist = growXML->FloatAttribute("distance");
+
+            vertices.reserve(vertices.size() + stages * 2);
+
+            // the random number generator can only generate integers.
+            // To get a random non-integer number, we multiply the limits
+            // by accuracy and, during the generation itself, divide by accuracy
+            const size_t accuracy = 100000;
+            const uint max = static_cast<uint>(max_dist * accuracy);
+            ezg::Random randDist(max / 6, max);
+
+            for (size_t i = 0; i < stages; ++i) {
+                ezg::Random randTriangle(0, vertices.size() / 3 - 1);
+
+                grow(randTriangle(), static_cast<float>(randDist()) / accuracy);
+            }
+        }
     }
 
 }// namespace ezg

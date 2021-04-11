@@ -13,10 +13,10 @@ namespace ezg
 {
 
     Window::Window(int width, int height
-           , const std::string& title
-           , GLFWmonitor *monitor
-           , GLFWwindow *share
-           , const std::vector< std::pair< int, int > >& hints)
+                   , const std::string& title
+                   , GLFWmonitor* monitor
+                   , GLFWwindow* share
+                   , const std::vector< std::pair< int, int > >& hints)
     {
         glfwDefaultWindowHints();
         for (auto&& h : hints) {
@@ -25,7 +25,7 @@ namespace ezg
 
         m_pWindow = glfwCreateWindow(width, height
                                      , title.c_str()
-                                     ,monitor, share);
+                                     , monitor, share);
         if (m_pWindow == nullptr) {
             throw std::runtime_error("failed create window");
         }
@@ -35,7 +35,6 @@ namespace ezg
     {
         glfwDestroyWindow(m_pWindow);
     }
-
 
 
     void Window::setUserPointer(void* pointer) const
@@ -60,6 +59,7 @@ namespace ezg
         glfwGetWindowSize(m_pWindow, &width, &height);
         return height;
     }
+
     int Window::getWidth() const
     {
         int height = 0, width = 0;
@@ -85,6 +85,7 @@ namespace ezg
         glfwGetCursorPos(m_pWindow, &x, &y);
         return x;
     }
+
     double Window::getCursorYPos() const
     {
         double x = 0, y = 0;
