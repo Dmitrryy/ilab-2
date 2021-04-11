@@ -41,10 +41,8 @@ namespace ezg
 
     class AppLVL4
     {
-
         std::unique_ptr< Engine >    m_driver;
 
-        //GLFWwindow*                  m_pWindow = nullptr;
         std::unique_ptr< Window >    m_window;
 
         std::vector< Engine::Mesh* > m_entities;

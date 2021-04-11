@@ -14,7 +14,6 @@
 
 #include <vector>
 #include <string>
-#include <vulkan/vulkan.h>
 
 
 namespace ezg

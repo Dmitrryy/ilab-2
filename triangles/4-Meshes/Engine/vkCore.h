@@ -14,8 +14,6 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFWWrap/Window.hpp>
 
-#include <vulkan/vulkan.h>
-
 #include <string>
 #include <vector>
 #include <iostream>
