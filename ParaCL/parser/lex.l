@@ -6,7 +6,7 @@
 
 %{
 
-#include "gramar.tab.hh"
+#include "compiler.cpp.h"
 #include "scanner.h"
 #include <iostream>
 

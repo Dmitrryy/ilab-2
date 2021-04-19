@@ -5,7 +5,7 @@
 
 #include "../Compiler/INode.h"
 
-#include "gramar.tab.hh"
+#include "compiler.cpp.h"
 #include "scanner.h"
 
 namespace yy

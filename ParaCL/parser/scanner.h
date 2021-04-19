@@ -2,7 +2,6 @@
 
 #ifndef yyFlexLexer
 #include <FlexLexer.h>
-
 #include <utility>
 #endif
 
