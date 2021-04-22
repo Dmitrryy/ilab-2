@@ -170,6 +170,12 @@ namespace ezg
         {
             VkPipeline pipeline;
             VkPipelineLayout pipelineLayout;
+
+            enum class Type
+            {
+                DEFAULT
+                , FB_IS_CUBE_MAP //todo
+            };
         };
 
 
@@ -208,7 +214,9 @@ namespace ezg
 
 		VkRenderPass                   m_renderPass     = nullptr;
 
-        RenderMaterial                 m_renderMaterial = {};
+		std::unordered_map< RenderMaterial::Type, RenderMaterial >
+		                               m_renderMaterials;
+
 
         VkImageView                    m_depthImageView = nullptr;
         AllocatedImage                 m_depthImage     = {};
@@ -230,6 +238,17 @@ namespace ezg
 
 
         DeletionQueue_t                m_deletionQueue;
+
+        //============================================================
+        //in dev (experiment) TODO
+        VkImageView                    m_cubeMapView = nullptr;
+        VkExtent3D                     m_cubeExtent = { 1024, 1024, 1 };
+        AllocatedImage                 m_cubeMap = {};
+        VkFramebuffer                  m_cubeFrameBuffer = nullptr;
+
+        void prepareCubeFrameBuffer__();
+        //============================================================
+
 
     public:
 
@@ -263,9 +282,21 @@ namespace ezg
 
         void init_(GLFWwindow* window);
 
+
 	    FrameData& getCurFrame() { return m_frames[m_currentFrame % m_maxFramesInFlight]; }
 
         AllocatedBuffer create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage);
+	    AllocatedImage  create_image_(VkImageType type
+                                   , VkFormat format
+                                   , VkImageCreateFlags flags
+                                   , VkSampleCountFlagBits samples
+                                   , VkImageTiling tiling
+                                   , VkImageUsageFlags usage
+                                   , VmaMemoryUsage memoryUsage
+                                   , VkExtent3D extent
+                                   , uint32_t layers
+                                   , uint32_t mipLevels);
+
 
         VkShaderModule createShaderModule_(const std::string &source_);
 

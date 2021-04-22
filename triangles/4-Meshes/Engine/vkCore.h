@@ -123,7 +123,15 @@ namespace ezg
 
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+        VkImageView createImageView(VkImage image
+                                    , VkFormat format
+                                    , VkImageViewType type
+                                    , VkImageAspectFlags aspectFlags
+                                    , VkComponentMapping components = {}
+                                    , uint32_t baseArrayLayer = 0
+                                    , uint32_t layers = 1
+                                    , uint32_t baseMipLevel = 0
+                                    , uint32_t levels = 1);
 
 
         VkFormat findSupportedFormat(const std::vector< VkFormat >& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);

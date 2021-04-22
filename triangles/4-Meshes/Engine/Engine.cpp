@@ -71,6 +71,9 @@ namespace ezg
         createPipeline_();
 
         createSyncObjects_();
+
+
+        prepareCubeFrameBuffer__();
     }
 
 
@@ -177,28 +180,20 @@ namespace ezg
         );
         int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
 
-        VkImageCreateInfo dimg_imfo = {};
-        dimg_imfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        dimg_imfo.pNext = nullptr;
-        dimg_imfo.imageType = VK_IMAGE_TYPE_2D;
-        dimg_imfo.format = depthFormat;
-        dimg_imfo.extent = VkExtent3D{static_cast<uint32_t>(wWidth), static_cast<uint32_t>(wHeight), 1};
-        dimg_imfo.mipLevels = 1;
-        dimg_imfo.arrayLayers = 1;
-        dimg_imfo.samples = VK_SAMPLE_COUNT_1_BIT;
-        dimg_imfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-        dimg_imfo.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        m_depthImage = create_image_(VK_IMAGE_TYPE_2D
+                                     , depthFormat
+                                     , 0, VK_SAMPLE_COUNT_1_BIT
+                                     , VK_IMAGE_TILING_OPTIMAL
+                                     , VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+                                     , VMA_MEMORY_USAGE_GPU_ONLY
+                                     , VkExtent3D{static_cast<uint32_t>(wWidth), static_cast<uint32_t>(wHeight), 1}
+                                     , 1, 1);
 
 
-        VmaAllocationCreateInfo dimg_allocinfo = {};
-        dimg_allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY;
-        dimg_allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-
-        vmaCreateImage(m_allocator, &dimg_imfo, &dimg_allocinfo, &m_depthImage._image, &m_depthImage._allocation
-                       , nullptr);
-
-        m_depthImageView = m_core.createImageView(m_depthImage._image, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+        m_depthImageView = m_core.createImageView(m_depthImage._image
+                                                  , depthFormat
+                                                  , VK_IMAGE_VIEW_TYPE_2D
+                                                  , VK_IMAGE_ASPECT_DEPTH_BIT);
 
         m_deletionQueue.push(
                 [dev = m_core.getDevice(), dIm = m_depthImage, dImV = m_depthImageView, alloc = m_allocator]()
@@ -352,23 +347,9 @@ namespace ezg
             return;
         }
 
-        //allocate vertex buffer
-        VkBufferCreateInfo bufferInfo = {};
-        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferInfo.pNext = nullptr;
-        //this is the total size, in bytes, of the buffer we are allocating
-        bufferInfo.size = mesh.vertices.size() * sizeof(Vertex);
-        //this buffer is going to be used as a Vertex Buffer
-        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-
-
-        //let the VMA library know that this data should be writeable by CPU, but also readable by GPU
-        VmaAllocationCreateInfo vmaallocInfo = {};
-        vmaallocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-
-        //allocate the buffer
-        vmaCreateBuffer(m_allocator, &bufferInfo, &vmaallocInfo, &mesh.m_vertexBuffer._buffer
-                        , &mesh.m_vertexBuffer._allocation, nullptr);
+        mesh.m_vertexBuffer = create_buffer_(mesh.vertices.size() * sizeof(Vertex)
+                                             , VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+                                             , VMA_MEMORY_USAGE_CPU_TO_GPU);
 
         //copy vertex data
         void* data;
@@ -467,6 +448,7 @@ namespace ezg
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();
 
+
         vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 
@@ -481,7 +463,7 @@ namespace ezg
                 continue;
             }
 
-            auto&& material = &m_renderMaterial;
+            auto&& material = &m_renderMaterials[RenderMaterial::Type::DEFAULT];
             //only bind the pipeline if it doesnt match with the already bound one
             if (material != lastMaterial) {
 
@@ -628,6 +610,7 @@ namespace ezg
 
         for (uint32_t i = 0, mi = m_images.size(); i < mi; i++) {
             m_views[i] = m_core.createImageView(m_images[i], m_core.getSurfaceFormat().format
+                                                , VK_IMAGE_VIEW_TYPE_2D
                                                 , VK_IMAGE_ASPECT_COLOR_BIT);
             m_deletionQueue.push([dev = m_core.getDevice(), view = m_views[i]]()
                                  {
@@ -646,7 +629,7 @@ namespace ezg
             fbInfo.pAttachments = attachments.data();
             fbInfo.width = wWidth;
             fbInfo.height = wHeight;
-            fbInfo.layers = 1;
+            fbInfo.layers = 1; //TODO to 6 from cube map
 
             if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_frameBuffers[i])) {
                 throw std::runtime_error(("failed to create frame buffer"));
@@ -814,8 +797,8 @@ namespace ezg
         VkPipeline meshPipeline = pipelineBuildInfo.build_pipeline(m_core.getDevice(), m_renderPass);
 
 
-        m_renderMaterial = {meshPipeline, pipelineLayout};
-
+        m_renderMaterials[RenderMaterial::Type::DEFAULT] = {meshPipeline, pipelineLayout};
+//TODO
         m_deletionQueue.push([dev = m_core.getDevice(), mpl = meshPipeline]()
                              {
                                  vkDestroyPipeline(dev, mpl, nullptr);
@@ -882,6 +865,83 @@ namespace ezg
         vmaCreateBuffer(m_allocator, &bufferInfo, &vmaallocInfo, &newBuffer._buffer, &newBuffer._allocation, nullptr);
 
         return newBuffer;
+    }
+
+
+    Engine::AllocatedImage
+    Engine::create_image_(VkImageType type
+                          , VkFormat format
+                          , VkImageCreateFlags flags
+                          , VkSampleCountFlagBits samples
+                          , VkImageTiling tiling
+                          , VkImageUsageFlags usage
+                          , VmaMemoryUsage memoryUsage
+                          , VkExtent3D extent
+                          , uint32_t layers
+                          , uint32_t mipLevels)
+    {
+        VkImageCreateInfo info = {};
+        info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        info.pNext = nullptr;
+        info.imageType = type;
+        info.format = format;
+        info.extent = extent;
+        info.mipLevels = mipLevels;
+        info.arrayLayers = layers;
+        info.samples = samples;
+        info.tiling = tiling;
+        info.usage = usage;
+        info.flags = flags;
+
+
+        VmaAllocationCreateInfo allocInfo = {};
+        allocInfo.usage = memoryUsage;
+
+
+        AllocatedImage new_image = {};
+        vmaCreateImage(m_allocator, &info, &allocInfo, &new_image._image, &new_image._allocation
+                       , nullptr);
+
+        return new_image;
+    }
+
+
+    void Engine::prepareCubeFrameBuffer__()
+    {
+        m_cubeMap = create_image_(VK_IMAGE_TYPE_2D
+                                  , VK_FORMAT_R32_SFLOAT
+                                  , VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+                                  , VK_SAMPLE_COUNT_1_BIT
+                                  , VK_IMAGE_TILING_OPTIMAL
+                                  , VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+                                  , VMA_MEMORY_USAGE_GPU_ONLY
+                                  , m_cubeExtent
+                                  , 6, 1);
+
+        m_cubeMapView = m_core.createImageView(m_cubeMap._image
+                                               , VK_FORMAT_R32_SFLOAT
+                                               , VK_IMAGE_VIEW_TYPE_CUBE
+                                               , VK_IMAGE_ASPECT_COLOR_BIT
+                                               , { VK_COMPONENT_SWIZZLE_R }
+                                               , 0, 6);
+
+
+        std::array< VkImageView, 1 > attachments = {
+                m_cubeMapView //todo depth map
+        };
+
+        VkFramebufferCreateInfo fbInfo = {};
+        fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        fbInfo.renderPass = m_renderPass; //TODO
+        fbInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        fbInfo.pAttachments = attachments.data();
+        fbInfo.width = m_cubeExtent.width;
+        fbInfo.height = m_cubeExtent.height;
+        fbInfo.layers = 6;
+
+        if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_cubeFrameBuffer)) {
+            throw std::runtime_error(("failed to create frame buffer"));
+        }
     }
 
 }//namespace vks

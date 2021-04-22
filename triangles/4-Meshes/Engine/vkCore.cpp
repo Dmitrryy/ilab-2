@@ -37,18 +37,27 @@ namespace ezg
     }
 
 
-    VkImageView Core::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
+    VkImageView Core::createImageView(VkImage image
+                                      , VkFormat format
+                                      , VkImageViewType type
+                                      , VkImageAspectFlags aspectFlags
+                                      , VkComponentMapping components /*= {}*/
+                                      , uint32_t baseArrayLayer /*= 0*/
+                                      , uint32_t layers         /*= 1*/
+                                      , uint32_t baseMipLevel   /*= 0*/
+                                      , uint32_t levels         /*= 1*/)
     {
         VkImageViewCreateInfo viewInfo = {};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewInfo.image = image;
-        viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        viewInfo.viewType = type;
         viewInfo.format = format;
+        viewInfo.components = components;
         viewInfo.subresourceRange.aspectMask = aspectFlags;
-        viewInfo.subresourceRange.baseMipLevel = 0;
-        viewInfo.subresourceRange.levelCount = 1;
-        viewInfo.subresourceRange.baseArrayLayer = 0;
-        viewInfo.subresourceRange.layerCount = 1;
+        viewInfo.subresourceRange.baseMipLevel = baseMipLevel;
+        viewInfo.subresourceRange.levelCount = levels;
+        viewInfo.subresourceRange.baseArrayLayer = baseArrayLayer;
+        viewInfo.subresourceRange.layerCount = layers;
 
         VkImageView imageView;
         if (vkCreateImageView(getDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
