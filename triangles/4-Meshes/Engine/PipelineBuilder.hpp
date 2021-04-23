@@ -28,6 +28,7 @@ namespace ezg
         VkPipelineMultisampleStateCreateInfo           multisampling        = {};
         VkPipelineLayout                               pipelineLayout       = {};
         VkPipelineDepthStencilStateCreateInfo          depthStencil         = {};
+        VkPipelineDynamicStateCreateInfo               dynamicState         = {};
 
         VkPipeline build_pipeline(VkDevice device, VkRenderPass pass);
     };

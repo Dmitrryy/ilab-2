@@ -83,6 +83,6 @@ void main()
 
     gl_Position = ubo.proj * ubo.view * worldPosition;
 
-    //fragColor = inColor * max(minLight, abs(dot(validNormal.xyz, light1)));
-    fragColor = validNormal.xyz / 2.f + 0.5;
+    fragColor = model_color * max(minLight, abs(dot(validNormal.xyz, light1)));
+    //fragColor = validNormal.xyz / 2.f + 0.5;
 }

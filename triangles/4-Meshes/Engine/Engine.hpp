@@ -174,7 +174,7 @@ namespace ezg
             enum class Type
             {
                 DEFAULT
-                , FB_IS_CUBE_MAP //todo
+                , CUBE_MAP_AS_TEXTURE
             };
         };
 
@@ -229,7 +229,7 @@ namespace ezg
         Timer m_time;
 
 		size_t                         m_currentFrame      = 0;
-		size_t                         m_maxFramesInFlight = 2;
+		size_t                         m_maxFramesInFlight = 1;
 
 		// TODO increase if necessary
 		size_t                         m_numObjects        = ezg_default_max_objects;
@@ -241,28 +241,29 @@ namespace ezg
 
         //============================================================
         //in dev (experiment) TODO
-        VkImageView                    m_cubeMapView = nullptr;
         VkExtent3D                     m_cubeExtent = { 1024, 1024, 1 };
         AllocatedImage                 m_cubeMap = {};
         VkFormat                       m_cubeMapFormat = VK_FORMAT_B8G8R8A8_UNORM;
-        VkFramebuffer                  m_cubeFrameBuffer = nullptr;
+
+        struct frameBufferData {
+            VkImageView imageView;
+            VkImageView depthImageView;
+            VkFramebuffer frameBuffer;
+        };
+        std::array< frameBufferData, 6 > m_cubeFrameBuffers = {};
 
         VkRenderPass                   m_cubeRenderPass = nullptr;
 
-        VkImageView                    m_cubeDepthImageView = nullptr;
+        //VkImageView                    m_cubeDepthImageView = nullptr;
         AllocatedImage                 m_cubeDepthImage = {};
 
         //TODO !!!
         VkDescriptorSetLayout          m_cubeSetLayout = nullptr;
         VkDescriptorSet                m_cubeDescriptorSet = nullptr;
 
-        const std::string              m_cubeGeomShaderPath = "resource/shaders/fbCube.geom";
+        const std::string              m_cubeGeomShaderPath = "resource/shaders/fbCube.geom.spv";
 
-        void prepareCubeFrameBuffer__();
-        void createRenderPassFromCubeBuffer__();
-        void createCubeDepthResource__();
-        void createCubePipeline__();
-        void createCubeDescriptors__();
+        void prepareCubeFrameBuffers_t();
         //============================================================
 
 

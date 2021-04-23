@@ -8,15 +8,94 @@
 
 <objects>
     <obj0>
-        <model file="resource/meshes/monkey_flat.obj"/>
+        <model file="resource/meshes/cube.obj"/>
         <properties>
-            <scale x="2" y="2" z="2"/>
+            <scale x="1" y="1" z="1"/>
             <color r="1" g="1" b="1"/>
             <position x="0" y="0" z="0"/>
-            <dirTravel x="12" y="-23" z="123"/>
-            <dirRotate x="-123" y="-32" z="213"/>
-            <speedRotation val="12"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
         </properties>
-        <grow stages="4" distance="20"/>
+        <grow stages="0" distance="0"/>
     </obj0>
+
+
+    <obj1>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="0" g="1" b="1"/>
+            <position x="10" y="0" z="0"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="0" distance="0"/>
+    </obj1>
+
+    <obj2>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="1" g="0" b="1"/>
+            <position x="-10" y="0" z="0"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="0" distance="0"/>
+    </obj2>
+
+    <obj3>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="1" g="1" b="0.5"/>
+            <position x="0" y="10" z="0"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="0" distance="0"/>
+    </obj3>
+
+    <obj4>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="1" g="1" b="0"/>
+            <position x="0" y="-10" z="0"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="0" distance="0"/>
+    </obj4>
+
+    <obj5>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="1" g="0.5" b="0.5"/>
+            <position x="0" y="0" z="10"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="0" distance="0"/>
+    </obj5>
+
+    <obj6>
+        <model file="resource/meshes/monkey_flat.obj"/>
+        <properties>
+            <scale x="1" y="1" z="1"/>
+            <color r="0.5" g="0.5" b="1"/>
+            <position x="0" y="0" z="-10"/>
+            <dirTravel x="0" y="0" z="0"/>
+            <dirRotate x="0" y="0" z="1"/>
+            <speedRotation val="0"/>
+        </properties>
+        <grow stages="0" distance="0"/>
+    </obj6>
 </objects>

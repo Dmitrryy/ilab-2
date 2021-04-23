@@ -57,6 +57,7 @@ namespace ezg
         pipelineInfo.renderPass = pass;
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+        pipelineInfo.pDynamicState = &dynamicState;
 
 
         VkPipeline newPipeline;
