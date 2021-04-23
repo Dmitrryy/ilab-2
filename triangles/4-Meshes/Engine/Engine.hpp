@@ -244,9 +244,25 @@ namespace ezg
         VkImageView                    m_cubeMapView = nullptr;
         VkExtent3D                     m_cubeExtent = { 1024, 1024, 1 };
         AllocatedImage                 m_cubeMap = {};
+        VkFormat                       m_cubeMapFormat = VK_FORMAT_B8G8R8A8_UNORM;
         VkFramebuffer                  m_cubeFrameBuffer = nullptr;
 
+        VkRenderPass                   m_cubeRenderPass = nullptr;
+
+        VkImageView                    m_cubeDepthImageView = nullptr;
+        AllocatedImage                 m_cubeDepthImage = {};
+
+        //TODO !!!
+        VkDescriptorSetLayout          m_cubeSetLayout = nullptr;
+        VkDescriptorSet                m_cubeDescriptorSet = nullptr;
+
+        const std::string              m_cubeGeomShaderPath = "resource/shaders/fbCube.geom";
+
         void prepareCubeFrameBuffer__();
+        void createRenderPassFromCubeBuffer__();
+        void createCubeDepthResource__();
+        void createCubePipeline__();
+        void createCubeDescriptors__();
         //============================================================
 
 

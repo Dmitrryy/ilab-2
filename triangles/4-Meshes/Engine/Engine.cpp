@@ -73,7 +73,10 @@ namespace ezg
         createSyncObjects_();
 
 
+        //TODO
+        createRenderPassFromCubeBuffer__();
         prepareCubeFrameBuffer__();
+
     }
 
 
@@ -533,6 +536,7 @@ namespace ezg
 
     void Engine::createRenderPass_()
     {
+        //TODO 622 page in example
         VkAttachmentDescription colorAttachment = {};
         colorAttachment.format = m_core.getSurfaceFormat().format;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -662,8 +666,8 @@ namespace ezg
     {
         std::ostringstream forShader;
 
-        std::ifstream vertFile(vert_shader_fname);
-        forShader << vertFile.rdbuf();
+        std::ifstream iFile(vert_shader_fname);
+        forShader << iFile.rdbuf();
         VkShaderModule vertShader = createShaderModule_(forShader.str());
         forShader.flush();
 
@@ -671,6 +675,11 @@ namespace ezg
         std::ifstream fragFile(frag_shader_fname);
         forFrag << fragFile.rdbuf();
         VkShaderModule fragShader = createShaderModule_(forFrag.str());
+
+        std::ostringstream forGeom;
+        std::ifstream geomFile(m_cubeGeomShaderPath);
+        forGeom << geomFile.rdbuf();
+        VkShaderModule geomShader = createShaderModule_(forGeom.str());
 
 
         VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
@@ -687,9 +696,17 @@ namespace ezg
         fragShaderStageInfo.pName = "main";
 
 
+        VkPipelineShaderStageCreateInfo geomShaderStageInfo = {};
+        geomShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        geomShaderStageInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+        geomShaderStageInfo.module = geomShader;
+        geomShaderStageInfo.pName = "main";
+
+
         PipelineBuildInfo pipelineBuildInfo;
         pipelineBuildInfo.shaderStages.push_back(vertShaderStageInfo);
         pipelineBuildInfo.shaderStages.push_back(fragShaderStageInfo);
+        pipelineBuildInfo.shaderStages.push_back(geomShaderStageInfo);
 
         std::vector< VkDescriptorSetLayout > setLayouts = {
                 m_globalSetLayout
@@ -909,30 +926,35 @@ namespace ezg
     void Engine::prepareCubeFrameBuffer__()
     {
         m_cubeMap = create_image_(VK_IMAGE_TYPE_2D
-                                  , VK_FORMAT_R32_SFLOAT
+                                  , m_cubeMapFormat
                                   , VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
                                   , VK_SAMPLE_COUNT_1_BIT
                                   , VK_IMAGE_TILING_OPTIMAL
-                                  , VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT
+                                  , VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT
                                   , VMA_MEMORY_USAGE_GPU_ONLY
                                   , m_cubeExtent
                                   , 6, 1);
 
         m_cubeMapView = m_core.createImageView(m_cubeMap._image
-                                               , VK_FORMAT_R32_SFLOAT
+                                               , m_cubeMapFormat
                                                , VK_IMAGE_VIEW_TYPE_CUBE
                                                , VK_IMAGE_ASPECT_COLOR_BIT
-                                               , { VK_COMPONENT_SWIZZLE_R }
+                                               , {VK_COMPONENT_SWIZZLE_R}
                                                , 0, 6);
 
 
-        std::array< VkImageView, 1 > attachments = {
-                m_cubeMapView //todo depth map
+        createCubeDepthResource__();
+
+
+
+        std::array< VkImageView, 2 > attachments = {
+                m_cubeMapView
+                , m_cubeDepthImageView
         };
 
         VkFramebufferCreateInfo fbInfo = {};
         fbInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fbInfo.renderPass = m_renderPass; //TODO
+        fbInfo.renderPass = m_cubeRenderPass; //TODO
         fbInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
         fbInfo.pAttachments = attachments.data();
         fbInfo.width = m_cubeExtent.width;
@@ -942,6 +964,252 @@ namespace ezg
         if (VK_SUCCESS != vkCreateFramebuffer(m_core.getDevice(), &fbInfo, NULL, &m_cubeFrameBuffer)) {
             throw std::runtime_error(("failed to create frame buffer"));
         }
+    }
+
+
+    void Engine::createCubeDepthResource__()
+    {
+        VkFormat depthFormat = m_core.findSupportedFormat(
+                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}
+                , VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+        );
+
+        m_cubeDepthImage = create_image_(VK_IMAGE_TYPE_2D
+                                         , depthFormat
+                                         , VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+                                         , VK_SAMPLE_COUNT_1_BIT
+                                         , VK_IMAGE_TILING_OPTIMAL
+                                         , VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+                                         , VMA_MEMORY_USAGE_GPU_ONLY
+                                         , m_cubeExtent
+                                         , 6, 1);
+
+
+        m_cubeDepthImageView = m_core.createImageView(m_cubeDepthImage._image
+                                                      , depthFormat
+                                                      , VK_IMAGE_VIEW_TYPE_CUBE
+                                                      , VK_IMAGE_ASPECT_DEPTH_BIT
+                                                      , {VK_COMPONENT_SWIZZLE_R}
+                                                      , 0, 6);
+
+    }
+
+
+    void Engine::createRenderPassFromCubeBuffer__()
+    {
+        VkAttachmentDescription colorAttachment = {};
+        colorAttachment.format = m_cubeMapFormat;
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference attachRef = {};
+        attachRef.attachment = 0;
+        attachRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentDescription depthAttachment = {};
+        depthAttachment.format = m_core.findSupportedFormat(
+                {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT}
+                , VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+        );
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE; //todo set store from shadow map
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference depthAttachmentRef = {};
+        depthAttachmentRef.attachment = 1;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+
+        VkSubpassDescription subpassDesc = {};
+        subpassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+        subpassDesc.colorAttachmentCount = 1;
+        subpassDesc.pColorAttachments = &attachRef;
+        subpassDesc.pDepthStencilAttachment = &depthAttachmentRef;
+
+        VkSubpassDependency dependency = {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask =
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask =
+                VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+
+        std::array< VkAttachmentDescription, 2 > attachments = {colorAttachment, depthAttachment};
+
+        VkRenderPassCreateInfo renderPassInfo = {};
+        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+        renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        renderPassInfo.pAttachments = attachments.data();
+        renderPassInfo.subpassCount = 1;
+        renderPassInfo.pSubpasses = &subpassDesc;
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
+
+        if (vkCreateRenderPass(m_core.getDevice(), &renderPassInfo, nullptr, &m_cubeRenderPass) != VK_SUCCESS) {
+            throw std::runtime_error(("failed to create render pass!"));
+        }
+    }
+
+
+    void Engine::createCubePipeline__()
+    {
+        std::ostringstream forShader;
+
+        std::ifstream vertFile(vert_shader_fname);
+        forShader << vertFile.rdbuf();
+        VkShaderModule vertShader = createShaderModule_(forShader.str());
+        forShader.flush();
+
+        std::ostringstream forFrag;
+        std::ifstream fragFile(frag_shader_fname);
+        forFrag << fragFile.rdbuf();
+        VkShaderModule fragShader = createShaderModule_(forFrag.str());
+
+
+        VkPipelineShaderStageCreateInfo vertShaderStageInfo = {};
+        vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertShaderStageInfo.module = vertShader;
+        vertShaderStageInfo.pName = "main";
+
+
+        VkPipelineShaderStageCreateInfo fragShaderStageInfo = {};
+        fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragShaderStageInfo.module = fragShader;
+        fragShaderStageInfo.pName = "main";
+
+
+        PipelineBuildInfo pipelineBuildInfo;
+        pipelineBuildInfo.shaderStages.push_back(vertShaderStageInfo);
+        pipelineBuildInfo.shaderStages.push_back(fragShaderStageInfo);
+
+        std::vector< VkDescriptorSetLayout > setLayouts = {
+                m_globalSetLayout
+                //, m_objectSetLayout
+        };
+
+        VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
+        pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        pipelineLayoutInfo.setLayoutCount = setLayouts.size();
+        pipelineLayoutInfo.pSetLayouts = setLayouts.data();
+        pipelineLayoutInfo.pushConstantRangeCount = 0;
+        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+
+        VkPipelineLayout pipelineLayout = {};
+        if (vkCreatePipelineLayout(m_core.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+            throw std::runtime_error(("failed to create pipeline layout!"));
+        }
+        pipelineBuildInfo.pipelineLayout = pipelineLayout;
+        m_deletionQueue.push([dev = m_core.getDevice(), pll = pipelineLayout]()
+                             {
+                                 vkDestroyPipelineLayout(dev, pll, nullptr);
+                             });
+
+
+        auto bindingDescription = Vertex::getBindingDescription();
+        auto attributeDescriptions = Vertex::getAttributeDescription();
+
+        VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
+        vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription; // Optional
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data(); // Optional
+
+        pipelineBuildInfo.vertexInputInfo = vertexInputInfo;
+
+
+        VkPipelineInputAssemblyStateCreateInfo inputAssembly = {};
+        inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+        inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+        pipelineBuildInfo.inputAssembly = inputAssembly;
+
+        int wHeight = m_rWindow.getHeight(), wWidth = m_rWindow.getWidth();
+
+        pipelineBuildInfo.viewport.x = 0.f;
+        pipelineBuildInfo.viewport.y = 0.f;
+        pipelineBuildInfo.viewport.width = static_cast<float>(wWidth);
+        pipelineBuildInfo.viewport.height = static_cast<float>(wHeight);
+        pipelineBuildInfo.viewport.minDepth = 0.f;
+        pipelineBuildInfo.viewport.maxDepth = 1.f;
+
+        pipelineBuildInfo.scissor.offset = {0, 0};
+        pipelineBuildInfo.scissor.extent.width = wWidth;
+        pipelineBuildInfo.scissor.extent.height = wHeight;
+
+
+        pipelineBuildInfo.rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        pipelineBuildInfo.rasterizer.depthClampEnable = VK_FALSE;
+        pipelineBuildInfo.rasterizer.rasterizerDiscardEnable = VK_FALSE;
+        pipelineBuildInfo.rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+        pipelineBuildInfo.rasterizer.lineWidth = 1.f;
+        //todo here you can change cull mode
+        pipelineBuildInfo.rasterizer.cullMode = VK_CULL_MODE_NONE;
+        pipelineBuildInfo.rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+        pipelineBuildInfo.rasterizer.depthClampEnable = VK_FALSE;
+        pipelineBuildInfo.rasterizer.depthBiasConstantFactor = 0.f;
+        pipelineBuildInfo.rasterizer.depthBiasClamp = 0.f;
+        pipelineBuildInfo.rasterizer.depthBiasSlopeFactor = 0.f;
+
+
+        pipelineBuildInfo.depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        pipelineBuildInfo.depthStencil.depthTestEnable = VK_TRUE;
+        pipelineBuildInfo.depthStencil.depthWriteEnable = VK_TRUE;
+        pipelineBuildInfo.depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        pipelineBuildInfo.depthStencil.depthBoundsTestEnable = VK_FALSE;
+        pipelineBuildInfo.depthStencil.minDepthBounds = 0.0f;
+        pipelineBuildInfo.depthStencil.maxDepthBounds = 1.0f;
+        pipelineBuildInfo.depthStencil.stencilTestEnable = VK_FALSE;
+        pipelineBuildInfo.depthStencil.front = {};
+        pipelineBuildInfo.depthStencil.back = {};
+
+
+        pipelineBuildInfo.multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        pipelineBuildInfo.multisampling.sampleShadingEnable = VK_FALSE;
+        pipelineBuildInfo.multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+        pipelineBuildInfo.multisampling.minSampleShading = 1.f;
+        pipelineBuildInfo.multisampling.pSampleMask = nullptr;
+        pipelineBuildInfo.multisampling.alphaToCoverageEnable = VK_FALSE;
+        pipelineBuildInfo.multisampling.alphaToOneEnable = VK_FALSE;
+
+
+        pipelineBuildInfo.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT
+                                                                | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
+                                                                VK_COLOR_COMPONENT_A_BIT;
+        pipelineBuildInfo.colorBlendAttachment.blendEnable = VK_FALSE;
+        pipelineBuildInfo.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+        pipelineBuildInfo.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+        pipelineBuildInfo.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
+        pipelineBuildInfo.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+        pipelineBuildInfo.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+        pipelineBuildInfo.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
+
+        VkPipeline meshPipeline = pipelineBuildInfo.build_pipeline(m_core.getDevice(), m_renderPass);
+
+
+        m_renderMaterials[RenderMaterial::Type::DEFAULT] = {meshPipeline, pipelineLayout};
+//TODO
+        m_deletionQueue.push([dev = m_core.getDevice(), mpl = meshPipeline]()
+                             {
+                                 vkDestroyPipeline(dev, mpl, nullptr);
+                             });
+
+        vkDestroyShaderModule(m_core.getDevice(), fragShader, nullptr);
+        vkDestroyShaderModule(m_core.getDevice(), vertShader, nullptr);
     }
 
 }//namespace vks
