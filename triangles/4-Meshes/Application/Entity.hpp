@@ -34,6 +34,7 @@ namespace ezg
 
         glm::mat4 getModelMatrix() const override;
         glm::vec3 getColor() const override { return m_color; }
+        glm::vec3 getPosition() const override { return m_position; }
 
         /// Carries out the growth of the mesh according to the following algorithm:
         /// A point is selected in the triangle, then it is stretched along the normal

@@ -71,6 +71,7 @@ namespace ezg
 		}
 		void turnInVerticalPlane(float angle)
 		{
+		    m_direction = glm::normalize(m_direction);
 			if ((angle > 0 && m_direction.z >= m_max_z_direction_component) ||
                     (angle < 0 && m_direction.z <= -m_max_z_direction_component))
 			{
@@ -82,11 +83,13 @@ namespace ezg
 
 		void moveAlongDirection(float distance)
 		{
-			m_position += m_direction * distance;
+            m_direction = glm::normalize(m_direction);
+            m_position += m_direction * distance;
 		}
 		void movePerpendicularDirection(float distance_horizontal)
 		{
-			auto axis = glm::cross(m_direction, m_topDirection);
+            m_direction = glm::normalize(m_direction);
+            auto axis = glm::cross(m_direction, m_topDirection);
 			m_position += axis * distance_horizontal;
 		}
 		void moveVertical(float distance)

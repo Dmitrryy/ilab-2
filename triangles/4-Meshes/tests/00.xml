@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <box x1="-10" y1="-10" z1="-10" x2="20" y2="20" z2="20"/>
 
-<camera speed="20">
-    <position x="40" y="40" z="40"/>
+<camera speed="6">
+    <position x="10" y="10" z="10"/>
     <direction x="-1" y="-1" z="-1"/>
 </camera>
 

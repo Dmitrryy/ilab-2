@@ -1,9 +1,9 @@
 /*************************************************************************
  *
- *   shader.vert
+ * reflection.vert
  *
- *   Created by dmitry
- *   22.02.2021
+ * Created by dmitry
+ * 24.04.2021
  *
  ***/
 
@@ -25,6 +25,7 @@ struct ObjectInfo
 layout( push_constant ) uniform constants
 {
     mat4 viewProjMatrix;
+    vec3 cameraPosition;
 } pushConstants;
 //=======================================================================================
 //=======================================================================================
@@ -32,12 +33,12 @@ layout( push_constant ) uniform constants
 
 // set 0
 //=======================================================================================
-layout(set = 0, binding = 0) uniform UniformBufferObject {
-	mat4 view;
-	mat4 proj;
-} ubo;
+/*layout(set = 0, binding = 0) uniform UniformBufferObject {
+    mat4 view;
+    mat4 proj;
+} ubo;*/
 
-layout(set = 0, binding = 1) readonly buffer object_transform
+layout(set = 0, binding = 0) readonly buffer object_transform
 {
     ObjectInfo object_info[];
 };
@@ -56,21 +57,12 @@ layout(location = 2) in vec3 inNormal;
 
 // output atributes
 //=======================================================================================
-layout(location = 0) out vec3 fragColor;
+layout(location = 0) out vec3 outUVW;
+layout(location = 1) out vec3 outNormal;
 //=======================================================================================
 //=======================================================================================
 
-
-// light options
-//=======================================================================================
-vec3 light1 = normalize(vec3(-1.0, -1.0, -1.0));
-vec3 light2 = normalize(vec3(0.0, 1.0, -1.0));
-float minLight = 0.2;
-//=======================================================================================
-//=======================================================================================
-
-
-void main() 
+void main()
 {
     //===================================================================================
     // "We are using gl_BaseInstance to access the object buffer. This is due to how Vulkan works
@@ -85,15 +77,11 @@ void main()
     mat4 model_matrix = object_info[  gl_BaseInstance  ].model_matrix;
     vec3 model_color = object_info[  gl_BaseInstance  ].color;
 
-
-    vec4 validNormal = model_matrix * vec4(inNormal, 0.f);
-
-
     vec4 worldPosition = model_matrix * vec4(inPosition, 1.0);
 
+    outNormal = normalize((model_matrix * vec4(inNormal, 0.f)).xyz);
 
     gl_Position = pushConstants.viewProjMatrix * worldPosition;
 
-    fragColor = model_color * max(minLight, abs(dot(validNormal.xyz, light1)));
-    //fragColor = validNormal.xyz / 2.f + 0.5;
+    outUVW = worldPosition.xyz;
 }

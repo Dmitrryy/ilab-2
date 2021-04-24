@@ -24,7 +24,8 @@ add_custom_target(${FB_TARGET}
 
         COMMAND glslc ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/shader.vert -o ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/vert.spv
         COMMAND glslc ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/shader.frag -o ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/frag.spv
-        #COMMAND glslc ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/fbCube.geom -o ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/fbCube.geom.spv
+        COMMAND glslc ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/reflection.vert -o ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/reflection.vert.spv
+        COMMAND glslc ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/reflection.frag -o ${CMAKE_CURRENT_BINARY_DIR}/resource/shaders/reflection.frag.spv
         )
 ##=======================================================================================
 ##=======================================================================================

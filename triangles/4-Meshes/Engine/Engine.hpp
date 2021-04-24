@@ -141,6 +141,7 @@ namespace ezg
 
             virtual glm::mat4 getModelMatrix() const { return glm::mat4{1.f}; }
             virtual glm::vec3 getColor()       const { return glm::vec3(1.f); }
+            virtual glm::vec3 getPosition()    const { return glm::vec3(0.f); }
 
             bool load_from_obj(const std::string& filename);
         };//class Mesh
@@ -174,7 +175,7 @@ namespace ezg
             enum class Type
             {
                 DEFAULT
-                , CUBE_MAP_AS_TEXTURE
+                , REFLECTION
             };
         };
 
@@ -195,6 +196,13 @@ namespace ezg
         {
             Mesh *mesh = nullptr;
         };
+
+
+        struct PushConstants {
+            glm::mat4 viewProjMatrix = glm::mat4(1.f);
+            glm::vec3 cameraPosition = {};
+        };
+
 
 	private:
 
@@ -243,6 +251,8 @@ namespace ezg
         //in dev (experiment) TODO
         VkExtent3D                     m_cubeExtent = { 1024, 1024, 1 };
         AllocatedImage                 m_cubeMap = {};
+        VkImageView                    m_cubeImageView = nullptr;
+        VkSampler                      m_cubeSampler = nullptr;
         VkFormat                       m_cubeMapFormat = VK_FORMAT_B8G8R8A8_UNORM;
 
         struct frameBufferData {
@@ -261,9 +271,14 @@ namespace ezg
         VkDescriptorSetLayout          m_cubeSetLayout = nullptr;
         VkDescriptorSet                m_cubeDescriptorSet = nullptr;
 
-        const std::string              m_cubeGeomShaderPath = "resource/shaders/fbCube.geom.spv";
-
         void prepareCubeFrameBuffers_t();
+
+        VkDescriptorSetLayout m_reflectionDescriptorSetLayout = nullptr;
+        VkDescriptorSet       m_reflectionDescriptorSet = nullptr;
+        const std::string m_reflectionVertShaderPathName = "resource/shaders/reflection.vert.spv";
+        const std::string m_reflectionFragShaderPathName = "resource/shaders/reflection.frag.spv";
+        void createReflectionPipeLine_t();
+        void createReflectionDescriptors_t();
         //============================================================
 
 
