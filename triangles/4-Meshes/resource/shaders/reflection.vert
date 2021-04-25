@@ -33,11 +33,6 @@ layout( push_constant ) uniform constants
 
 // set 0
 //=======================================================================================
-/*layout(set = 0, binding = 0) uniform UniformBufferObject {
-    mat4 view;
-    mat4 proj;
-} ubo;*/
-
 layout(set = 0, binding = 0) readonly buffer object_transform
 {
     ObjectInfo object_info[];

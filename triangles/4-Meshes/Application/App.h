@@ -45,7 +45,7 @@ namespace ezg
 
         std::unique_ptr< Window >    m_window;
 
-        std::vector< Engine::Mesh* > m_entities;
+        std::vector< Engine::Renderable* > m_entities;
         la::Rectangle3               m_box;
 
         CameraView                   m_cameraView;

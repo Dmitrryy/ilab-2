@@ -22,7 +22,7 @@ layout( push_constant ) uniform constants
 
 
 
-layout (set = 0, binding = 1) uniform samplerCube samplerCubeMap;
+layout (set = 1, binding = 0) uniform samplerCube samplerCubeMap;
 
 layout (location = 0) in vec3 inUVW;
 layout (location = 1) in vec3 inNormal;
@@ -34,5 +34,4 @@ void main()
     vec3 I = normalize(inUVW - pushConstants.cameraPosition);
     vec3 R = reflect(I, inNormal);
     outFragColor = vec4(texture(samplerCubeMap, R).rgb, 1.0);
-    //outFragColor = vec4(pushConstants.cameraPosition, 1.0) / 100;
 }

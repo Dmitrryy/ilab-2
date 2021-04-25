@@ -17,19 +17,23 @@
 namespace ezg
 {
 
+    void Entity::update(float dt) noexcept
+    {
+        m_angle += m_speedRotation * dt;
+
+        m_position += m_dirTravel * dt;
+    }
+
+
+
+
+
     glm::mat4 TriangleMesh::getModelMatrix() const /*override*/
     {
         glm::mat4 res = glm::translate(glm::mat4(1.f), m_position);
         res = glm::rotate(res, glm::radians(m_angle), m_dirRotation);
         res = glm::scale(res, m_scale);
         return res;
-    }
-
-    void TriangleMesh::update(float dt) noexcept
-    {
-        m_angle += m_speedRotation * dt;
-
-        m_position += m_dirTravel * dt;
     }
 
 
@@ -132,5 +136,72 @@ namespace ezg
             }
         }
     }
+
+
+
+
+
+
+
+
+    void Mirror::loadFromXML(tinyxml2::XMLElement* xmlElem)
+    {
+        auto* modelXML = xmlElem->FirstChildElement("model");
+        if (modelXML == nullptr || !load_from_obj(modelXML->Attribute("file"))) {
+            throw std::runtime_error("cant load model from file: " + std::string(modelXML->Attribute("file")));
+        }
+
+        using tinyxml2p::getAttribute;
+
+        auto* prop = xmlElem->FirstChildElement("properties");
+        if (prop != nullptr) {
+            auto* posXML = prop->FirstChildElement("position");
+            if (posXML != nullptr) {
+                getAttribute(posXML, "x", m_position.x, "y", m_position.y, "z"
+                             , m_position.z);
+            }
+
+            auto* colorXML = prop->FirstChildElement("color");
+            if (colorXML != nullptr) {
+                getAttribute(colorXML, "r", m_color.x, "g", m_color.y, "b", m_color.z);
+            }
+
+            auto* scaleXML = prop->FirstChildElement("scale");
+            if (scaleXML != nullptr) {
+                getAttribute(scaleXML, "x", m_scale.x, "y", m_scale.y, "z", m_scale.z);
+            }
+
+            auto* dirTravelXML = prop->FirstChildElement("dirTravel");
+            if (dirTravelXML != nullptr) {
+                getAttribute(dirTravelXML, "x", m_dirTravel.x, "y", m_dirTravel.y, "z"
+                             , m_dirTravel.z);
+            }
+
+            auto* dirRotateXML = prop->FirstChildElement("dirRotate");
+            if (dirRotateXML != nullptr) {
+                getAttribute(dirRotateXML, "x", m_dirRotation.x, "y", m_dirRotation.y, "z"
+                             , m_dirRotation.z);
+            }
+
+            auto* speedRotationXML = prop->FirstChildElement("speedRotation");
+            if (speedRotationXML != nullptr) {
+                m_speedRotation = speedRotationXML->FloatAttribute("val");
+            }
+        }
+
+    }
+
+
+
+
+
+    glm::mat4 Mirror::getModelMatrix() const /*override*/
+    {
+        glm::mat4 res = glm::translate(glm::mat4(1.f), m_position);
+        res = glm::rotate(res, glm::radians(m_angle), m_dirRotation);
+        res = glm::scale(res, m_scale);
+        return res;
+    }
+
 
 }// namespace ezg

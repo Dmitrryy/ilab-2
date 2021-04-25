@@ -7,7 +7,8 @@
 </camera>
 
 <objects>
-    <obj0>
+    <obj0 type="mirror">
+
         <model file="resource/meshes/cube.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
@@ -21,8 +22,8 @@
     </obj0>
 
 
-    <obj1>
-        <model file="resource/meshes/monkey_flat.obj"/>
+    <obj1 type="mirror">
+        <model file="resource/meshes/sphere.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
             <color r="0" g="1" b="1"/>
@@ -34,7 +35,7 @@
         <grow stages="0" distance="0"/>
     </obj1>
 
-    <obj2>
+    <obj2 type="justMesh">
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
@@ -47,7 +48,7 @@
         <grow stages="0" distance="0"/>
     </obj2>
 
-    <obj3>
+    <obj3 type="justMesh">
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
@@ -60,7 +61,7 @@
         <grow stages="0" distance="0"/>
     </obj3>
 
-    <obj4>
+    <obj4 type="justMesh">
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
@@ -73,7 +74,7 @@
         <grow stages="0" distance="0"/>
     </obj4>
 
-    <obj5>
+    <obj5 type="justMesh">
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
@@ -86,7 +87,7 @@
         <grow stages="0" distance="0"/>
     </obj5>
 
-    <obj6>
+    <obj6 type="justMesh">
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>

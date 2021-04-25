@@ -10,11 +10,34 @@
 #include "Engine.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
+
 #include <tiny_obj_loader.h>
 
 
 namespace ezg
 {
+
+    void Engine::Mesh::draw(VkCommandBuffer cmdBuff
+                            , const CameraView& camera
+                            , const RenderMaterial& last) const /*override*/
+    {
+        if (!isUploaded()) {
+            std::cerr << "object with id " << m_curInstanceId << " isn't uploaded!" << std::endl;
+            return;
+        }
+
+        //only bind the pipeline if it doesnt match with the already bound one
+        if (!m_renderMaterial.equal(last)) {
+
+            vkCmdBindPipeline(cmdBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, m_renderMaterial.pipeline);
+        }
+
+
+        VkDeviceSize offset = 0;
+        vkCmdBindVertexBuffers(cmdBuff, 0, 1, &m_vertexBuffer._buffer, &offset);
+
+        vkCmdDraw(cmdBuff, vertices.size(), 1, 0, m_curInstanceId);
+    }
 
 
     /// download code taken from article
@@ -25,17 +48,16 @@ namespace ezg
         //attrib will contain the vertex arrays of the file
         tinyobj::attrib_t attrib;
         //shapes contains the info for each separate object in the file
-        std::vector<tinyobj::shape_t> shapes;
+        std::vector< tinyobj::shape_t > shapes;
         //materials contains the information about the material of each shape, but we wont use it.
-        std::vector<tinyobj::material_t> materials;
+        std::vector< tinyobj::material_t > materials;
 
         //error and warning output from the load function
         std::string warn;
         std::string err;
 
         //load the OBJ file
-        tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str(),
-                nullptr);
+        tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filename.c_str(), nullptr);
         //make sure to output the warnings to the console, in case there are issues with the file
         if (!warn.empty()) {
             std::cout << "WARN: " << warn << std::endl;

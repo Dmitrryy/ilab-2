@@ -57,7 +57,7 @@ endif()
 set(EXECUTE_NAME app)
 add_executable(${EXECUTE_NAME} app_main.cpp Engine/Engine.cpp Engine/vkCore.cpp
         Application/App.cpp Application/Entity.cpp Engine/PipelineBuilder.cpp Engine/Mesh.cpp
-        ../GLFWWrap/Window.cpp ../GLFWWrap/GLFWWrap.cpp ../path/tinyxml2p.hpp)
+        ../GLFWWrap/Window.cpp ../GLFWWrap/GLFWWrap.cpp ../path/tinyxml2p.hpp Engine/Mirror.cpp)
 
 target_sources(${EXECUTE_NAME} PRIVATE ../path/tinyxml2.cpp)
 

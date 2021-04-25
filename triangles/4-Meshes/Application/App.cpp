@@ -28,7 +28,7 @@
 #include <OtherLibs/random.h>
 
 
-#define WINDOW_HEIGHT 800
+#define WINDOW_HEIGHT 1000
 #define WINDOW_WIDTH  1000
 
 
@@ -65,7 +65,7 @@ namespace ezg
 
         //-----------------------------------------------
         // init camera view
-        m_cameraView.setAspect(static_cast< float >(wHeight) / wWidth);
+        m_cameraView.setAspect(static_cast< float >(wWidth) / wHeight);
         // end init camera view
         //-----------------------------------------------
     }
@@ -75,7 +75,7 @@ namespace ezg
         std::transform(m_entities.begin(), m_entities.end(), m_entities.begin(), [&driver = m_driver](
                 auto* pEnt) -> TriangleMesh*
         {
-            driver->unload_mesh(*pEnt);
+            driver->unload_object(*pEnt);
             delete pEnt;
             return nullptr;
         });
@@ -114,7 +114,7 @@ namespace ezg
         }
 
         for (auto* o : m_entities) {
-            m_driver->upload_mesh(*o);
+            m_driver->upload_object(*o);
         }
 
         m_time.reset();
@@ -193,9 +193,20 @@ namespace ezg
         if (objectXML != nullptr) {
             objectXML = objectXML->FirstChildElement();
             while (objectXML != nullptr) {
-                auto* entity = new TriangleMesh();
-                m_entities.push_back(entity);
+                const std::string type = objectXML->Attribute("type");
 
+                Entity* entity = nullptr;
+                if (type == "mirror") {
+                    entity = new Mirror;
+                }
+                else if (type == "justMesh") {
+                    entity = new TriangleMesh;
+                }
+                else {
+                    assert(0);
+                }
+
+                m_entities.push_back(dynamic_cast< Engine::Renderable* >(entity));
                 entity->loadFromXML(objectXML);
 
                 objectXML = objectXML->NextSiblingElement();
@@ -207,7 +218,8 @@ namespace ezg
     void AppLVL4::update_entities_(float time)
     {
         for (auto* entity : m_entities) {
-            auto* curEntity = static_cast<TriangleMesh*>(entity);
+            auto* curEntity = dynamic_cast<Entity*>(entity);
+            assert(entity != nullptr);
 
             //we detected the exit of the figure outside the box
             if (curEntity->m_position.x < m_box.getA().x || curEntity->m_position.x > m_box.getB().x) {

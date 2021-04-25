@@ -25,6 +25,7 @@ struct ObjectInfo
 layout( push_constant ) uniform constants
 {
     mat4 viewProjMatrix;
+    vec3 cameraPosition;
 } pushConstants;
 //=======================================================================================
 //=======================================================================================
@@ -32,12 +33,7 @@ layout( push_constant ) uniform constants
 
 // set 0
 //=======================================================================================
-layout(set = 0, binding = 0) uniform UniformBufferObject {
-	mat4 view;
-	mat4 proj;
-} ubo;
-
-layout(set = 0, binding = 1) readonly buffer object_transform
+layout(set = 0, binding = 0) readonly buffer object_transform
 {
     ObjectInfo object_info[];
 };
