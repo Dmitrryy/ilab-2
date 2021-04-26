@@ -410,7 +410,7 @@ namespace matrix
 
 		std::for_each(tmp.begin(), tmp.end(), [&rhs_, &lhs = *this](Elem<T> elem)
 			{
-				elem.val = rhs_.at(elem.line, elem.column) + lhs.at(elem.line, elem.line);
+				elem.val = rhs_.at(elem.line, elem.column) + lhs.at(elem.line, elem.column);
 			});
 
 		///
