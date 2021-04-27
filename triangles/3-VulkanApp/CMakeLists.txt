@@ -46,7 +46,7 @@ find_package(Vulkan REQUIRED)
 find_package(X11 REQUIRED)
 find_package(glfw3 REQUIRED)
 if(NOT LAL_FOUND)
-    add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
+    add_subdirectory(../path/LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
 endif()
 
 

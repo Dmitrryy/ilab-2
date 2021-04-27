@@ -10,7 +10,7 @@ find_package(Threads REQUIRED)
 add_executable(${PROJECT_NAME} main.cpp other.cpp tests/test_gen.cpp tests/LAL_test.cpp)
 
 if(NOT LAL_FOUND)
-    add_subdirectory(../LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
+    add_subdirectory(../path/LAL ${CMAKE_CURRENT_BINARY_DIR}/LALBuild)
 endif()
 
 target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} Threads::Threads)
