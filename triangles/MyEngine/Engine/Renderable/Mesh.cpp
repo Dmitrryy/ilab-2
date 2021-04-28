@@ -7,19 +7,19 @@
  *
  ***/
 
-#include "Engine.hpp"
+#include "triangles/MyEngine/Engine/Engine.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
 
 #include <tiny_obj_loader.h>
 
 
-namespace ezg
+namespace ezg::engine
 {
 
-    void Engine::Mesh::draw(VkCommandBuffer cmdBuff
+    void Mesh::draw(VkCommandBuffer cmdBuff
                             , const CameraView& camera
-                            , const RenderMaterial& last) const /*override*/
+                            , RenderMaterial& last) const /*override*/
     {
         if (!isUploaded()) {
             std::cerr << "object with id " << m_curInstanceId << " isn't uploaded!" << std::endl;
@@ -30,6 +30,7 @@ namespace ezg
         if (!m_renderMaterial.equal(last)) {
 
             vkCmdBindPipeline(cmdBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, m_renderMaterial.pipeline);
+            last = m_renderMaterial;
         }
 
 
@@ -43,7 +44,7 @@ namespace ezg
     /// download code taken from article
     /// \param filename - source with vertex data
     /// \return
-    bool Engine::Mesh::load_from_obj(const std::string& filename)
+    bool Mesh::load_from_obj(const std::string& filename)
     {
         //attrib will contain the vertex arrays of the file
         tinyobj::attrib_t attrib;

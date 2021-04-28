@@ -42,11 +42,11 @@ namespace ezg
         const size_t id0 = triangleId * 3;
         const size_t id1 = triangleId * 3 + 1;
         const size_t id2 = triangleId * 3 + 2;
-        Vertex v0 = vertices.at(id0);
-        Vertex v1 = vertices.at(id1);
-        Vertex v2 = vertices.at(id2);
+        engine::Vertex v0 = vertices.at(id0);
+        engine::Vertex v1 = vertices.at(id1);
+        engine::Vertex v2 = vertices.at(id2);
 
-        Vertex v3 = v0;
+        engine::Vertex v3 = v0;
         v3.pos = v0.pos + ((v1.pos - v0.pos) + (v2.pos - v0.pos)) / 5.f + v0.normal * distance;
 
         {

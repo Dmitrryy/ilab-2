@@ -15,7 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-namespace ezg
+namespace ezg::engine
 {
 
 	struct CameraView
@@ -47,8 +47,8 @@ namespace ezg
 		float getMaxZComponentDirection() const { return m_max_z_direction_component; }
 		//
 		glm::mat4 getViewMatrix() const { return glm::lookAt(m_position, m_position + m_direction, m_topDirection); }
-		glm::mat4 getProjectionMatrix() const 
-		{ 
+		glm::mat4 getProjectionMatrix() const
+		{
 			auto res = glm::perspective(m_viewingAngle, m_aspect, m_near, m_far);
 			res[1][1] *= -1;
 			return res;

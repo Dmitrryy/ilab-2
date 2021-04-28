@@ -13,7 +13,7 @@
 #include <vector>
 
 
-namespace ezg
+namespace ezg::engine
 {
 
     class DeletionQueue_t final

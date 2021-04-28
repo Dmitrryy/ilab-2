@@ -26,7 +26,7 @@
 
 #endif
 
-namespace ezg
+namespace ezg::engine
 {
 
     struct VulkanPhysicalDevices

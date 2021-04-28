@@ -35,7 +35,7 @@
 constexpr char vert_shader_fname[] = "resource/shaders/vert.spv";
 constexpr char frag_shader_fname[] = "resource/shaders/frag.spv";
 
-namespace ezg
+namespace ezg::engine
 {
 
     Engine::Engine(const Window& window)
@@ -303,7 +303,7 @@ namespace ezg
 
     void Engine::upload_object(Renderable& mesh)
     {
-        using type = Engine::Renderable::Type;
+        using type = Renderable::Type;
         switch (mesh.type()) {
             case type::JustMesh:
                 upload_mesh(dynamic_cast< Mesh& >(mesh));
@@ -321,7 +321,7 @@ namespace ezg
 
     void Engine::unload_object(Renderable& mesh)
     {
-        using type = Engine::Renderable::Type;
+        using type = Renderable::Type;
         switch (mesh.type()) {
             case type::JustMesh:
                 unload_mesh(dynamic_cast< Mesh& >(mesh));
@@ -1205,7 +1205,7 @@ namespace ezg
     }
 
 
-    Engine::AllocatedBuffer
+    AllocatedBuffer
     Engine::create_buffer_(size_t allocSize, VkBufferUsageFlags usage, VmaMemoryUsage memoryUsage)
     {
         //allocate vertex buffer
@@ -1230,7 +1230,7 @@ namespace ezg
     }
 
 
-    Engine::AllocatedImage
+    AllocatedImage
     Engine::create_image_(VkImageType type
                           , VkFormat format
                           , VkImageCreateFlags flags
@@ -1653,4 +1653,51 @@ namespace ezg
 
     }
 
+
+    // TODO: do the compilation of matrices at compile time
+    // TODO: Problem: glm functions are not constexpr
+    std::array< CameraView, 6 > getCameraViewCube(const glm::vec3& position)
+    {
+        CameraView cameraView = {};
+        cameraView.setViewingAngle(static_cast<float>(M_PI / 2.f));
+        cameraView.setMaxZcomponentDirection(1.f);
+        cameraView.m_near = 0.1f;
+        cameraView.m_far = 1000.f;
+        cameraView.setPosition(position);
+
+
+        std::array< CameraView, 6 > result = {};
+        int i = 0;
+        for (auto&& camera : result) {
+            switch (i) {
+                case 0: // POSITIVE_X
+                    camera.setDirection(glm::vec3(1.f, 0.f, 0.f));
+                    camera.setTopDirection(glm::vec3(0.f, -1.f, 0.f));
+                    break;
+                case 1:    // NEGATIVE_X
+                    camera.setDirection(glm::vec3(-1.f, 0.f, 0.f));
+                    camera.setTopDirection(glm::vec3(0.f, -1.f, 0.f));
+                    break;
+                case 2:    // POSITIVE_Y
+                    camera.setDirection(glm::vec3(0.f, 1.f, 0.f));
+                    camera.setTopDirection(glm::vec3(0.f, 0.f, 1.f));
+                    break;
+                case 3:    // NEGATIVE_Y
+                    camera.setDirection(glm::vec3(0.f, -1.f, 0.f));
+                    camera.setTopDirection(glm::vec3(0.f, 0.f, -1.f));
+                    break;
+                case 4:    // POSITIVE_Z
+                    camera.setDirection(glm::vec3(0.f, 0.f, 1.f));
+                    camera.setTopDirection(glm::vec3(0.f, -1.f, 0.f));
+                    break;
+                case 5:    // NEGATIVE_Z
+                    camera.setDirection(glm::vec3(0.f, 0.f, -1.f));
+                    camera.setTopDirection(glm::vec3(0.f, -1.f, 0.f));
+                    break;
+            }
+            i++;
+        }
+
+        return result;
+    }
 }//namespace vks

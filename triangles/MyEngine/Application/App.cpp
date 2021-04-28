@@ -61,7 +61,7 @@ namespace ezg
         // end create window
         //-----------------------------------------------
 
-        m_driver = std::make_unique< Engine >(*m_window);
+        m_driver = std::make_unique< engine::Engine >(*m_window);
 
         //-----------------------------------------------
         // init camera view
@@ -206,7 +206,7 @@ namespace ezg
                     assert(0);
                 }
 
-                m_entities.push_back(dynamic_cast< Engine::Renderable* >(entity));
+                m_entities.push_back(dynamic_cast< engine::Renderable* >(entity));
                 entity->loadFromXML(objectXML);
 
                 objectXML = objectXML->NextSiblingElement();

@@ -8,15 +8,15 @@
  ***/
 
 
-#include "Engine.hpp"
+#include "triangles/MyEngine/Engine/Engine.hpp"
 
 
-namespace ezg
+namespace ezg::engine
 {
 
-    void Engine::Mirror::draw(VkCommandBuffer cmdBuff
+    void Mirror::draw(VkCommandBuffer cmdBuff
                               , const CameraView& camera
-                              , const RenderMaterial& last) const
+                              , RenderMaterial& last) const
     {
         if (!isUploaded()) {
             std::cerr << "object with id " << m_curInstanceId << " isn't uploaded!" << std::endl;
@@ -31,6 +31,7 @@ namespace ezg
         if (!m_renderMaterial.equal(last)) {
 
             vkCmdBindPipeline(cmdBuff, VK_PIPELINE_BIND_POINT_GRAPHICS, m_renderMaterial.pipeline);
+            last = m_renderMaterial;
         }
 
         vkCmdPushConstants(cmdBuff
@@ -51,7 +52,7 @@ namespace ezg
     }
 
 
-    void Engine::Mirror::updateEnvironmentMap(VkCommandBuffer cmdBuff
+    void Mirror::updateEnvironmentMap(VkCommandBuffer cmdBuff
                                               , const std::vector< Renderable* >& objects)
     {
         std::array< VkClearValue, 2 > clearValues{};
@@ -137,15 +138,11 @@ namespace ezg
                                , 0, sizeof(PushConstants)
                                , &pushConst);
 
-            for (size_t i = 0, mi = objects.size(); i < mi; ++i) {
-                auto* object = objects.at(i);
-                if (object != nullptr && object != this) {
-                    //if (object.type() != Renderable::Type::ReflectionMesh) {
-                    object->draw(cmdBuff, {}, lastMaterial);
-                    lastMaterial = object->m_renderMaterial;
-                    //}
+            std::for_each(objects.begin(), objects.end(), [&](auto* obj) {
+                if(obj != nullptr && obj != this) {
+                    obj->draw(cmdBuff, cameraView, lastMaterial);
                 }
-            }
+            });
 
 
             vkCmdEndRenderPass(cmdBuff);

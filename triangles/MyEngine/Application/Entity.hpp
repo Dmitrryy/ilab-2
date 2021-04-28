@@ -41,15 +41,16 @@ namespace ezg
     };
 
 
-
-    struct TriangleMesh : public Entity, public Engine::Mesh
+    struct TriangleMesh : public Entity, public engine::Mesh
     {
         glm::vec3 m_color = {1.f, 1.f, 1.f};
 
     public:
 
         glm::mat4 getModelMatrix() const override;
+
         glm::vec3 getColor() const override { return m_color; }
+
         glm::vec3 getPosition() const override { return m_position; }
 
         /// Carries out the growth of the mesh according to the following algorithm:
@@ -64,15 +65,16 @@ namespace ezg
     };
 
 
-
-    struct Mirror : public Entity, public Engine::Mirror
+    struct Mirror : public Entity, public engine::Mirror
     {
         glm::vec3 m_color = {0.1f, 0.1f, 0.1f};
 
     public:
 
         glm::mat4 getModelMatrix() const override;
+
         glm::vec3 getColor() const override { return m_color; }
+
         glm::vec3 getPosition() const override { return m_position; }
 
         void loadFromXML(tinyxml2::XMLElement* xmlElem) override;

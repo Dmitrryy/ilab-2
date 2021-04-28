@@ -13,7 +13,7 @@
 #include <vulkan/vulkan.h>
 
 
-namespace ezg
+namespace ezg::engine
 {
 
     struct PipelineBuildInfo

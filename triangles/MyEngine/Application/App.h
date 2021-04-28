@@ -41,14 +41,14 @@ namespace ezg
 
     class AppLVL4 final
     {
-        std::unique_ptr< Engine >    m_driver;
+        std::unique_ptr< engine::Engine >    m_driver;
 
         std::unique_ptr< Window >    m_window;
 
-        std::vector< Engine::Renderable* > m_entities;
+        std::vector< engine::Renderable* > m_entities;
         la::Rectangle3               m_box;
 
-        CameraView                   m_cameraView;
+        engine::CameraView                   m_cameraView;
         float                        m_speed = 100.f;
 
         Timer                        m_time;

@@ -12,7 +12,7 @@
 #include <iostream>
 
 
-namespace ezg
+namespace ezg::engine
 {
 
     VkPipeline PipelineBuildInfo::build_pipeline(VkDevice device, VkRenderPass pass)

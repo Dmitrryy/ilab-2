@@ -15,7 +15,7 @@
 #include <cstring>
 
 
-namespace ezg
+namespace ezg::engine
 {
 
     Core::Core(const Window& window)

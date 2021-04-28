@@ -7,7 +7,7 @@
 </camera>
 
 <objects>
-    <obj0>
+    <obj0 type="justMesh">
         <model file="resource/meshes/ak_47.obj"/>
         <properties>
             <scale x="1" y="1" z="1"/>
@@ -18,7 +18,7 @@
             <speedRotation val="50"/>
         </properties>
     </obj0>
-    <obj1>
+    <obj1 type="justMesh">
         <model file="resource/meshes/monkey_flat.obj"/>
         <properties>
             <scale x="20" y="20" z="20"/>
