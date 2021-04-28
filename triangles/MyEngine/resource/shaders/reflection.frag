@@ -22,7 +22,7 @@ layout( push_constant ) uniform constants
 
 
 
-layout (set = 1, binding = 0) uniform samplerCube samplerCubeMap;
+layout (set = 2, binding = 0) uniform samplerCube samplerCubeMap;
 
 layout (location = 0) in vec3 inUVW;
 layout (location = 1) in vec3 inNormal;

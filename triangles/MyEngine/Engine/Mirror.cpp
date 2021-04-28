@@ -41,7 +41,7 @@ namespace ezg
 
         vkCmdBindDescriptorSets(cmdBuff
                                 , VK_PIPELINE_BIND_POINT_GRAPHICS
-                                , m_renderMaterial.pipelineLayout, 1, 1
+                                , m_renderMaterial.pipelineLayout, 2, 1
                                 , &m_descriptorSet, 0, nullptr);
 
         VkDeviceSize offset = 0;
@@ -138,11 +138,12 @@ namespace ezg
                                , &pushConst);
 
             for (size_t i = 0, mi = objects.size(); i < mi; ++i) {
-                auto&& object = *objects.at(i);
-
-                if (object.type() != Renderable::Type::ReflectionMesh) {
-                    object.draw(cmdBuff, {}, lastMaterial);
-                    lastMaterial = object.m_renderMaterial;
+                auto* object = objects.at(i);
+                if (object != nullptr && object != this) {
+                    //if (object.type() != Renderable::Type::ReflectionMesh) {
+                    object->draw(cmdBuff, {}, lastMaterial);
+                    lastMaterial = object->m_renderMaterial;
+                    //}
                 }
             }
 

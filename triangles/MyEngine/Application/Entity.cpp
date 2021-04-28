@@ -182,6 +182,11 @@ namespace ezg
                              , m_dirTravel.z);
             }
 
+            auto* startAngleRotateXML = prop->FirstChildElement("startAngle");
+            if (startAngleRotateXML != nullptr) {
+                getAttribute(startAngleRotateXML, "val", m_angle);
+            }
+
             auto* dirRotateXML = prop->FirstChildElement("dirRotate");
             if (dirRotateXML != nullptr) {
                 getAttribute(dirRotateXML, "x", m_dirRotation.x, "y", m_dirRotation.y, "z"

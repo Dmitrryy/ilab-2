@@ -1329,9 +1329,10 @@ namespace ezg
         pipelineBuildInfo.shaderStages.push_back(vertShaderStageInfo);
         pipelineBuildInfo.shaderStages.push_back(fragShaderStageInfo);
 
-        std::vector< VkDescriptorSetLayout > setLayouts = {
+        std::vector setLayouts = {
                 m_globalSetLayout,
-                m_reflectionDescriptorSetLayout //TODO!!!
+                m_shadowSetLayout,
+                m_reflectionDescriptorSetLayout
                 //, m_objectSetLayout
         };
 
