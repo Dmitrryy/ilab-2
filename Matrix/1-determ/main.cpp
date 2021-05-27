@@ -32,6 +32,30 @@ using matrix::Order;
 
 int main()
 {
+#if 1
+    std::vector< int > v = { 1, 2, 3 };
+    auto&& itV = v.begin() + 1354643232;
+    if (itV == v.end()) {
+        std::cout << "equal" << std::endl;
+    }
+
+#endif
+
+
+#if 1
+    Matrix matr(2, 2);
+
+    auto&& it = matr.begin();
+
+    it->val =  10;
+    it++;
+    *it = 11;
+
+
+    std::cout << matr << std::endl;
+#endif
+
+#if 0
 	size_t mat_size = 0;
 	std::cin >> mat_size;
 	Matrix<double> m(mat_size, mat_size);
@@ -42,6 +66,6 @@ int main()
 	}
 
     std::cout << std::round(m.determinante()) << std::endl;
-
+#endif
 	return 0;
 }

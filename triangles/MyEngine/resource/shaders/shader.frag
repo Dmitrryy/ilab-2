@@ -9,6 +9,18 @@
 
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shader_draw_parameters : require
+
+
+
+struct lightInfo
+{
+    vec3 position;
+    vec3 color;
+    float farPlane;
+    float epsilon;
+    float shadowOpacity;
+};
 
 
 // push constants
@@ -22,7 +34,16 @@ layout( push_constant ) uniform constants
 //=======================================================================================
 
 
+// set 0
+//=======================================================================================
 layout (set = 1, binding = 0) uniform samplerCube shadowCubeMap;
+
+layout (set = 1, binding = 1) readonly buffer lightsInfo
+{
+    lightInfo light_info[];
+};
+//=======================================================================================
+//=======================================================================================
 
 
 // input vertex atributes
@@ -65,14 +86,6 @@ void main() {
     float shadow = ShadowCalculation(inFragPosition, inLightPosition, inLightFarPlane, shadowCubeMap);
 
     outFragColor = vec4((ambient + shadow * diffuse) * inFragColor, 1.0);
-
-
-
-    //outColor = vec4(fragColor, 1.0);
-    //outFragColor = vec4(ShadowCalculation(inFragPosition, inLightPosition, inLightFarPlane, shadowCubeMap));
-
-/*    vec3 fragToLight = inFragPosition - inLightPosition;
-    outFragColor = vec4(texture(shadowCubeMap, fragToLight).r);*/
 }
 
 

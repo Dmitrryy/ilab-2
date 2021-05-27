@@ -19,7 +19,7 @@ namespace matrix
             return false;
         }
 
-        std::for_each(cbegin(), cend(), [&that_, &result](Elem<const T> elem)
+        std::for_each(begin(), end(), [&that_, &result](Elem<const T> elem)
         {
             result = result && (elem.val == that_.at(elem.line, elem.column));
         });

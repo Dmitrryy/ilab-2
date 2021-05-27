@@ -41,6 +41,8 @@ namespace ezg::engine
 
     public:
 
+        bool isUploaded() const noexcept { return m_isUploaded; }
+
         virtual void draw(VkCommandBuffer cmdBuff
                           , const CameraView& camera
                           , RenderMaterial& last) const = 0;
@@ -48,7 +50,6 @@ namespace ezg::engine
         virtual glm::mat4 getModelMatrix() const { return glm::mat4{1.f}; }
         virtual glm::vec3 getColor() const { return glm::vec3(1.f); }
 
-        bool isUploaded() const noexcept { return m_isUploaded; }
         virtual glm::vec3 getPosition() const { return glm::vec3(0.f); }
         virtual Type type() const noexcept = 0;
         virtual RenderMaterial::Type renderMaterialType() const noexcept = 0;
@@ -123,5 +124,22 @@ namespace ezg::engine
 
     };//class Mirror
 
+
+
+
+    struct Light : public Renderable
+    {
+        virtual float getFarPlane() const noexcept { return 50.f; }
+        virtual float getEpsilon() const noexcept { return 0.05f; }
+        virtual float getShadowOpacity() const noexcept { return 0.5f; }
+
+
+        void draw(VkCommandBuffer cmdBuff
+                          , const CameraView& camera
+                          , RenderMaterial& last) const override { /* nop */ }
+
+        Type type() const noexcept override { return Type::Light; }
+        RenderMaterial::Type renderMaterialType() const noexcept override { return RenderMaterial::Type::DEFAULT_DEPTH_TEST_ONLY; }
+    };//class Light
 
 }//namespace ezg

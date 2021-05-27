@@ -152,10 +152,11 @@ namespace ezg::engine
     {
         for (size_t i = 0, mi = m_physDevices.m_devices.size(); i < mi; i++) {
             const VkSurfaceCapabilitiesKHR &SurfaceCaps = m_physDevices.m_surfaceCaps[i];
-            if (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount) {
+            //TODO: what is wrong?
+/*            if (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount) {
                 printf("Chawo?!? (SurfaceCaps.minImageCount > SurfaceCaps.maxImageCount)\n");
                 continue;
-            }
+            }*/
 
 
             for (size_t k = 0, km = m_physDevices.m_qFamilyProps[i].size(); k < km; k++) {
@@ -191,7 +192,7 @@ namespace ezg::engine
             }
         }
 
-        if (m_DeviceIndex < 0) {
+        if (m_DeviceIndex == -1) {
             throw std::runtime_error(("fatal error in Core::selectPhysicalDevice(): No GFX device found!"));
         }
     }

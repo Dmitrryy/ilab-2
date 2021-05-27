@@ -26,6 +26,21 @@ namespace ezg::engine
     };
 
 
+    struct GPULightInfo {
+        glm::vec3 position = {};
+        glm::vec3 color = { 1.f, 1.f, 1.f };
+        float farPlane = 0;
+        float epsilon = 0.05;
+        float shadowOpacity = 0.5;
+    };
+
+
+    struct GPUSceneInfo {
+        float lightAmbient = 0;
+        size_t numLights = 0;
+    };
+
+
     struct Vertex
     {
         glm::vec3 pos;

@@ -86,8 +86,8 @@ namespace ezg::engine
     {
         const VkSurfaceCapabilitiesKHR& SurfaceCaps = m_core.getSurfaceCaps();
 
-        uint32_t numImages = SurfaceCaps.minImageCount + 1;
-        assert(numImages <= SurfaceCaps.maxImageCount);
+        uint32_t numImages = SurfaceCaps.minImageCount;
+        //assert(numImages <= SurfaceCaps.maxImageCount);
 
         VkSwapchainCreateInfoKHR swapChainCreateInfo = {};
         swapChainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -236,8 +236,15 @@ namespace ezg::engine
         modelLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
         modelLayoutBinding.pImmutableSamplers = nullptr;
 
-        std::vector< VkDescriptorSetLayoutBinding > bindings = {
-                modelLayoutBinding
+        VkDescriptorSetLayoutBinding sceneLayoutBinding = {};
+        sceneLayoutBinding.binding = 1;
+        sceneLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        sceneLayoutBinding.descriptorCount = 1;
+        sceneLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        sceneLayoutBinding.pImmutableSamplers = nullptr;
+
+        std::vector bindings = {
+                modelLayoutBinding, sceneLayoutBinding
         };
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = {};
@@ -256,12 +263,22 @@ namespace ezg::engine
 
         for (auto&& frame : m_frames) {
 
-            frame.objectBuffer = create_buffer_(sizeof(GPUObjectData) * m_numObjects, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            frame.objectBuffer = create_buffer_(sizeof(GPUObjectData) * m_numObjects
+                                                , VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
                                                 , VMA_MEMORY_USAGE_CPU_TO_GPU);
             m_deletionQueue.push([alloc = m_allocator, ob = frame.objectBuffer]()
                                  {
                                      vmaDestroyBuffer(alloc, ob._buffer, ob._allocation);
                                  });
+
+            frame.sceneBuffer = create_buffer_(sizeof(GPUSceneInfo)
+                    , VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
+                    , VMA_MEMORY_USAGE_CPU_TO_GPU);
+            m_deletionQueue.push([alloc = m_allocator, ob = frame.sceneBuffer]()
+                                 {
+                                     vmaDestroyBuffer(alloc, ob._buffer, ob._allocation);
+                                 });
+
 
             VkDescriptorSetAllocateInfo allocInfo = {};
             allocInfo.pNext = nullptr;
@@ -291,8 +308,27 @@ namespace ezg::engine
             descriptorWriteModel.pTexelBufferView = nullptr;
 
 
-            std::vector< VkWriteDescriptorSet > descriptorWrites = {
+            VkDescriptorBufferInfo sceneBufferInfo;
+            sceneBufferInfo.buffer = frame.sceneBuffer._buffer;
+            sceneBufferInfo.offset = 0;
+            sceneBufferInfo.range = sizeof(GPUSceneInfo);
+
+
+            VkWriteDescriptorSet sceneDescriptorWrite = {};
+            sceneDescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            sceneDescriptorWrite.dstSet = frame.globalDescriptor;
+            sceneDescriptorWrite.dstBinding = 1;
+            sceneDescriptorWrite.dstArrayElement = 0;
+            sceneDescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            sceneDescriptorWrite.descriptorCount = 1;
+            sceneDescriptorWrite.pBufferInfo = &sceneBufferInfo;
+            sceneDescriptorWrite.pImageInfo = nullptr;
+            sceneDescriptorWrite.pTexelBufferView = nullptr;
+
+
+            std::vector descriptorWrites = {
                     descriptorWriteModel
+                    , sceneDescriptorWrite
             };
 
             vkUpdateDescriptorSets(device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
@@ -571,8 +607,13 @@ namespace ezg::engine
 
             meshes[i]->m_curInstanceId = i;
         }
-
         vmaUnmapMemory(m_allocator, curFrame.objectBuffer._allocation);
+
+        vmaMapMemory(m_allocator, curFrame.sceneBuffer._allocation, &data);
+        auto* pSceneInfo = static_cast< GPUSceneInfo* > (data);
+        *pSceneInfo = m_sceneInfo;
+        vmaUnmapMemory(m_allocator, curFrame.sceneBuffer._allocation);
+
     }
 
 
@@ -693,6 +734,8 @@ namespace ezg::engine
                         cameraView.setDirection(glm::vec3(0.f, 0.f, -1.f));
                         cameraView.setTopDirection(glm::vec3(0.f, -1.f, 0.f));
                         break;
+                    default:
+                        assert(0);
                 }
 
                 const PushConstants pushConst = {
@@ -810,8 +853,8 @@ namespace ezg::engine
         RenderMaterial lastMaterial = {};
         for (auto i : objects) {
             vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS
-            , m_renderMaterials[RenderMaterial::Type::DEFAULT].pipelineLayout
-            , 1, 1, &m_shadowDescriptorSet, 0, nullptr);
+                                    , m_renderMaterials[RenderMaterial::Type::DEFAULT].pipelineLayout
+                                    , 1, 1, &m_shadowDescriptorSet, 0, nullptr);
             auto&& object = *i;
 
             object.draw(cmd, m_cameraView, lastMaterial);
@@ -1036,14 +1079,12 @@ namespace ezg::engine
         fragDepthShaderStageInfo.pName = "main";
 
 
-
         PipelineBuildInfo pipelineBuildInfo;
         pipelineBuildInfo.shaderStages.push_back(vertShaderStageInfo);
         pipelineBuildInfo.shaderStages.push_back(fragShaderStageInfo);
 
         std::vector< VkDescriptorSetLayout > setLayouts = {
-                m_globalSetLayout
-                , m_shadowSetLayout
+                m_globalSetLayout, m_shadowSetLayout
                 //, m_objectSetLayout
         };
 
@@ -1555,6 +1596,7 @@ namespace ezg::engine
         ///====================================
 
 
+        m_shadowFrameBuffers.resize(m_maxNumLight * 6);
         for (size_t i = 0, mi = m_shadowFrameBuffers.size(); i < mi; ++i) {
             auto&& curFrameBuff = m_shadowFrameBuffers.at(i);
 
@@ -1594,8 +1636,16 @@ namespace ezg::engine
         cubeLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
         cubeLayoutBinding.pImmutableSamplers = nullptr;
 
-        std::vector< VkDescriptorSetLayoutBinding > bindings = {
+        VkDescriptorSetLayoutBinding lightInfoLayoutBinding = {};
+        lightInfoLayoutBinding.binding = 1;
+        lightInfoLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        lightInfoLayoutBinding.descriptorCount = 1;
+        lightInfoLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        lightInfoLayoutBinding.pImmutableSamplers = nullptr;
+
+        std::vector bindings = {
                 cubeLayoutBinding
+                , lightInfoLayoutBinding
         };
 
         VkDescriptorSetLayoutCreateInfo layoutInfo = {};
@@ -1614,6 +1664,14 @@ namespace ezg::engine
                              });
 
         ///============================================================================
+        //TODO
+        m_lightInfoBuffer = create_buffer_(sizeof(GPULightInfo) * m_maxNumLight
+                , VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+                , VMA_MEMORY_USAGE_CPU_TO_GPU);
+        m_deletionQueue.push([alloc = m_allocator, ob = m_lightInfoBuffer]()
+                             {
+                                 vmaDestroyBuffer(alloc, ob._buffer, ob._allocation);
+                             });
 
 
         VkDescriptorSetAllocateInfo allocInfo = {};
@@ -1631,8 +1689,6 @@ namespace ezg::engine
         cubeBufferInfo.imageView = m_shadowMapView;
         cubeBufferInfo.sampler = m_shadowSampler;
 
-        ////
-
         VkWriteDescriptorSet descriptorWriteCubeMap = {};
         descriptorWriteCubeMap.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptorWriteCubeMap.dstSet = m_shadowDescriptorSet;
@@ -1644,13 +1700,31 @@ namespace ezg::engine
         descriptorWriteCubeMap.pImageInfo = &cubeBufferInfo;
         descriptorWriteCubeMap.pTexelBufferView = nullptr;
 
+        ///
 
-        std::vector< VkWriteDescriptorSet > descriptorWrites = {
+        VkDescriptorBufferInfo lightBufferInfo = {};
+        lightBufferInfo.offset = 0;
+        lightBufferInfo.buffer = m_lightInfoBuffer._buffer;
+        lightBufferInfo.range = sizeof(GPULightInfo) * m_maxNumLight;
+
+        VkWriteDescriptorSet lightDescriptorWrite = {};
+        lightDescriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        lightDescriptorWrite.dstSet = m_shadowDescriptorSet;
+        lightDescriptorWrite.dstBinding = 1;
+        lightDescriptorWrite.dstArrayElement = 0;
+        lightDescriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+        lightDescriptorWrite.descriptorCount = 1;
+        lightDescriptorWrite.pBufferInfo = &lightBufferInfo;
+        lightDescriptorWrite.pImageInfo = nullptr;
+        lightDescriptorWrite.pTexelBufferView = nullptr;
+
+
+        std::vector descriptorWrites = {
                 descriptorWriteCubeMap
+                , lightDescriptorWrite
         };
 
         vkUpdateDescriptorSets(device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-
     }
 
 
@@ -1700,4 +1774,5 @@ namespace ezg::engine
 
         return result;
     }
+
 }//namespace vks

@@ -14,20 +14,95 @@
 #include <sstream>
 #include <cmath>
 #include <algorithm>
+#include <iterator>
 
 #include "IBuf.h"
 #include <iterator>
 
 namespace matrix
 {
-    template <typename Pointer, typename Conteiner>
-    class normal_iterator_t;
 
-	enum class Order
-	{
-		Row
-		, Column
-	};
+    enum class Order
+    {
+        Row
+        , Column
+    };
+
+
+    //class for storing, in addition to the reference to the value, its coordinates in the matrix
+    template <typename T>
+    struct Elem
+    {
+        T val;
+
+        const size_t line = 0;
+        const size_t column = 0;
+
+        Elem(T elem, size_t l, size_t c)
+                : val(elem)
+                , line(l)
+                , column(c)
+        {}
+
+        operator T() { return val; }
+
+        template< typename U >
+        Elem& operator = (U&& that) {
+            val = std::forward< U >(that);
+            return *this;
+        }
+    };
+
+
+    template< typename ValIt >
+    class matrix_iterator {
+        ValIt m_valIt;
+
+        //TODO
+        size_t m_line = 0;
+        size_t m_column = 0;
+
+        template <typename Reference> struct arrow_proxy {
+            Reference R;
+            Reference *operator->() { return &R; }
+        };
+
+    public:
+
+        using iterator_category = std::forward_iterator_tag;
+        using difference_type = typename std::iterator_traits< ValIt >::difference_type;
+        using value_type = Elem< typename std::iterator_traits< ValIt >::value_type >;
+        using reference = Elem< typename std::iterator_traits< ValIt >::reference >;
+        using pointer = arrow_proxy<reference>;
+
+    public:
+
+        matrix_iterator(ValIt it, size_t line, size_t column)
+        : m_valIt(it)
+        , m_line(line)
+        , m_column(column)
+        { }
+
+    public:
+
+        reference operator*() const { return { *m_valIt, m_line, m_column }; }
+        pointer operator->() const { return { {*m_valIt, m_line, m_column} }; }
+
+        matrix_iterator& operator++()& {
+            m_valIt++;
+            return *this;
+        }
+
+        matrix_iterator operator++(int) {
+            auto tmp{*this};
+            operator++();
+            return tmp;
+        }
+
+    };
+
+
+
 
 	template< typename T >
 	class MatrixBuffer_t : private IBuff_t< T >
@@ -45,8 +120,8 @@ namespace matrix
 	    using value = T;
 	    using const_value = const T;
 
-	    using iterator = normal_iterator_t< value, MatrixBuffer_t< T > >;
-	    using const_iterator = normal_iterator_t< const_value, const MatrixBuffer_t< T > >;
+	    using iterator = matrix_iterator< decltype(m_data) >;
+	    //using const_iterator = normal_iterator_t< const_value, const MatrixBuffer_t< T > >;
 
 
 		MatrixBuffer_t() = default;
@@ -90,11 +165,11 @@ namespace matrix
         template <typename U>
         bool operator == (const MatrixBuffer_t<U>& that_) const { return equal(that_); }
 
-		iterator begin() noexcept { return iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
-		iterator end() noexcept { return iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
+		iterator begin() noexcept { return iterator(m_data, 0, 0); }
+		iterator end() noexcept { return iterator(m_data, getLines() - 1, getColumns() - 1); }
 
-		const_iterator cbegin() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
-		const_iterator cend() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }
+/*		const_iterator cbegin() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data, 0, 0); }
+		const_iterator cend() const noexcept { return const_iterator(this, m_data, m_data + m_used, m_data + m_used, getLines() - 1, getColumns() - 1); }*/
 
 		void setOrder(Order nOrder);
 
@@ -142,31 +217,6 @@ namespace matrix
 	        return that >= left && that <= right;
         }
     };//struct Range
-
-
-    //class for storing, in addition to the reference to the value, its coordinates in the matrix
-    template <typename T>
-    struct Elem
-    {
-        T& val;
-
-        size_t line = 0;
-        size_t column = 0;
-
-        Elem(T& elem, size_t l, size_t c)
-                : val(elem)
-                , line(l)
-                , column(c)
-        {}
-
-        operator T&() { return val; }
-
-        template <typename U>
-        Elem& operator = (const U& that) {
-            val = that;
-            return *this;
-        }
-    };
 
 
 

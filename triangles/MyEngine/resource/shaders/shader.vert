@@ -37,6 +37,11 @@ layout(set = 0, binding = 0) readonly buffer object_transform
 {
     ObjectInfo object_info[];
 };
+layout(set = 0, binding = 0) uniform sceneInfo
+{
+    float lightAmbient;
+    uint  numLights;
+};
 //=======================================================================================
 //=======================================================================================
 

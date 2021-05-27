@@ -74,9 +74,8 @@ namespace ezg::engine
             VkCommandBuffer mainCommandBuffer = nullptr;
 
             VkDescriptorSet globalDescriptor = nullptr;
-
             AllocatedBuffer objectBuffer = {};
-            VkDescriptorSet objectDescriptor = nullptr;
+            AllocatedBuffer sceneBuffer = {};
         };//struct FrameData
 
     private:
@@ -121,7 +120,7 @@ namespace ezg::engine
         Timer m_time;
 
         size_t m_currentFrame = 0;
-        size_t m_maxFramesInFlight = 2;
+        size_t m_maxFramesInFlight = 1;
 
         // TODO increase if necessary
         size_t m_numObjects = ezg_default_max_objects;
@@ -141,6 +140,7 @@ namespace ezg::engine
 
         ///========================================================================
         /// TODO it is experimental
+        size_t         m_maxNumLight = 1;
         AllocatedImage m_shadowMap         = {};
         VkImageView    m_shadowMapView     = nullptr;
         VkSampler      m_shadowSampler       = nullptr;
@@ -148,7 +148,8 @@ namespace ezg::engine
         VkDescriptorSetLayout m_shadowSetLayout = nullptr;
         VkDescriptorSet m_shadowDescriptorSet = nullptr;
 
-        std::array< frameBufferData, 6 > m_shadowFrameBuffers = {};
+        std::vector< frameBufferData > m_shadowFrameBuffers = {};
+        AllocatedBuffer m_lightInfoBuffer = {};
 
         VkExtent3D  m_shadowExtent = { 2024, 2024, 1 };
 
@@ -160,6 +161,9 @@ namespace ezg::engine
         void createShadowRenderPass_t();
         void createShadowFrameBuffer_t();
         void createShadowDescriptors_t();
+
+
+        GPUSceneInfo m_sceneInfo = { 0.3, 4 };
         ///========================================================================
         ///========================================================================
 

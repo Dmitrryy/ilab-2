@@ -51,8 +51,8 @@ namespace matrix
 
         using MatrixBuffer_t<T>::begin;
         using MatrixBuffer_t<T>::end;
-        using MatrixBuffer_t<T>::cbegin;
-        using MatrixBuffer_t<T>::cend;
+/*        using MatrixBuffer_t<T>::cbegin;
+        using MatrixBuffer_t<T>::cend;*/
 
         using MatrixBuffer_t<T>::empty;
         using MatrixBuffer_t<T>::resize;
